@@ -1,20 +1,11 @@
 @guest
-    @if (Route::has('login'))
-        <li>
-            <a href="{{ route('login') }}" class="no-underline">{{ __('Login') }}</a>
-        </li>
-    @endif
-
+    <a href="{{ url('login/google')}}"><span class="btn-inner--icon"><img src="{{asset('images/btn_google_signin_light_normal_web.png')}}"></span></a>
     @if (Route::has('register'))
         <li>
             <a href="{{ route('register') }}" class="btn btn-primary">{{ __('Sign up') }}</a>
         </li>
     @endif
 @else
-    <li>
-            <a href="/account" class="no-underline">Account</a>
-    </li>
-
     <li>
             <a href="{{ route('logout') }}" class="no-underline"
                 onclick="event.preventDefault();

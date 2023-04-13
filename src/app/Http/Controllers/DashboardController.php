@@ -24,11 +24,6 @@ class DashboardController extends Controller
      */
     public function index()
     {        
-        $userid = Auth::user()->id;
-
-        return view('dashboard', [
-            'tests' => Test::where('userid', $userid)
-                ->orderByDesc('created_at')->get()
-        ]);
+        return view('dashboard');
     }
 }
