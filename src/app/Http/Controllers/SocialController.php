@@ -22,7 +22,8 @@ class SocialController extends Controller
                 
                 if($user){
                     Auth::login($user);
-                    return redirect()->to('/dashboard');
+                    //return redirect()->to('/dashboard');
+                    return redirect()->intended();
                 }else{
                     echo "No account exists for the email address {$googleUser->email}. " .
                     "<a href=\"https://alphatilesapps.org/contact.html\">Contact us</a> to get started " .

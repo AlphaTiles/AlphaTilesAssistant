@@ -1,21 +1,9 @@
 <?php
 
-use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\PdfController;
-use App\Http\Controllers\PlanController;
-use Laravel\Socialite\Facades\Socialite;
-use App\Http\Controllers\TermsController;
 use App\Http\Controllers\SocialController;
-use App\Http\Controllers\AccountController;
-use App\Http\Controllers\ContactController;
-use App\Http\Controllers\PricingController;
-use App\Http\Controllers\ResultsController;
-use App\Http\Controllers\WebhookController;
-use App\Http\Controllers\EditTestController;
-use App\Http\Controllers\DisplayTestController;
-use App\Http\Controllers\GenerateTestController;
+use App\Http\Controllers\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,7 +21,7 @@ Route::get('/', function () {
 })->middleware('guest');
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->name('home');    
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('home');    
 });
 
 Auth::routes(['register' => false]);

@@ -4,9 +4,10 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Database\Seeders\PlanSeeder;
-use Database\Seeders\TestSeeder;
-use Database\Seeders\UserSeeder;
+use Database\Seeders\RolesTableSeeder;
+use Database\Seeders\UsersTableSeeder;
+use Database\Seeders\PermissionsTableSeeder;
+use Database\Seeders\ConnectRelationshipsSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -18,9 +19,10 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->call([
-            UserSeeder::class,
-            TestSeeder::class,
-            PlanSeeder::class,
+            PermissionsTableSeeder::class,
+            RolesTableSeeder::class,
+            ConnectRelationshipsSeeder::class,
+            UsersTableSeeder::class,
         ]);
 
     }
