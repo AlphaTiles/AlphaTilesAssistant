@@ -1,5 +1,5 @@
 @guest
-    <a href="{{ url('login/google')}}"><span class="btn-inner--icon"><img src="{{asset('images/btn_google_signin_light_normal_web.png')}}"></span></a>
+    <a href="{{ url('login/google')}}"><span class="btn-inner--icon"><img src="/images/btn_google_signin_light_normal_web.png"></span></a>
     @if (Route::has('register'))
         <li>
             <a href="{{ route('register') }}" class="btn btn-primary">{{ __('Sign up') }}</a>
