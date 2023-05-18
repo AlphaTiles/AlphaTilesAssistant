@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LanguagePack;
 use App\Models\Test;
 use Illuminate\Support\Facades\Auth;
 
@@ -24,6 +25,11 @@ class DashboardController extends Controller
      */
     public function index()
     {        
-        return view('dashboard');
+        $userid = Auth::user()->id;
+
+        return view('dashboard', [
+            'languagepacks' => LanguagePack::where('userid', $userid)
+                ->orderByDesc('created_at')->get()
+        ]);
     }
 }

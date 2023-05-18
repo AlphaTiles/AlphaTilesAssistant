@@ -7,3 +7,16 @@
 a {
     text-decoration: underline;
 }
+
+[type="text"], [type="email"], [type="url"], [type="password"],
+select, textarea {
+    padding-right: 2px !important;
+    padding-left: 2px !important;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    border: 2px solid #eee !important;
+}
+
+.alert {
+    padding: 0px;
+}
