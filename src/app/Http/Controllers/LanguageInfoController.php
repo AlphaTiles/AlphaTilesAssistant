@@ -30,6 +30,7 @@ class LanguageInfoController extends Controller
     {        
         return view('languagepack.info', [
             'id' => '',
+            'completedSteps' => ['lang_info'],
             'settings' => $this->getSettings(true),
             'tiles' => ''
         ]);
@@ -44,6 +45,7 @@ class LanguageInfoController extends Controller
     {        
         return view('languagepack.info', [
             'id' => $languagePack->id,
+            'completedSteps' => ['lang_info'],
             'settings' => $this->getSettings(false),
             'tiles' => ''
         ]);
@@ -67,6 +69,10 @@ class LanguageInfoController extends Controller
         }
 
         $this->saveSettings($languagePackSaved, $request);
+
+        if($request->btnNext) {
+            return redirect("languagepack/tiles/{$languagePackSaved->id}");    
+        }
 
         return redirect("languagepack/edit/{$languagePackSaved->id}");    
     }    

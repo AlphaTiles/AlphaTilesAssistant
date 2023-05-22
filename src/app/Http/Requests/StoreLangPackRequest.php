@@ -13,6 +13,7 @@ class StoreLangPackRequest extends FormRequest
             'settings' => [
                 'array'
             ],
+            'btnNext' => 'sometimes',
             'settings.lang_name_local' => 'required',
             'settings.lang_name_english' => 'required',
         ];

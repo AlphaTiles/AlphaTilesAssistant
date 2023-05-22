@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SocialController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LanguageInfoController;
+use App\Http\Controllers\TilesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,6 +26,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('home');    
     Route::get('languagepack/create', [LanguageInfoController::class, 'create']);
     Route::get('languagepack/edit/{languagePack}', [LanguageInfoController::class, 'edit']);
+    Route::get('languagepack/tiles/{languagePack}', [TilesController::class, 'edit']);
     Route::post('languagepack/edit', [LanguageInfoController::class, 'store']);
     Route::post('languagepack/edit/{id}', [LanguageInfoController::class, 'store']);      
 });
