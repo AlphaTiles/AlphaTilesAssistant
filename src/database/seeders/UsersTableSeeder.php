@@ -21,7 +21,7 @@ class UsersTableSeeder extends Seeder
          * Add Users
          *
          */
-        if (config('roles.models.defaultUser')::where('email', '=', 'philonline10@gmail.com')->first() === null) {
+        if (config('roles.models.defaultUser')::where('email', '=', env('ADMIN_EMAIL'))->first() === null) {
             $newUser = config('roles.models.defaultUser')::create([
                 'name'     => 'Admin',
                 'email'    => env('ADMIN_EMAIL'),
