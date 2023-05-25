@@ -27,6 +27,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('languagepack/create', [LanguageInfoController::class, 'create']);
     Route::get('languagepack/edit/{languagePack}', [LanguageInfoController::class, 'edit']);
     Route::get('languagepack/tiles/{languagePack}', [TilesController::class, 'edit']);
+    Route::post('languagepack/tiles/{languagePack}', [TilesController::class, 'store']);
     Route::post('languagepack/edit', [LanguageInfoController::class, 'store']);
     Route::post('languagepack/edit/{id}', [LanguageInfoController::class, 'store']);      
 });

@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Tile;
 use App\Models\LanguagePack;
-use Illuminate\Http\Client\Request;
+use Illuminate\Http\Request;
 
 class TilesController extends Controller
 {
@@ -30,12 +31,20 @@ class TilesController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(LanguagePack $languagePack, Request $request)
     {
         $data = $request->all();
-        dd($data);
-        
+        $tiles = explode("\r\n", $data['add_tiles']);
 
-        //return redirect("languagepack/tiles/{$languagePack->id}");    
+        $insert = [];
+        foreach($tiles as $key => $tile) {
+            $insert[$key]['languagepackid'] = $languagePack->id;
+            $insert[$key]['value'] = $tile;
+            $insert[$key]['upper'] = strtoupper($tile);
+        }
+
+        Tile::insert($insert);
+
+        return redirect("languagepack/tiles/{$languagePack->id}");    
     }        
 }

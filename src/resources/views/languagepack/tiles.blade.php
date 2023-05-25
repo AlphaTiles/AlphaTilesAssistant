@@ -8,7 +8,7 @@
 
     <h1>Tiles</h1>
 	
-	<form method="post" action="/languagepack/edit/{{ $id }}">
+	<form method="post" action="/languagepack/tiles/{{ $id }}">
 		@csrf
 		<div class="form">
 			@if ($errors->any())
@@ -22,9 +22,7 @@
 			@endif
 
 			<label for="add_tiles">Add tiles (one tile per line):</label><br>
-			<textarea name="add_tiles" rows=7 cols=40>
-
-			</textarea>
+			<textarea name="add_tiles" rows=7 cols=40></textarea>
 		</div>
 
 		<div class="mt-3 w-9/12">		
