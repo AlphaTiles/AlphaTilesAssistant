@@ -33,3 +33,11 @@ select, textarea {
 .alert {
     padding: 0px;
 }
+
+.error {
+    color: red;
+}
+
+.inputError {
+    border: red solid 1px !important;
+}

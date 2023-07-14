@@ -29,8 +29,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('languagepack/tiles/{languagePack}', [TilesController::class, 'edit']);
     Route::post('languagepack/tiles/{languagePack}', [TilesController::class, 'store']);
     Route::patch('languagepack/tiles/{languagePack}', [TilesController::class, 'update']);
+    Route::delete('languagepack/tiles/{languagePack}', [TilesController::class, 'delete']);
+    Route::get('languagepack/tiles/{languagePack}/download/{filename}', [TilesController::class, 'downloadFile']);
     Route::post('languagepack/edit', [LanguageInfoController::class, 'store']);
-    Route::post('languagepack/edit/{id}', [LanguageInfoController::class, 'store']);      
+    Route::post('languagepack/edit/{id}', [LanguageInfoController::class, 'store']);       
 });
 
 Auth::routes(['register' => false]);

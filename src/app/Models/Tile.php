@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Tile extends Model
 {
@@ -15,4 +16,9 @@ class Tile extends Model
         'or_2',
         'or_3'
     ];
+
+    public function file(): HasOne
+    {
+        return $this->hasOne(File::class, 'id', 'file_id');
+    }
 }

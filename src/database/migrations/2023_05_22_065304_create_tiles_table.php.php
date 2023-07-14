@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('languagepackid')->constrained('language_packs')
             ->onDelete('cascade');      
             $table->char('value');
-            $table->char('upper');
+            $table->char('upper')->nullable();
             $table->char('or_1')->nullable();            
             $table->char('or_2')->nullable();
             $table->char('or_3')->nullable();
