@@ -5,6 +5,8 @@ use App\Enums\FieldTypeEnum;
 
 @section('content')
 
+@include('layouts/langpacksteps')    
+
 <div class="prose">
 
     <h1>Language Info</h1>
@@ -46,9 +48,7 @@ use App\Enums\FieldTypeEnum;
 		<div class="mt-3 w-9/12">		
 			<input type="hidden" name="id" value="{{ $id }}" />
 			<input type="submit" name="btnSave" value="Save" class="btn-sm btn-secondary" />
-			<!--			
 			<input type="submit" name="btnNext" value="Next" class="btn-sm btn-primary ml-1" />
-			-->
 		</div>
 	</form>
 	<div class="mt-4">

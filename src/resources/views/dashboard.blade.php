@@ -32,7 +32,7 @@
                         <tr>
                             <td>
                                 <a href="/languagepack/edit/{{ $languagepack->id }}">
-                                    <img src="/images/edit.svg" width=25>
+                                    <i class="fa-regular fa-pen-to-square"></i>
                                 </a>
                             </td> 
                             <td>

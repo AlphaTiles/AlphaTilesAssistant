@@ -8,6 +8,10 @@ a {
     text-decoration: underline;
 }
 
+.prose td, .prose th {
+    padding-left: 5px;
+}
+
 [type="text"], [type="email"], [type="url"], [type="password"],
 select, textarea {
     padding-right: 2px !important;
@@ -17,6 +21,23 @@ select, textarea {
     border: 2px solid #eee !important;
 }
 
+.prose {
+    max-width: none;
+}
+
+.prose img {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
 .alert {
     padding: 0px;
+}
+
+.error {
+    color: red;
+}
+
+.inputError {
+    border: red solid 1px !important;
 }
