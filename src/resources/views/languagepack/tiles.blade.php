@@ -34,8 +34,8 @@ use Illuminate\Support\Facades\Log;
 			<div class="block p-2">
 				<h3 class="mt-0">Are you sure want to delete the following tiles?</h3>
 				<?php $tileDeleteIds = []; ?>
-				@foreach ($tilesData as $tile)					
-					@if(!empty($tile->delete))
+				@foreach ($tiles as $key => $tile)					
+					@if(isset($deleteValues[$key]))
 						<?php array_push($tileDeleteIds, $tile->id); ?>
 						<div>{{ $tile->value }}</div>
 					@endif
@@ -139,8 +139,9 @@ use Illuminate\Support\Facades\Log;
 						</div>
 					</td> 
 					<td>
+						<?php $delete = $deleteValues[$key] === '1'; ?>
 						<input type="checkbox" name="tiles[{{ $key }}][delete]" value="1" 
-							{{ old('tiles.' . $key . '.delete') == '1' ? 'checked' : '' }} />
+							{{  $delete ? 'checked' : '' }} />
 					</td>
 				</tr>
 				@endforeach

@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Rules\CustomRequired;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use App\Rules\RequireAtLeastOneDistractor;
@@ -56,9 +57,13 @@ class TilesController extends Controller
         }
 
         Tile::insert($insert);
-
+        
         if($request->btnBack) {
             return redirect("languagepack/edit/{$languagePack->id}");    
+        }
+
+        if($request->btnNext) {
+            return redirect("languagepack/wordlist/{$languagePack->id}");    
         }
 
         return redirect("languagepack/tiles/{$languagePack->id}");    
@@ -76,7 +81,7 @@ class TilesController extends Controller
                 'tiles.*' => [
                     'required_unless:tiles.*.delete,1',
                     new RequireAtLeastOneDistractor(request()),
-                    new CustomRequired(request())
+                    new CustomRequired(request(), 'type')
                 ],
                 'tiles.*.type' => ['required_unless:tiles.*.delete,1'],
                 'tiles.*.or_1' => ['required_unless:tiles.*.delete,1'],
@@ -153,8 +158,8 @@ class TilesController extends Controller
 
         foreach($tileIds as $tileId) {
             $fileName = "tile_" .  str_pad($tileId, 3, '0', STR_PAD_LEFT) . '.mp3';
-            $file = storage_path("app/public/languagepacks/{$languagePack->id}/res/raw/{$fileName}");
-            unset($file);
+            $file = "languagepacks/{$languagePack->id}/res/raw/{$fileName}";
+            Storage::disk('public')->delete($file);
             Tile::where('id', $tileId)->delete();
         }
 

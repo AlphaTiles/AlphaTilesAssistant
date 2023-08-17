@@ -8,12 +8,14 @@ use Illuminate\Support\Facades\Log;
 
 class CustomRequired implements Rule
 {
+    protected $key;
     protected $request;
-    protected $value;
+    protected $value;    
 
-    public function __construct(Request $request)
+    public function __construct(Request $request, string $key)
     {
         $this->request = $request;
+        $this->key  = $key;
     }
 
     public function passes($attribute, $value)
@@ -23,7 +25,7 @@ class CustomRequired implements Rule
         }
 
         $isValid = true;
-        $isValid = !empty($value['type']);
+        $isValid = !empty($value[$this->key]);
 
         if (!$isValid) {
             $this->value = $value;
@@ -34,8 +36,8 @@ class CustomRequired implements Rule
 
     public function message()
     {
-        if(empty($this->value['type'])) {
-            return "The type is required for {$this->value['value']}";
+        if(empty($this->value[$this->key])) {
+            return "The {$this->key} is required for {$this->value['value']}";
         }
     }
 }
