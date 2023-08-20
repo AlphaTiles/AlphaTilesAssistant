@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 class FileRequired implements Rule
 {
     protected $attribute;
+    protected $key;
     protected $request;
     protected $value;        
 
@@ -20,14 +21,20 @@ class FileRequired implements Rule
 
     public function passes($attribute, $value)
     {
-        if (substr($attribute, -4) != 'file' && (!empty($value['filename']) || !empty($value['delete']))) {
-            return true;
-        }
-
+        $this->key = substr($attribute, -4);
         $this->attribute = $attribute;
         $this->value = $value;        
 
-        if(substr($attribute, -4) === 'file')
+        if(is_array($value) && !empty($value['file'])) {
+            $this->key = 'file';
+            $value = $value['file'];
+        }
+            
+        if ($this->key != 'file' && (!empty($value['filename']) || !empty($value['delete']))) {
+            return true;
+        }
+
+        if($this->key === 'file')
         {
             if($value->getClientOriginalExtension() !== 'mp3') {
                 return false;
@@ -47,7 +54,7 @@ class FileRequired implements Rule
 
     public function message()
     {
-        if(substr($this->attribute, -4) != 'file' && (empty($this->value['file']) || empty($this->value['filename']))) {
+        if(is_array($this->value)) {
             return [
                 $this->attribute . '.file' => "An audio file is required for {$this->value['value']}. It must be an mp3 and the file size no bigger than 1024kb."
             ];

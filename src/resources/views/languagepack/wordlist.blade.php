@@ -1,5 +1,7 @@
 <?php
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
+
 ?>
 
 @extends('layouts.app')
@@ -105,8 +107,9 @@ use Illuminate\Support\Arr;
 						<div class="custom-file">
 							<input type="file" name="words[{{ $key }}][file]" class="custom-file-input" id="chooseFile" value="{{ old('words.' . $key . '.file') }}">
 							@if(isset($word->file) || isset($word->filename))
-								<?php 									
-								$filename = isset($word->file) ? $word->file->name : (isset($word->filename) ? $word->filename : '');
+								<?php 		
+								$filename = isset($word->file) ? (isset($word->file->name) ? $word->file->name : $word->filename) 
+									: (isset($word->filename) ? $word->filename : '');
 								$storedFileName = strtolower(preg_replace("/\s+/", "", $word->translation));
 								?>
 								<a href="/languagepack/wordlist/{{ $word->languagepackid }}/download/{{ $storedFileName }}.mp3">

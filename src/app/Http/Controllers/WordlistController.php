@@ -72,10 +72,7 @@ class WordlistController extends Controller
     public function update(LanguagePack $languagePack, Request $request)
     {
         $words = $request->all()['words'];
-               
-        $fileRules = ['words.*.file' => [            
-            new FileRequired(request()),
-        ]];
+          
         $validator = Validator::make(
             $request->all(), 
             [
@@ -93,10 +90,13 @@ class WordlistController extends Controller
             ]
         );
 
-        DB::transaction(function() use($languagePack, $words, $fileRules, $validator) {
+        DB::transaction(function() use($languagePack, $words) {
             foreach($words as $key => $word) {
                 $fileModel = new File;
                 if(isset($word['file'])) {
+                    $fileRules = ['words.*.file' => [            
+                        new FileRequired(request()),
+                    ]];            
                     $fileValdidation = Validator::make(['words' => [$word]], $fileRules);                        
                         if($fileValdidation->passes()){
                             $filename = strtolower(preg_replace("/\s+/", "", $word['translation']));
@@ -131,6 +131,9 @@ class WordlistController extends Controller
         session()->flash('success', 'Records updated successfully');
 
         $wordCollection = Collection::make($words)->map(function ($item) {
+            if(isset($item['file'])) {
+                $item['filename'] = $item['file']->getClientOriginalName();
+            }
             return (object) $item;
         });
 
