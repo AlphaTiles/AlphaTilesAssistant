@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Rules\CustomRequired;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
@@ -136,8 +137,12 @@ class TilesController extends Controller
         session()->flash('success', 'Records updated successfully');
 
         $tilesCollection = Collection::make($tiles)->map(function ($item) {
+            if(isset($item['file'])) {
+                $item['filename'] = $item['file']->getClientOriginalName();
+            }
             return (object) $item;
         });
+
 
         return view('languagepack.tiles', [
             'completedSteps' => ['lang_info', 'tiles'],
