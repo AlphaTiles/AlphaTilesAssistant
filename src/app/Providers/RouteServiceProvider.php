@@ -37,10 +37,6 @@ class RouteServiceProvider extends ServiceProvider
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
         });
-
-        Route::bind('test', function ($code, $route) {
-            return UniqueCodeService::getTestForCode($code);
-        });        
     }
 
     /**

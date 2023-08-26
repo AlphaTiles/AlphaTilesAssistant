@@ -23,7 +23,7 @@ Route::get('/', function () {
     return view('welcome');
 })->middleware('guest');
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'authorize.languagepack'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('home');    
     Route::get('languagepack/create', [LanguageInfoController::class, 'create']);
     Route::get('languagepack/edit/{languagePack}', [LanguageInfoController::class, 'edit']);
