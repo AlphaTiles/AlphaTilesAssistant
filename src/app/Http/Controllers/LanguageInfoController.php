@@ -46,7 +46,7 @@ class LanguageInfoController extends Controller
         return view('languagepack.info', [
             'id' => $languagePack->id,
             'completedSteps' => ['lang_info'],
-            'settings' => $this->getSettings(false),
+            'settings' => $this->getSettings(false, $languagePack),
             'tiles' => ''
         ]);
     }
@@ -77,7 +77,7 @@ class LanguageInfoController extends Controller
         return redirect("languagepack/edit/{$languagePackSaved->id}");    
     }    
 
-    private function getSettings(bool $create): array
+    private function getSettings(bool $create, LanguagePack $languagePack = null): array
     {
         $settings = [];
         $i = 0;
@@ -87,7 +87,8 @@ class LanguageInfoController extends Controller
             } else {
                 $settingValue = '';
                 if(!$create) {
-                    $langSetting = LanguageSetting::where('name', $setting->value)->first();
+                    $langSetting = LanguageSetting::where('languagepackid', $languagePack->id)
+                    ->where('name', $setting->value)->first();
                     $settingValue = $langSetting ? $langSetting['value'] : '';
                 }
             }   
