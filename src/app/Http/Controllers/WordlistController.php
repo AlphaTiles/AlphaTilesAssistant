@@ -66,6 +66,10 @@ class WordlistController extends Controller
             return redirect("languagepack/tiles/{$languagePack->id}");    
         }
 
+        if($request->btnNext) {
+            return redirect("languagepack/export/{$languagePack->id}");    
+        }
+
         return redirect("languagepack/wordlist/{$languagePack->id}");    
     }        
 
