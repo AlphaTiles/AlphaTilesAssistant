@@ -2,21 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use ZipArchive;
-use App\Models\File;
-use App\Models\Tile;
-use App\Models\Word;
-use App\Rules\FileRequired;
 use App\Models\LanguagePack;
-use Illuminate\Http\Request;
-use App\Rules\CustomRequired;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Validator;
-use App\Rules\RequireAtLeastOneDistractor;
+use App\Services\GenerateZipExportService;
 
 class ExportController extends Controller
 {
@@ -45,16 +32,7 @@ class ExportController extends Controller
 
     public function store(LanguagePack $languagePack) 
     {
-        $zipFileName = $languagePack->name;
-        $zipFile = sys_get_temp_dir() . '/' . $zipFileName;
-
-        $zip = new ZipArchive();
-        $zip->open($zipFile, ZipArchive::CREATE | ZipArchive::OVERWRITE);
-                
-        $resourceFile = 'app/public/languagepacks/4/res/raw/culebra.mp3';
-        $outputFolder = $zipFileName . '/res/raw/culebra.mp3';
-        $zip->addFile(storage_path($resourceFile), $outputFolder);
-        $zip->close();
+        $zipFile = (new GenerateZipExportService($languagePack))->handle();
         
         return response()->download($zipFile);        
     }
