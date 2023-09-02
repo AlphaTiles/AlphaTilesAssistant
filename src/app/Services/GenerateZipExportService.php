@@ -61,12 +61,13 @@ class GenerateZipExportService
         foreach ($tiles as $tile) {            
             $separator = "\t";                               
             $file = $tile->file ? basename($tile->file->file_path) : '';            
+            $type = !empty($tile->type) ? $tile->type : 'none';
 
             $fileContent .= "{$tile->value}" . $separator .
             "{$tile->or_1}" . $separator .
             "{$tile->or_2}" . $separator .
             "{$tile->or_3}" . $separator .
-            "{$tile->type}" . $separator .
+            "{$type}" . $separator .
             "{$file}" . $separator .
             "{$tile->upper}" . "\n";
         }
