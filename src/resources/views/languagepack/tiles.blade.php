@@ -1,5 +1,4 @@
 <?php
-use App\Enums\TileTypeEnum;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 ?>
@@ -101,16 +100,11 @@ use Illuminate\Support\Facades\Log;
 						<input type="text" size=2 name="tiles[{{ $key }}][upper]" value="{{ $tile->upper }}" />
 					</td> 
 					<td>
-						<?php $errorClass = isset($errorKeys) && in_array('tiles.' . $key . '.type', $errorKeys) ? 'inputError' : ''; ?>
-						<select name="tiles[{{ $key }}][type]" class="{{ $errorClass }}">
-							<option value=""></option>
-						@foreach(TileTypeEnum::cases() as $optionKey => $typeEnum)
-							<?php 
-							$typeValue = old('tiles.' . $key . '.type') ?? $tile->type;
-							$selected = $typeValue === $typeEnum->value ? 'selected' : ''; 
-							?>								
-							<option value="{{ $typeEnum->value }}" {{ $selected }}>{{ $typeEnum->label() }}</option>
-						@endforeach								
+						<x-select-type 
+							:key=$key 
+							:tile=$tile
+							:error-keys="$errorKeys ?? null"
+						/>
 					</td> 
 					<td>
 						<?php $errorClass = isset($errorKeys) && in_array('tiles.' . $key . '.or_1', $errorKeys) ? 'inputError' : ''; ?>
