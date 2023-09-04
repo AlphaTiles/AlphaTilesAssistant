@@ -4,7 +4,7 @@ namespace App\Enums;
 
 enum TileTypeEnum: string
 {
-    case CONSONENT        =     'C';
+    case CONSONANT        =     'C';
     case VOWEL            =     'V';
     case TONE_MARKER      =     'T';
     case OTHER            =     'X';
@@ -12,7 +12,7 @@ enum TileTypeEnum: string
     public function label(): string
     {
         return match ($this) {
-            self::CONSONENT => 'consonent',
+            self::CONSONANT => 'consonant',
             self::VOWEL     => 'vowel',
             self::TONE_MARKER   => 'tone marker',
             self::OTHER     => 'other',
