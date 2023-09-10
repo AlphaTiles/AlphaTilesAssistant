@@ -100,11 +100,30 @@ use Illuminate\Support\Facades\Log;
 						<input type="text" size=2 name="tiles[{{ $key }}][upper]" value="{{ $tile->upper }}" />
 					</td> 
 					<td>
+						<div>
 						<x-select-type 
-							:key=$key 
+							:nr="1"
+							:key=$key
 							:tile=$tile
 							:error-keys="$errorKeys ?? null"
 						/>
+						</div>
+						<div class="mt-1">
+						<x-select-type 
+							:nr="2"
+							:key=$key
+							:tile=$tile
+							:error-keys="$errorKeys ?? null"
+						/>
+						</div>
+						<div class="mt-1">
+						<x-select-type 
+							:nr="3"
+							:key=$key
+							:tile=$tile
+							:error-keys="$errorKeys ?? null"
+						/>
+						</div>
 					</td> 
 					<td>
 						<?php $errorClass = isset($errorKeys) && in_array('tiles.' . $key . '.or_1', $errorKeys) ? 'inputError' : ''; ?>
@@ -180,6 +199,21 @@ function checkAllTiles(source) {
 	let checkboxes = document.querySelectorAll('input[name^="tiles["][name$="][delete]"]');
 	for(var i=0, n=checkboxes.length;i<n;i++) {
 		checkboxes[i].checked = source.checked;
+	}
+}
+
+function addElement(element, key, nr) {
+	var elementId = element + key + '_' + nr;
+	var addLink = document.getElementById('add_' + elementId);
+	addLink.style.display = 'none';
+	var showElement = document.getElementById('show_' + elementId);
+	showElement.classList.remove('hidden');
+
+	console.log(elementId);
+
+	if(element === 'type' && nr === 2) {
+		var addSecondLink = document.getElementById('add_type' + key + '_3');
+		addSecondLink.classList.remove('hidden');
 	}
 }
 </script>

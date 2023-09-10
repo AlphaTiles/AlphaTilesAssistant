@@ -14,7 +14,9 @@ class Tile extends Model
         'type',
         'or_1',
         'or_2',
-        'or_3'
+        'or_3',
+        'type2',
+        'type3',
     ];
 
     public function file(): HasOne

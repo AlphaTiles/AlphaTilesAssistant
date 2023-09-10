@@ -2,8 +2,6 @@
 
 namespace App\View\Components;
 
-use App\Models\Tile;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\Component;
 
@@ -15,6 +13,7 @@ class SelectType extends Component
      * @return void
      */
     public function __construct(
+        public int $nr,
         public string $key,
         public object $tile,
         public ?array $errorKeys

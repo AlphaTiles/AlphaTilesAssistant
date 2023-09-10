@@ -87,13 +87,17 @@ class TilesController extends Controller
                 'tiles.*.type' => ['required_unless:tiles.*.delete,1'],
                 'tiles.*.or_1' => ['required_unless:tiles.*.delete,1'],
                 'tiles.*.or_2' => ['required_unless:tiles.*.delete,1'],
-                'tiles.*.or_3' => ['required_unless:tiles.*.delete,1'],    
+                'tiles.*.or_3' => ['required_unless:tiles.*.delete,1'],
+                'tiles.*.type2' => ['sometimes'],    
+                'tiles.*.type3' => ['sometimes'],    
             ] + $fileRules,
             [                
                 'tiles.*.type' => '',
                 'tiles.*.or_1' => '',
                 'tiles.*.or_2' => '',
                 'tiles.*.or_3' => '',
+                'tiles.*.type2' => '',
+                'tiles.*.type3' => '',
                 'tiles.*.file' => $customErrorMessage,
             ]
         );
@@ -119,6 +123,8 @@ class TilesController extends Controller
                     'or_1' => $tile['or_1'],
                     'or_2' => $tile['or_2'],
                     'or_3' => $tile['or_3'],
+                    'type2' => $tile['type2'],
+                    'type3' => $tile['type3'],
                 ];
                 
                 if (isset($fileModel->id)) {
