@@ -10,7 +10,7 @@ $hideAddLinkClass = $nr === 3 && empty($tile->type2) ? 'hidden' : '';
 ?>
 @if(empty($tile->{$typeField}))
     <?php $hideTypeSelectionClass = 'hidden'; ?>
-    <div id="add_type{{ $key }}_{{ $nr }}" class="{{$hideAddLinkClass}} text-xs"><a href="#" onclick="addElement('type', {{ $key }}, {{ $nr }})">Add type</a></div>
+    <div id="add_type{{ $key }}_{{ $nr }}" class="{{$hideAddLinkClass}} text-xs"><a href="#" onclick="addType({{ $key }}, {{ $nr }})">Add type</a></div>
 @endif
 <div id="show_type{{ $key }}_{{ $nr }}" class="{{$hideTypeSelectionClass}}">
     {{ $nr }}:

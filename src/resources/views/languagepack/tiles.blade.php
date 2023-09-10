@@ -202,16 +202,14 @@ function checkAllTiles(source) {
 	}
 }
 
-function addElement(element, key, nr) {
-	var elementId = element + key + '_' + nr;
+function addType(key, nr) {
+	var elementId = 'type' + key + '_' + nr;
 	var addLink = document.getElementById('add_' + elementId);
 	addLink.style.display = 'none';
 	var showElement = document.getElementById('show_' + elementId);
 	showElement.classList.remove('hidden');
 
-	console.log(elementId);
-
-	if(element === 'type' && nr === 2) {
+	if(nr === 2) {
 		var addSecondLink = document.getElementById('add_type' + key + '_3');
 		addSecondLink.classList.remove('hidden');
 	}
