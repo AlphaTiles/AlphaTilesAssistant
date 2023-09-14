@@ -34,12 +34,9 @@ class GenerateZipExportService
 
         $tiles = Tile::where('languagepackid', $this->languagePack->id)->get();
         foreach ($tiles as $tile) {
-            if($tile->file) {
-                $file = basename($tile->file->file_path);
-                $resourceFile = "app/public/languagepacks/4/res/raw/{$file}";
-                $outputFolder = "{$zipFileName}/res/raw/{$file}";
-                $zip->addFile(storage_path($resourceFile), $outputFolder);        
-            }
+            $this->saveTileFile(1, $tile, $zip, $zipFileName);
+            $this->saveTileFile(2, $tile, $zip, $zipFileName);
+            $this->saveTileFile(3, $tile, $zip, $zipFileName);
         }
 
         $resourceFile = 'app/public/languagepacks/4/res/raw/culebra.mp3';
@@ -60,21 +57,42 @@ class GenerateZipExportService
 
         foreach ($tiles as $tile) {            
             $separator = "\t";                               
-            $file = $tile->file ? basename($tile->file->file_path) : '';            
-            $type = !empty($tile->type) ? $tile->type : 'none';
+            $file1 = $tile->file ? basename($tile->file->file_path) : '';            
+            $type1 = !empty($tile->type) ? $tile->type : 'none';
+            $file2 = $tile->file2 ? basename($tile->file2->file_path) : '';            
+            $type2 = !empty($tile->type2) ? $tile->type2 : 'none';
+            $file3 = $tile->file3 ? basename($tile->file3->file_path) : '';            
+            $type3 = !empty($tile->type3) ? $tile->type3 : 'none';
 
             $fileContent .= "{$tile->value}" . $separator .
             "{$tile->or_1}" . $separator .
             "{$tile->or_2}" . $separator .
             "{$tile->or_3}" . $separator .
-            "{$type}" . $separator .
-            "{$file}" . $separator .
-            "{$tile->upper}" . "\n";
+            "{$type1}" . $separator .
+            "{$file1}" . $separator .
+            "{$tile->upper}" . $separator .
+            "{$type2}" . $separator .
+            "{$file2}" . $separator .
+            "{$type3}" . $separator .
+            "{$file3}" . "\n";
         }
 
         $tilesFile = "{$this->tempDir}/{$tilesFileName}";
         file_put_contents($tilesFile, $fileContent);
 
         return $tilesFile;
+    }
+
+    private function saveTileFile(int $nr, Tile $tile, ZipArchive $zip, string $zipFileName): void
+    {
+        $fileRelation = $nr > 1 ? "file{$nr}" : 'file';
+
+        if($tile->{$fileRelation}) {
+            $file = basename($tile->{$fileRelation}->file_path);
+            $resourceFile = "app/public/languagepacks/4/res/raw/{$file}";
+            $outputFolder = "{$zipFileName}/res/raw/{$file}";
+            $zip->addFile(storage_path($resourceFile), $outputFolder);        
+        }
+
     }
 }
