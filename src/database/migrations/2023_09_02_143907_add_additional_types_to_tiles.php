@@ -14,12 +14,12 @@ return new class extends Migration
     public function up()
     {
         Schema::table('tiles', function (Blueprint $table) {
-            $table->char('type2')->after('file_id')->nullable();
-            $table->unsignedBigInteger('file2_id')->after('type')->nullable();
-            $table->foreign('file2_id')->after('type2')->references('id')->on('files');            
-            $table->char('type3')->after('file2_id')->nullable();
+            $table->char('type2')->after('type')->nullable();
+            $table->unsignedBigInteger('file2_id')->after('type2')->nullable();
+            $table->foreign('file2_id')->references('id')->on('files');            
+            $table->char('type3')->after('type2_id')->nullable();
             $table->unsignedBigInteger('file3_id')->after('type3')->nullable();
-            $table->foreign('file3_id')->after('type2')->references('id')->on('files');            
+            $table->foreign('file3_id')->references('id')->on('files');            
         });
     }
 

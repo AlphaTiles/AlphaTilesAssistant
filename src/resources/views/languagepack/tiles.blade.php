@@ -135,20 +135,28 @@ use Illuminate\Support\Facades\Log;
 					</td> 
 					<td>
 						<div class="custom-file">
-							<input type="file" name="tiles[{{ $key }}][file]" class="custom-file-input" id="chooseFile" value="{{ old('tiles.' . $key . '.file') }}">
-							@if(isset($tile->file) || isset($tile->filename))
-								<?php 									
-								$filename = $tile->file->name ?? $tile->filename;
-								$storedFileNumber = str_pad($tile->id, 3, '0', STR_PAD_LEFT); 
-								?>
-								<a href="/languagepack/tiles/{{ $tile->languagepackid }}/download/tile_{{ $storedFileNumber }}.mp3">
-									{{ mb_strlen($filename) > 30 ? mb_substr($filename, 0, 30) . '...' : $filename }}
-								</a>
-								<input type="hidden" name="tiles[{{ $key }}][filename]" value="{{ $filename }}">
-							@endif
-							@if($errors->has('tiles.' . $key . '.file'))
-								<div class="error">The file upload failed.</div>
-							@endif									
+							<x-select-file
+							:nr="1"
+							:key=$key
+							:tile=$tile
+							:error-keys="$errorKeys ?? null"
+							/>
+						</div>
+						<div class="mt-1 custom-file">						
+							<x-select-file
+							:nr="2"
+							:key=$key
+							:tile=$tile
+							:error-keys="$errorKeys ?? null"
+							/>
+						</div>
+						<div class="mt-1 custom-file">						
+							<x-select-file
+							:nr="3"
+							:key=$key
+							:tile=$tile
+							:error-keys="$errorKeys ?? null"
+							/>
 						</div>
 					</td> 
 					<td>
@@ -203,11 +211,15 @@ function checkAllTiles(source) {
 }
 
 function addType(key, nr) {
-	var elementId = 'type' + key + '_' + nr;
-	var addLink = document.getElementById('add_' + elementId);
+	var typeId = 'type' + key + '_' + nr;
+	var addLink = document.getElementById('add_' + typeId);
 	addLink.style.display = 'none';
-	var showElement = document.getElementById('show_' + elementId);
-	showElement.classList.remove('hidden');
+	var showType = document.getElementById('show_' + typeId);
+	showType.classList.remove('hidden');
+
+	var fileId = 'file' + key + '_' + nr;
+	var showFile = document.getElementById('show_' + fileId);
+	showFile.classList.remove('hidden');
 
 	if(nr === 2) {
 		var addSecondLink = document.getElementById('add_type' + key + '_3');

@@ -74,7 +74,7 @@ class TilesController extends Controller
     {
         $tiles = $request->all()['tiles'];
                
-        $fileRules = ['tiles.*.file' => 'mimes:mp3|max:1024'];
+        $fileRules = 'mimes:mp3|max:1024';
         $customErrorMessage = "The file upload failed. Please verify that the files are of type mp3 and the file size is not bigger than 1 MB.";
         $validator = Validator::make(
             $request->all(), 
@@ -84,13 +84,17 @@ class TilesController extends Controller
                     new RequireAtLeastOneDistractor(request()),
                     new CustomRequired(request(), 'type')
                 ],
+                'tiles.*.languagepackid' => ['required', 'integer'],
                 'tiles.*.type' => ['required_unless:tiles.*.delete,1'],
                 'tiles.*.or_1' => ['required_unless:tiles.*.delete,1'],
                 'tiles.*.or_2' => ['required_unless:tiles.*.delete,1'],
                 'tiles.*.or_3' => ['required_unless:tiles.*.delete,1'],
                 'tiles.*.type2' => ['sometimes'],    
                 'tiles.*.type3' => ['sometimes'],    
-            ] + $fileRules,
+                'tiles.*.file' => $fileRules,
+                'tiles.*.file2' => $fileRules,
+                'tiles.*.file3' => $fileRules,
+            ],
             [                
                 'tiles.*.type' => '',
                 'tiles.*.or_1' => '',
@@ -99,23 +103,17 @@ class TilesController extends Controller
                 'tiles.*.type2' => '',
                 'tiles.*.type3' => '',
                 'tiles.*.file' => $customErrorMessage,
+                'tiles.*.file2' => $customErrorMessage,
+                'tiles.*.file3' => $customErrorMessage,
             ]
         );
 
-        DB::transaction(function() use($languagePack, $tiles, $fileRules, $validator) {
+        DB::transaction(function() use($tiles, $fileRules, $validator) {
             foreach($tiles as $key => $tile) {
-                $fileModel = new File;
-                if(isset($tile['file'])) {
-                    $fileValdidation = Validator::make(['tiles' => [$tile]], $fileRules);                        
-                        if($fileValdidation->passes()){
-                            $newFileName = "tile_" .  str_pad($tile['id'], 3, '0', STR_PAD_LEFT) . '.mp3';
-                            $languagePackPath = "languagepacks/{$languagePack->id}/res/raw/";
-                            $filePath = $tile['file']->storeAs($languagePackPath, $newFileName, 'public');
-                            $fileModel->name = $tile['file']->getClientOriginalName();
-                            $fileModel->file_path = '/storage/' . $filePath;
-                            $fileModel->save();
-                        }           
-                }
+
+                $fileModel1 = $this->uploadFile($tile, 1, $fileRules);
+                $fileModel2 = $this->uploadFile($tile, 2, $fileRules);
+                $fileModel3 = $this->uploadFile($tile, 3, $fileRules);
 
                 $updateData = [
                     'upper' => $tile['upper'],
@@ -127,10 +125,16 @@ class TilesController extends Controller
                     'type3' => $tile['type3'],
                 ];
                 
-                if (isset($fileModel->id)) {
-                    $updateData['file_id'] = $fileModel->id;
+                if (isset($fileModel1->id)) {
+                    $updateData['file_id'] = $fileModel1->id;
                 }
-                
+                if (isset($fileModel2->id)) {
+                    $updateData['file2_id'] = $fileModel2->id;
+                }
+                if (isset($fileModel3->id)) {
+                    $updateData['file3_id'] = $fileModel3->id;
+                }
+
                 Tile::where(['id' => $tile['id']])
                 ->update($updateData);
             }
@@ -145,6 +149,12 @@ class TilesController extends Controller
         $tilesCollection = Collection::make($tiles)->map(function ($item) {
             if(isset($item['file'])) {
                 $item['filename'] = $item['file']->getClientOriginalName();
+            }
+            if(isset($item['file2'])) {
+                $item['filename2'] = $item['file2']->getClientOriginalName();
+            }
+            if(isset($item['file3'])) {
+                $item['filename3'] = $item['file3']->getClientOriginalName();
             }
             return (object) $item;
         });
@@ -182,5 +192,32 @@ class TilesController extends Controller
         $filePath = storage_path("app/public/languagepacks/{$languagePack->id}/res/raw/{$filename}");
 
         return response()->download($filePath);
+    }
+
+    private function uploadFile(array $tile, int $fileNr, string $fileRules): ?File
+    {
+        $fileField = $fileNr > 1 ? "file{$fileNr}" : 'file';
+
+        if(!isset($tile[$fileField])) {
+            return null;
+        }
+
+        $fileModel = new File;
+        $fileValdidation = Validator::make(
+            ['tiles' => [$tile]], 
+            ["tiles.*.{$fileField}" => $fileRules]
+        );                        
+        if($fileValdidation->passes()){
+            $newFileName = "tile_" .  str_pad($tile['id'], 3, '0', STR_PAD_LEFT) . '_' . $fileNr . '.mp3';
+            $languagePackPath = "languagepacks/{$tile['languagepackid']}/res/raw/";
+            $filePath = $tile[$fileField]->storeAs($languagePackPath, $newFileName, 'public');
+            $fileModel->name = $tile[$fileField]->getClientOriginalName();
+            $fileModel->file_path = '/storage/' . $filePath;
+            $fileModel->save();
+
+            return $fileModel;
+        }           
+
+        return null;
     }
 }
