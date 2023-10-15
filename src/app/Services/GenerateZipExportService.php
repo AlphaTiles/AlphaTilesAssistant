@@ -116,7 +116,7 @@ class GenerateZipExportService
             ->get();
         $localLangName = LanguageSetting::where('languagepackid', $this->languagePack->id)
             ->where('name', LangInfoEnum::LANG_NAME_LOCAL->value)->first()->value;
-        $fileContent = "English\t$localLangName\tDuration\tMixedTypes\tAdjustment\t" .
+        $fileContent = "FileName\t$localLangName\tDuration\tMixedTypes\tAdjustment\t" .
                         "FirstAppearsInStage(IFOverrulingDefault)...\n";        
 
         foreach ($words as $word) {            
