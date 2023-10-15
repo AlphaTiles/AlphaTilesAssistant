@@ -1,13 +1,14 @@
 <?php
 namespace App\Services;
 
-use App\Enums\LangInfoEnum;
 use ZipArchive;
 use App\Models\Tile;
 use App\Models\Word;
+use App\Enums\LangInfoEnum;
 use App\Models\LanguagePack;
 use App\Models\LanguageSetting;
 use Illuminate\Support\Facades\Log;
+use App\Repositories\LangInfoRepository;
 
 class GenerateZipExportService
 {
@@ -32,6 +33,10 @@ class GenerateZipExportService
         $zip = new ZipArchive();
         $zip->open($zipFile, ZipArchive::CREATE | ZipArchive::OVERWRITE);
 
+        $tilesFileName = 'aa_langinfo.txt';
+        $tilesFile = $this->generateLanginfoFile($tilesFileName, $zip, $zipFileName);
+        $zip->addFile($tilesFile, "{$zipFileName}/res/raw/{$tilesFileName}");
+
         $tilesFileName = 'aa_gametiles.txt';
         $tilesFile = $this->generateTilesFile($tilesFileName, $zip, $zipFileName);
         $zip->addFile($tilesFile, "{$zipFileName}/res/raw/{$tilesFileName}");
@@ -40,12 +45,22 @@ class GenerateZipExportService
         $wordsFile = $this->generateWordlistFile($wordlistFileName, $zip, $zipFileName);
         $zip->addFile($wordsFile, "{$zipFileName}/res/raw/{$wordlistFileName}");
 
-        // $resourceFile = 'app/public/languagepacks/4/res/raw/culebra.mp3';
-        // $outputFolder = "{$zipFileName}/res/raw/culebra.mp3";
-        // $zip->addFile(storage_path($resourceFile), $outputFolder);
-        // $zip->close();
-
         return $zipFile;
+    }
+
+    public function generateLanginfoFile(string $fileName, ZipArchive $zip, string $zipFileName): string
+    {
+        $fileContent = "Item\tAnswer\n";
+
+        $settings = app(LangInfoRepository::class)->getSettings(false, $this->languagePack);
+        foreach($settings as $setting) {        
+            $fileContent .= $setting['export_key'] . self::SEPARATOR . $setting['value'] . "\n";
+        }
+
+        $file = "{$this->tempDir}/{$fileName}";
+        file_put_contents($file, $fileContent);
+        
+        return $file;
     }
 
     public function generateTilesFile(string $tilesFileName, ZipArchive $zip, string $zipFileName): string

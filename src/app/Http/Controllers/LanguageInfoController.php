@@ -7,18 +7,22 @@ use App\Models\LanguagePack;
 use App\Models\LanguageSetting;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreLangPackRequest;
-use Illuminate\Support\Facades\Log;
+use App\Repositories\LangInfoRepository;
 
 class LanguageInfoController extends Controller
 {
+    protected $langinfoRepository;
+    
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(LangInfoRepository $langinfoRepository)
     {
         $this->middleware('auth');
+
+        $this->langinfoRepository = $langinfoRepository;
     }
 
     /**
@@ -31,7 +35,7 @@ class LanguageInfoController extends Controller
         return view('languagepack.info', [
             'id' => '',
             'completedSteps' => ['lang_info'],
-            'settings' => $this->getSettings(true),
+            'settings' => $this->langinfoRepository->getSettings(true),
             'tiles' => ''
         ]);
     }
@@ -46,7 +50,7 @@ class LanguageInfoController extends Controller
         return view('languagepack.info', [
             'id' => $languagePack->id,
             'completedSteps' => ['lang_info'],
-            'settings' => $this->getSettings(false, $languagePack),
+            'settings' => $this->langinfoRepository->getSettings(false, $languagePack),
             'tiles' => ''
         ]);
     }
@@ -76,32 +80,6 @@ class LanguageInfoController extends Controller
 
         return redirect("languagepack/edit/{$languagePackSaved->id}");    
     }    
-
-    private function getSettings(bool $create, LanguagePack $languagePack = null): array
-    {
-        $settings = [];
-        $i = 0;
-        foreach(LangInfoEnum::cases() as $setting) {
-            if(old('setting')) {
-                $settingValue = old('setting');
-            } else {
-                $settingValue = '';
-                if(!$create) {
-                    $langSetting = LanguageSetting::where('languagepackid', $languagePack->id)
-                    ->where('name', $setting->value)->first();
-                    $settingValue = $langSetting ? $langSetting['value'] : '';
-                }
-            }   
-            $settings[$i]['label'] = $setting->label();
-            $settings[$i]['name'] = $setting->value;
-            $settings[$i]['value'] = $settingValue;
-            $settings[$i]['type'] = $setting->type();
-            $settings[$i]['options'] = $setting->options();
-            $i++;
-        }    
-        
-        return $settings;
-    }
 
     private function saveSettings(LanguagePack $languagePack, StoreLangPackRequest $request): void
     {
