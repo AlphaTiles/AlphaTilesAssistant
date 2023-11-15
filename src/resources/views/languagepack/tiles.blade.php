@@ -1,5 +1,4 @@
 <?php
-use App\Enums\TileTypeEnum;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 ?>
@@ -27,7 +26,7 @@ use Illuminate\Support\Facades\Log;
 		$deleteValues = old('tiles') ? Arr::pluck(old('tiles') , 'delete') : Arr::pluck($tilesData , 'delete'); 
 		?>
 		@if($tiles && in_array(1, $deleteValues))
-		<form method="post" action="/languagepack/tiles/{{ $id }}" enctype="multipart/form-data">			
+		<form method="post" action="/languagepack/tiles/{{ $languagePack->id }}" enctype="multipart/form-data">			
 		@csrf
 		@method('DELETE')
 		<div class="alert mb-3">  				
@@ -64,7 +63,7 @@ use Illuminate\Support\Facades\Log;
 	</div>
 	@endif
 
-	<form method="post" action="/languagepack/tiles/{{ $id }}" enctype="multipart/form-data">			
+	<form method="post" action="/languagepack/tiles/{{ $languagePack->id }}" enctype="multipart/form-data">			
 	@csrf
 	@method('PATCH')
 	@if(count($tiles) > 0)
@@ -101,16 +100,30 @@ use Illuminate\Support\Facades\Log;
 						<input type="text" size=2 name="tiles[{{ $key }}][upper]" value="{{ $tile->upper }}" />
 					</td> 
 					<td>
-						<?php $errorClass = isset($errorKeys) && in_array('tiles.' . $key . '.type', $errorKeys) ? 'inputError' : ''; ?>
-						<select name="tiles[{{ $key }}][type]" class="{{ $errorClass }}">
-							<option value=""></option>
-						@foreach(TileTypeEnum::cases() as $optionKey => $typeEnum)
-							<?php 
-							$typeValue = old('tiles.' . $key . '.type') ?? $tile->type;
-							$selected = $typeValue === $typeEnum->value ? 'selected' : ''; 
-							?>								
-							<option value="{{ $typeEnum->value }}" {{ $selected }}>{{ $typeEnum->label() }}</option>
-						@endforeach								
+						<div>
+						<x-select-type 
+							:nr="1"
+							:key=$key
+							:tile=$tile
+							:error-keys="$errorKeys ?? null"
+						/>
+						</div>
+						<div class="mt-1">
+						<x-select-type 
+							:nr="2"
+							:key=$key
+							:tile=$tile
+							:error-keys="$errorKeys ?? null"
+						/>
+						</div>
+						<div class="mt-1">
+						<x-select-type 
+							:nr="3"
+							:key=$key
+							:tile=$tile
+							:error-keys="$errorKeys ?? null"
+						/>
+						</div>
 					</td> 
 					<td>
 						<?php $errorClass = isset($errorKeys) && in_array('tiles.' . $key . '.or_1', $errorKeys) ? 'inputError' : ''; ?>
@@ -122,20 +135,28 @@ use Illuminate\Support\Facades\Log;
 					</td> 
 					<td>
 						<div class="custom-file">
-							<input type="file" name="tiles[{{ $key }}][file]" class="custom-file-input" id="chooseFile" value="{{ old('tiles.' . $key . '.file') }}">
-							@if(isset($tile->file) || isset($tile->filename))
-								<?php 									
-								$filename = $tile->file->name ?? $tile->filename;
-								$storedFileNumber = str_pad($tile->id, 3, '0', STR_PAD_LEFT); 
-								?>
-								<a href="/languagepack/tiles/{{ $tile->languagepackid }}/download/tile_{{ $storedFileNumber }}.mp3">
-									{{ mb_strlen($filename) > 30 ? mb_substr($filename, 0, 30) . '...' : $filename }}
-								</a>
-								<input type="hidden" name="tiles[{{ $key }}][filename]" value="{{ $filename }}">
-							@endif
-							@if($errors->has('tiles.' . $key . '.file'))
-								<div class="error">The file upload failed.</div>
-							@endif									
+							<x-select-file
+							:nr="1"
+							:key=$key
+							:tile=$tile
+							:error-keys="$errorKeys ?? null"
+							/>
+						</div>
+						<div class="mt-1 custom-file">						
+							<x-select-file
+							:nr="2"
+							:key=$key
+							:tile=$tile
+							:error-keys="$errorKeys ?? null"
+							/>
+						</div>
+						<div class="mt-1 custom-file">						
+							<x-select-file
+							:nr="3"
+							:key=$key
+							:tile=$tile
+							:error-keys="$errorKeys ?? null"
+							/>
 						</div>
 					</td> 
 					<td>
@@ -156,7 +177,7 @@ use Illuminate\Support\Facades\Log;
 		</div>
 	</form>
 
-	<form method="post" action="/languagepack/tiles/{{ $id }}">
+	<form method="post" action="/languagepack/tiles/{{ $languagePack->id }}">
 		@csrf
 		<div>
 			<label for="add_tiles">Add tiles (one tile per line):</label><br>
@@ -164,7 +185,7 @@ use Illuminate\Support\Facades\Log;
 		</div>
 
 		<div class="mt-3 w-9/12">		
-			<input type="hidden" name="id" value="{{ $id }}" />
+			<input type="hidden" name="id" value="{{ $languagePack->id }}" />
 			<input type="submit" name="btnAdd" value="Add tiles" class="btn-sm btn-primary ml-1" />
 		</div>
 		<div class="mt-6 w-9/12">	
@@ -186,6 +207,23 @@ function checkAllTiles(source) {
 	let checkboxes = document.querySelectorAll('input[name^="tiles["][name$="][delete]"]');
 	for(var i=0, n=checkboxes.length;i<n;i++) {
 		checkboxes[i].checked = source.checked;
+	}
+}
+
+function addType(key, nr) {
+	var typeId = 'type' + key + '_' + nr;
+	var addLink = document.getElementById('add_' + typeId);
+	addLink.style.display = 'none';
+	var showType = document.getElementById('show_' + typeId);
+	showType.classList.remove('hidden');
+
+	var fileId = 'file' + key + '_' + nr;
+	var showFile = document.getElementById('show_' + fileId);
+	showFile.classList.remove('hidden');
+
+	if(nr === 2) {
+		var addSecondLink = document.getElementById('add_type' + key + '_3');
+		addSecondLink.classList.remove('hidden');
 	}
 }
 </script>

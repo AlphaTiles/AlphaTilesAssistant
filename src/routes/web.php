@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SocialController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ExportController;
 use App\Http\Controllers\LanguageInfoController;
 use App\Http\Controllers\TilesController;
 use App\Http\Controllers\WordlistController;
@@ -25,20 +26,26 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'authorize.languagepack'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('home');    
+    
     Route::get('languagepack/create', [LanguageInfoController::class, 'create']);
+    Route::post('languagepack/edit', [LanguageInfoController::class, 'store']);
+    Route::post('languagepack/edit/{id}', [LanguageInfoController::class, 'store']);       
     Route::get('languagepack/edit/{languagePack}', [LanguageInfoController::class, 'edit']);
+
     Route::get('languagepack/tiles/{languagePack}', [TilesController::class, 'edit']);
     Route::post('languagepack/tiles/{languagePack}', [TilesController::class, 'store']);
     Route::patch('languagepack/tiles/{languagePack}', [TilesController::class, 'update']);
     Route::delete('languagepack/tiles/{languagePack}', [TilesController::class, 'delete']);
     Route::get('languagepack/tiles/{languagePack}/download/{filename}', [TilesController::class, 'downloadFile']);
+    
     Route::post('languagepack/wordlist/{languagePack}', [WordlistController::class, 'store']);
     Route::get('languagepack/wordlist/{languagePack}', [WordlistController::class, 'edit']);
     Route::patch('languagepack/wordlist/{languagePack}', [WordlistController::class, 'update']);
     Route::delete('languagepack/wordlist/{languagePack}', [WordlistController::class, 'delete']);
     Route::get('languagepack/wordlist/{languagePack}/download/{filename}', [WordlistController::class, 'downloadFile']);
-    Route::post('languagepack/edit', [LanguageInfoController::class, 'store']);
-    Route::post('languagepack/edit/{id}', [LanguageInfoController::class, 'store']);       
+
+    Route::get('languagepack/export/{languagePack}', [ExportController::class, 'show']);    
+    Route::post('languagepack/export/{languagePack}', [ExportController::class, 'store']);    
 });
 
 Auth::routes(['register' => false]);

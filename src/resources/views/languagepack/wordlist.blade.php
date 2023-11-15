@@ -27,7 +27,7 @@ use Illuminate\Support\Facades\Log;
 		$deleteValues = old('words') ? Arr::pluck(old('words') , 'delete') : Arr::pluck($wordData , 'delete'); 
 		?>
 		@if($words && in_array(1, $deleteValues))
-		<form method="post" action="/languagepack/wordlist/{{ $id }}" enctype="multipart/form-data">			
+		<form method="post" action="/languagepack/wordlist/{{ $languagePack->id }}" enctype="multipart/form-data">			
 		@csrf
 		@method('DELETE')
 		<div class="alert mb-3">  				
@@ -65,7 +65,7 @@ use Illuminate\Support\Facades\Log;
 	@endif
 
 
-	<form method="post" action="/languagepack/wordlist/{{ $id }}" enctype="multipart/form-data">			
+	<form method="post" action="/languagepack/wordlist/{{ $languagePack->id }}" enctype="multipart/form-data">			
 	@csrf
 	@method('PATCH')
 	@if(count($words) > 0)
@@ -141,7 +141,7 @@ use Illuminate\Support\Facades\Log;
 	</form>
 
 
-	<form method="post" action="/languagepack/wordlist/{{ $id }}">
+	<form method="post" action="/languagepack/wordlist/{{ $languagePack->id }}">
 		@csrf
 		<div>
 			<label for="add_words">Add Words (one word + translation separated by tab per line):</label><br>
@@ -149,7 +149,7 @@ use Illuminate\Support\Facades\Log;
 		</div>
 
 		<div class="mt-3 w-9/12">		
-			<input type="hidden" name="id" value="{{ $id }}" />
+			<input type="hidden" name="id" value="{{ $languagePack->id }}" />
 			<input type="submit" name="btnAdd" value="Add words" class="btn-sm btn-primary ml-1" />
 		</div>
 		<div class="mt-6 w-9/12">	

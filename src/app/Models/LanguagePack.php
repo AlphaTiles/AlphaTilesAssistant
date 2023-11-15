@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use App\Models\Tile;
 use App\Enums\LangInfoEnum;
+use App\Models\LanguageSetting;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -34,8 +37,18 @@ class LanguagePack extends Model
         return $this->belongsTo(User::class, 'userid');
     }
 
-    public function settings(): HasMany
+    public function langInfo(): HasMany
     {
-        return $this->hasMany(LanguageSetting::class, 'testid');
+        return $this->hasMany(LanguageSetting::class, 'languagepackid');
+    }
+
+    public function tiles(): HasMany
+    {
+        return $this->hasMany(Tile::class, 'languagepackid');
+    }
+
+    public function words(): HasMany
+    {
+        return $this->hasMany(Word::class, 'languagepackid');
     }
 }

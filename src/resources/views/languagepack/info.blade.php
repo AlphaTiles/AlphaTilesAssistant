@@ -11,7 +11,7 @@ use App\Enums\FieldTypeEnum;
 
     <h1>Language Info</h1>
 	
-	<form method="post" action="/languagepack/edit/{{ $id }}">
+	<form method="post" action="/languagepack/edit/{{ $languagePack->id }}">
 		@csrf
 		<div class="form">
 			@if ($errors->any())
@@ -46,7 +46,7 @@ use App\Enums\FieldTypeEnum;
 		</div>
 
 		<div class="mt-3 w-9/12">		
-			<input type="hidden" name="id" value="{{ $id }}" />
+			<input type="hidden" name="id" value="{{ $languagePack->id }}" />
 			<input type="submit" name="btnSave" value="Save" class="btn-sm btn-secondary" />
 			<input type="submit" name="btnNext" value="Next" class="btn-sm btn-primary ml-1" />
 		</div>

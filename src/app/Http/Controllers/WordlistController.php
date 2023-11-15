@@ -40,7 +40,7 @@ class WordlistController extends Controller
 
         return view('languagepack.wordlist', [
             'completedSteps' => ['lang_info', 'tiles', 'wordlist'],
-            'id' => $languagePack->id,
+            'languagePack' => $languagePack,
             'words' => $words    
         ]);
     }
@@ -64,6 +64,10 @@ class WordlistController extends Controller
 
         if($request->btnBack) {
             return redirect("languagepack/tiles/{$languagePack->id}");    
+        }
+
+        if($request->btnNext) {
+            return redirect("languagepack/export/{$languagePack->id}");    
         }
 
         return redirect("languagepack/wordlist/{$languagePack->id}");    
