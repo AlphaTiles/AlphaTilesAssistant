@@ -11,11 +11,11 @@ use App\Enums\FieldTypeEnum;
 
     <h1>Export Language Pack</h1>
 	
-	<form method="post" action="/languagepack/export/{{ $id }}">
+	<form method="post" action="/languagepack/export/{{ $languagePack->id }}">
 		@csrf
 
 		<div class="mt-3 w-9/12">		
-			<input type="hidden" name="id" value="{{ $id }}" />
+			<input type="hidden" name="id" value="{{ $languagePack->id }}" />
 			<input type="submit" name="btnExport" value="Download language pack" class="btn-sm btn-primary" />
 		</div>
 	</form>

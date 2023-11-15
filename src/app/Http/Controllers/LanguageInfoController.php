@@ -48,7 +48,7 @@ class LanguageInfoController extends Controller
     public function edit(LanguagePack $languagePack)
     {        
         return view('languagepack.info', [
-            'id' => $languagePack->id,
+            'languagePack' => $languagePack,
             'completedSteps' => ['lang_info'],
             'settings' => $this->langinfoRepository->getSettings(false, $languagePack),
             'tiles' => ''

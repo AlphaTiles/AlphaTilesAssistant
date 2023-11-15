@@ -40,7 +40,7 @@ class WordlistController extends Controller
 
         return view('languagepack.wordlist', [
             'completedSteps' => ['lang_info', 'tiles', 'wordlist'],
-            'id' => $languagePack->id,
+            'languagePack' => $languagePack,
             'words' => $words    
         ]);
     }

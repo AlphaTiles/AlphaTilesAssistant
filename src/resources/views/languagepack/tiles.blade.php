@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\Log;
 		$deleteValues = old('tiles') ? Arr::pluck(old('tiles') , 'delete') : Arr::pluck($tilesData , 'delete'); 
 		?>
 		@if($tiles && in_array(1, $deleteValues))
-		<form method="post" action="/languagepack/tiles/{{ $id }}" enctype="multipart/form-data">			
+		<form method="post" action="/languagepack/tiles/{{ $languagePack->id }}" enctype="multipart/form-data">			
 		@csrf
 		@method('DELETE')
 		<div class="alert mb-3">  				
@@ -63,7 +63,7 @@ use Illuminate\Support\Facades\Log;
 	</div>
 	@endif
 
-	<form method="post" action="/languagepack/tiles/{{ $id }}" enctype="multipart/form-data">			
+	<form method="post" action="/languagepack/tiles/{{ $languagePack->id }}" enctype="multipart/form-data">			
 	@csrf
 	@method('PATCH')
 	@if(count($tiles) > 0)
@@ -177,7 +177,7 @@ use Illuminate\Support\Facades\Log;
 		</div>
 	</form>
 
-	<form method="post" action="/languagepack/tiles/{{ $id }}">
+	<form method="post" action="/languagepack/tiles/{{ $languagePack->id }}">
 		@csrf
 		<div>
 			<label for="add_tiles">Add tiles (one tile per line):</label><br>
@@ -185,7 +185,7 @@ use Illuminate\Support\Facades\Log;
 		</div>
 
 		<div class="mt-3 w-9/12">		
-			<input type="hidden" name="id" value="{{ $id }}" />
+			<input type="hidden" name="id" value="{{ $languagePack->id }}" />
 			<input type="submit" name="btnAdd" value="Add tiles" class="btn-sm btn-primary ml-1" />
 		</div>
 		<div class="mt-6 w-9/12">	

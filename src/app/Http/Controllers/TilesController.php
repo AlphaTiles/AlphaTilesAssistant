@@ -38,7 +38,7 @@ class TilesController extends Controller
 
         return view('languagepack.tiles', [
             'completedSteps' => ['lang_info', 'tiles'],
-            'id' => $languagePack->id,
+            'languagePack' => $languagePack,
             'tiles' => $tiles    
         ]);
     }
