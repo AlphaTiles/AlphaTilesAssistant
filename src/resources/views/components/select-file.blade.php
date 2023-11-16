@@ -9,7 +9,7 @@ $fileRelation = $fileField;
 $hideFileSelectionClass = ''; 
 $previousFileValue = old('tiles' . $nr . '.' . $key . '.file');
 
-if(empty($tile->{$typeField})) {
+if(empty($tile->{$typeField}) && $nr > 1) {
     $hideFileSelectionClass = 'hidden';
 }
 ?>

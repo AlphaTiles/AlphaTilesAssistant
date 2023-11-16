@@ -8,7 +8,7 @@ $errorClass = isset($errorKeys) && in_array('tiles{{ $nr }}.' . $key . '.type', 
 $hideTypeSelectionClass = '';
 $hideAddLinkClass = $nr === 3 && empty($tile->type2) ? 'hidden' : '';
 ?>
-@if(empty($tile->{$typeField}))
+@if(empty($tile->{$typeField}) && $nr > 1)
     <?php $hideTypeSelectionClass = 'hidden'; ?>
     <div id="add_type{{ $key }}_{{ $nr }}" class="{{$hideAddLinkClass}} text-xs"><a href="#" onclick="addType({{ $key }}, {{ $nr }})">Add type</a></div>
 @endif
