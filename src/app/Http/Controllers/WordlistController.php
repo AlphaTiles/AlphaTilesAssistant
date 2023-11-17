@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\FileTypeEnum;
 use App\Models\File;
 use App\Models\Tile;
 use App\Models\Word;
-use App\Rules\FileRequired;
+use App\Rules\AudioFileRequired;
 use App\Models\LanguagePack;
 use Illuminate\Http\Request;
 use App\Rules\CustomRequired;
@@ -83,31 +84,32 @@ class WordlistController extends Controller
                 'words.*' => [
                     'required_unless:words.*.delete,1',
                     new CustomRequired(request(), 'translation'),
-                    new FileRequired(request()),
+                    new AudioFileRequired(request()),
                 ],
                 'words.*.translation' => ['required_unless:words.*.delete,1'],
             ],
             [                
                 'words.*.translation' => '',
                 'words.*.mixed_types' => '',
-                'words.*.file' => '',
+                'words.*.audioFile' => '',
             ]
         );
 
         DB::transaction(function() use($languagePack, $words) {
             foreach($words as $key => $word) {
                 $fileModel = new File;
-                if(isset($word['file'])) {
-                    $fileRules = ['words.*.file' => [            
-                        new FileRequired(request()),
+                if(isset($word['audioFile'])) {
+                    $fileRules = ['words.*.audioFile' => [            
+                        new AudioFileRequired(request()),
                     ]];            
                     $fileValdidation = Validator::make(['words' => [$word]], $fileRules);                        
                         if($fileValdidation->passes()){
                             $filename = strtolower(preg_replace("/\s+/", "", $word['translation']));
                             $newFileName = $filename . '.mp3';
                             $languagePackPath = "languagepacks/{$languagePack->id}/res/raw/";
-                            $filePath = $word['file']->storeAs($languagePackPath, $newFileName, 'public');
-                            $fileModel->name = $word['file']->getClientOriginalName();
+                            $filePath = $word['audioFile']->storeAs($languagePackPath, $newFileName, 'public');
+                            $fileModel->name = $word['audioFile']->getClientOriginalName();
+                            $fileModel->type = FileTypeEnum::AUDIO->value;
                             $fileModel->file_path = '/storage/' . $filePath;
                             $fileModel->save();
                         }           
@@ -136,14 +138,14 @@ class WordlistController extends Controller
 
         $wordCollection = Collection::make($words)->map(function ($item) {
             if(isset($item['file'])) {
-                $item['filename'] = $item['file']->getClientOriginalName();
+                $item['audioFilename'] = $item['file']->getClientOriginalName();
             }
             return (object) $item;
         });
 
         return view('languagepack.wordlist', [
             'completedSteps' => ['lang_info', 'tiles', 'words'],
-            'id' => $languagePack->id,
+            'languagePack' => $languagePack,
             'words' => $wordCollection
         ]);
 

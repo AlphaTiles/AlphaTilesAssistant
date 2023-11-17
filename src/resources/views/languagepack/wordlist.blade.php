@@ -84,6 +84,7 @@ use Illuminate\Support\Facades\Log;
 					<th>Translation</th> 
 					<th>Mixed Types</th>
 					<th>Audio</th>
+					<th>Image</th>
 					<th><input type="checkbox"  onClick="checkAllWords(this)" /> Delete</th>
 				</tr>
 				</thead> 
@@ -105,19 +106,20 @@ use Illuminate\Support\Facades\Log;
 					</td> 
 					<td>
 						<div class="custom-file">
-							<input type="file" name="words[{{ $key }}][file]" class="custom-file-input" id="chooseFile" value="{{ old('words.' . $key . '.file') }}">
-							@if(isset($word->file) || isset($word->filename))
+							<input type="file" name="words[{{ $key }}][audioFile]" class="custom-file-input" id="chooseFile" value="{{ old('words.' . $key . '.audioFile') }}">
+							<br>
+							@if(isset($word->audioFile) || isset($word->audioFilename))
 								<?php 		
-								$filename = isset($word->file) ? (isset($word->file->name) ? $word->file->name : $word->filename) 
-									: (isset($word->filename) ? $word->filename : '');
+								$audioFilename = isset($word->audioFile) ? (isset($word->audioFile->name) ? $word->audioFile->name : $word->audioFilename) 
+									: (isset($word->audioFilename) ? $word->audioFilename : '');
 								$storedFileName = strtolower(preg_replace("/\s+/", "", $word->translation));
 								?>
 								<a href="/languagepack/wordlist/{{ $word->languagepackid }}/download/{{ $storedFileName }}.mp3">
-									{{ mb_strlen($filename) > 30 ? mb_substr($filename, 0, 30) . '...' : $filename }}
+									{{ mb_strlen($audioFilename) > 30 ? mb_substr($audioFilename, 0, 30) . '...' : $audioFilename }}
 								</a>
-								<input type="hidden" name="words[{{ $key }}][filename]" value="{{ $filename }}">
+								<input type="hidden" name="words[{{ $key }}][audioFilename]" value="{{ $audioFilename }}">
 							@endif
-							@if($errors->has('words.' . $key . '.file') && old('words.' . $key . '.delete') != '1')							
+							@if($errors->has('words.' . $key . '.audioFile') && old('words.' . $key . '.delete') != '1')							
 								<div class="error">Upload a valid file</div>
 							@endif									
 						</div>
