@@ -22,7 +22,7 @@ if(empty($tile->{$typeField}) && $nr > 1) {
         $filename = $tile->{$fileRelation}->name ?? $tile->{$filenameKey};
         $storedFileNumber = str_pad($tile->id, 3, '0', STR_PAD_LEFT); 
         ?>
-        <a href="/languagepack/tiles/{{ $tile->languagepackid }}/download/tile_{{ $storedFileNumber }}.mp3">
+        <a href="/languagepack/tiles/{{ $tile->languagepackid }}/download/tile_{{ $storedFileNumber }}_{{ $nr }}.mp3">
             {{ mb_strlen($filename) > 30 ? mb_substr($filename, 0, 30) . '...' : $filename }}
         </a>
         <input type="hidden" name="tiles[{{ $key }}][{{ $filenameKey }}]" value="{{ $filename }}">
