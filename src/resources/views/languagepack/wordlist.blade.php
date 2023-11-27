@@ -1,7 +1,5 @@
 <?php
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Log;
-
 ?>
 
 @extends('layouts.app')
@@ -114,9 +112,12 @@ use Illuminate\Support\Facades\Log;
 									: (isset($word->audioFilename) ? $word->audioFilename : '');
 								$storedFileName = strtolower(preg_replace("/\s+/", "", $word->translation));
 								?>
-								<a href="/languagepack/wordlist/{{ $word->languagepackid }}/download/{{ $storedFileName }}.mp3">
-									{{ mb_strlen($audioFilename) > 30 ? mb_substr($audioFilename, 0, 30) . '...' : $audioFilename }}
-								</a>
+								<div class="mt-1">
+									<audio controls style="width: 200px;">
+										<source src="/languagepack/wordlist/{{ $word->languagepackid }}/download/{{ $storedFileName }}.mp3" type="audio/mpeg">
+										Your browser does not support the audio element.
+									</audio> 								
+								</div>
 								<input type="hidden" name="words[{{ $key }}][audioFilename]" value="{{ $audioFilename }}">
 							@endif
 							@if($errors->has('words.' . $key . '.audioFile') && old('words.' . $key . '.delete') != '1')							
@@ -124,6 +125,28 @@ use Illuminate\Support\Facades\Log;
 							@endif									
 						</div>
 					</td> 
+
+					<td>
+						<div class="custom-file">
+							<input type="file" name="words[{{ $key }}][imageFile]" class="custom-file-input" id="chooseFile" value="{{ old('words.' . $key . '.imageFile') }}">
+							<br>
+							@if(isset($word->imageFile) || isset($word->imageFilename))
+								<?php 		
+								$imageFilename = isset($word->imageFile) ? (isset($word->imageFile->name) ? $word->imageFile->name : $word->imageFilename) 
+									: (isset($word->imageFilename) ? $word->imageFilename : '');
+								$storedFileName = strtolower(preg_replace("/\s+/", "", $word->translation));
+								?>
+								<div class="mt-1">
+									<img width="30" src="/languagepack/wordlist/{{ $word->languagepackid }}/download/{{ $storedFileName }}.png" />
+								</div>
+								<input type="hidden" name="words[{{ $key }}][imageFilename]" value="{{ $imageFilename }}">
+							@endif
+							@if($errors->has('words.' . $key . '.imageFile') && old('words.' . $key . '.delete') != '1')							
+								<div class="error">Upload a valid file</div>
+							@endif									
+						</div>
+					</td> 
+
 					<td>
 						<?php $delete = $deleteValues[$key] === '1'; ?>
 						<input type="checkbox" name="words[{{ $key }}][delete]" value="1" 

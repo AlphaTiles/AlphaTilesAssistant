@@ -17,7 +17,13 @@ class Word extends Model
 
     public function audioFile(): HasOne
     {
-        return $this->hasOne(File::class, 'id', 'file_id')
+        return $this->hasOne(File::class, 'id', 'audiofile_id')
             ->where('type', FileTypeEnum::AUDIO->value);
     }
+
+    public function imageFile(): HasOne
+    {
+        return $this->hasOne(File::class, 'id', 'imagefile_id')
+            ->where('type', FileTypeEnum::IMAGE->value);
+    }    
 }
