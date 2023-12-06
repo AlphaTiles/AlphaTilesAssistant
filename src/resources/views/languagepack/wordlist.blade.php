@@ -114,7 +114,7 @@ use Illuminate\Support\Arr;
 								?>
 								<div class="mt-1">
 									<audio controls style="width: 200px;">
-										<source src="/languagepack/wordlist/{{ $word->languagepackid }}/download/{{ $storedFileName }}.mp3" type="audio/mpeg">
+										<source src="/languagepack/wordlist/{{ $word->languagepackid }}/download/{{ $storedFileName }}.mp3?{{ time() }}" type="audio/mpeg">
 										Your browser does not support the audio element.
 									</audio> 								
 								</div>
@@ -137,7 +137,7 @@ use Illuminate\Support\Arr;
 								$storedFileName = strtolower(preg_replace("/\s+/", "", $word->translation));
 								?>
 								<div class="mt-1">
-									<img width="30" src="/languagepack/wordlist/{{ $word->languagepackid }}/download/{{ $storedFileName }}.png" />
+									<img width="30" src="/languagepack/wordlist/{{ $word->languagepackid }}/download/{{ $storedFileName }}.png?{{ time() }}" />
 								</div>
 								<input type="hidden" name="words[{{ $key }}][imageFilename]" value="{{ $imageFilename }}">
 							@endif
@@ -169,7 +169,7 @@ use Illuminate\Support\Arr;
 	<form method="post" action="/languagepack/wordlist/{{ $languagePack->id }}">
 		@csrf
 		<div>
-			<label for="add_words">Add Words (one word + translation separated by tab per line):</label><br>
+			<label for="add_words">Add Words (one word + translation separated by semicolon per line):</label><br>
 			<textarea name="add_words" rows=7 cols=45></textarea>
 		</div>
 

@@ -54,7 +54,7 @@ class WordlistController extends Controller
         foreach($words as $key => $word) {
             if(!empty($word)) {
                 $insert[$key]['languagepackid'] = $languagePack->id;
-                $arrWord = preg_split("/\t+/", $word);
+                $arrWord = explode(';', $word);
                 $insert[$key]['value'] = $arrWord[0];
                 $insert[$key]['translation'] = $arrWord[1] ?? '';
             }
@@ -157,12 +157,17 @@ class WordlistController extends Controller
         $wordIds = explode(',', $wordIdsString);
 
         foreach($wordIds as $wordId) {
-            $fileName = "word_" .  str_pad($wordId, 3, '0', STR_PAD_LEFT) . '.mp3';
             $word = Word::find($wordId);
-            $filename = strtolower(preg_replace("/\s+/", "", $word->translation));
-            $newFileName = $filename . '.mp3';
-            $file = "languagepacks/{$languagePack->id}/res/raw/{$newFileName}";
-            Storage::disk('public')->delete($file);
+            $audioFilename = strtolower(preg_replace("/\s+/", "", $word->translation));
+            $newAudioFileName = $audioFilename . '.mp3';
+            $audioFile = "languagepacks/{$languagePack->id}/res/raw/{$newAudioFileName}";
+            Storage::disk('public')->delete($audioFile);
+
+            $imageFilename = strtolower(preg_replace("/\s+/", "", $word->translation));
+            $newImageFileName = $imageFilename . '.png';
+            $imageFile = "languagepacks/{$languagePack->id}/res/raw/{$newImageFileName}";
+            Storage::disk('public')->delete($imageFile);
+
             Word::where('id', $wordId)->delete();
         }
 
@@ -172,8 +177,7 @@ class WordlistController extends Controller
     public function downloadFile(LanguagePack $languagePack, $filename)
     {        
         $filePath = storage_path("app/public/languagepacks/{$languagePack->id}/res/raw/{$filename}");
-        Log::error($filePath);
 
-        return response()->download($filePath);
+        return response()->download($filePath, null, ['Cache-Control' => 'no-cache, must-revalidate']);
     }
 }
