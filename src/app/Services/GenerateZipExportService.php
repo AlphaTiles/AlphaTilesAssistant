@@ -143,7 +143,7 @@ class GenerateZipExportService
 
         if($tile->{$fileRelation}) {
             $file = basename($tile->{$fileRelation}->file_path);
-            $resourceFile = "app/public/languagepacks/4/res/raw/{$file}";
+            $resourceFile = "app/public/languagepacks/{$this->languagePack->id}/res/raw/{$file}";
             $outputFolder = "{$zipFileName}/res/raw/{$file}";
             $zip->addFile(storage_path($resourceFile), $outputFolder);        
         }
@@ -151,10 +151,17 @@ class GenerateZipExportService
 
     private function saveWordlistFile(Word $word, ZipArchive $zip, string $zipFileName): void
     {
-        if($word->file) {
-            $file = basename($word->file->file_path);
-            $resourceFile = "app/public/languagepacks/4/res/raw/{$file}";
+        if($word->audioFile) {
+            $file = basename($word->audioFile->file_path);
+            $resourceFile = "app/public/languagepacks/{$this->languagePack->id}/res/raw/{$file}";
             $outputFolder = "{$zipFileName}/res/raw/{$file}";
+            $zip->addFile(storage_path($resourceFile), $outputFolder);        
+        }
+
+        if($word->imageFile) {
+            $file = basename($word->imageFile->file_path);
+            $resourceFile = "app/public/languagepacks/{$this->languagePack->id}/res/raw/{$file}";
+            $outputFolder = "{$zipFileName}/res/drawable-xxxhdpi/{$file}";
             $zip->addFile(storage_path($resourceFile), $outputFolder);        
         }
     }

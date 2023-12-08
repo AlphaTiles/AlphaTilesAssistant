@@ -1,7 +1,5 @@
 <?php
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Log;
-
 ?>
 
 @extends('layouts.app')
@@ -84,6 +82,7 @@ use Illuminate\Support\Facades\Log;
 					<th>Translation</th> 
 					<th>Mixed Types</th>
 					<th>Audio</th>
+					<th>Image</th>
 					<th><input type="checkbox"  onClick="checkAllWords(this)" /> Delete</th>
 				</tr>
 				</thead> 
@@ -105,23 +104,49 @@ use Illuminate\Support\Facades\Log;
 					</td> 
 					<td>
 						<div class="custom-file">
-							<input type="file" name="words[{{ $key }}][file]" class="custom-file-input" id="chooseFile" value="{{ old('words.' . $key . '.file') }}">
-							@if(isset($word->file) || isset($word->filename))
+							<input type="file" name="words[{{ $key }}][audioFile]" class="custom-file-input" id="chooseFile" value="{{ old('words.' . $key . '.audioFile') }}">
+							<br>
+							@if(isset($word->audioFile) || isset($word->audioFilename))
 								<?php 		
-								$filename = isset($word->file) ? (isset($word->file->name) ? $word->file->name : $word->filename) 
-									: (isset($word->filename) ? $word->filename : '');
+								$audioFilename = isset($word->audioFile) ? (isset($word->audioFile->name) ? $word->audioFile->name : $word->audioFilename) 
+									: (isset($word->audioFilename) ? $word->audioFilename : '');
 								$storedFileName = strtolower(preg_replace("/\s+/", "", $word->translation));
 								?>
-								<a href="/languagepack/wordlist/{{ $word->languagepackid }}/download/{{ $storedFileName }}.mp3">
-									{{ mb_strlen($filename) > 30 ? mb_substr($filename, 0, 30) . '...' : $filename }}
-								</a>
-								<input type="hidden" name="words[{{ $key }}][filename]" value="{{ $filename }}">
+								<div class="mt-1">
+									<audio controls style="width: 200px;">
+										<source src="/languagepack/wordlist/{{ $word->languagepackid }}/download/{{ $storedFileName }}.mp3?{{ time() }}" type="audio/mpeg">
+										Your browser does not support the audio element.
+									</audio> 								
+								</div>
+								<input type="hidden" name="words[{{ $key }}][audioFilename]" value="{{ $audioFilename }}">
 							@endif
-							@if($errors->has('words.' . $key . '.file') && old('words.' . $key . '.delete') != '1')							
+							@if($errors->has('words.' . $key . '.audioFile') && old('words.' . $key . '.delete') != '1')							
 								<div class="error">Upload a valid file</div>
 							@endif									
 						</div>
 					</td> 
+
+					<td>
+						<div class="custom-file">
+							<input type="file" name="words[{{ $key }}][imageFile]" class="custom-file-input" id="chooseFile" value="{{ old('words.' . $key . '.imageFile') }}">
+							<br>
+							@if(isset($word->imageFile) || isset($word->imageFilename))
+								<?php 		
+								$imageFilename = isset($word->imageFile) ? (isset($word->imageFile->name) ? $word->imageFile->name : $word->imageFilename) 
+									: (isset($word->imageFilename) ? $word->imageFilename : '');
+								$storedFileName = strtolower(preg_replace("/\s+/", "", $word->translation));
+								?>
+								<div class="mt-1">
+									<img width="30" src="/languagepack/wordlist/{{ $word->languagepackid }}/download/{{ $storedFileName }}.png?{{ time() }}" />
+								</div>
+								<input type="hidden" name="words[{{ $key }}][imageFilename]" value="{{ $imageFilename }}">
+							@endif
+							@if($errors->has('words.' . $key . '.imageFile') && old('words.' . $key . '.delete') != '1')							
+								<div class="error">Upload a valid file</div>
+							@endif									
+						</div>
+					</td> 
+
 					<td>
 						<?php $delete = $deleteValues[$key] === '1'; ?>
 						<input type="checkbox" name="words[{{ $key }}][delete]" value="1" 
@@ -144,7 +169,7 @@ use Illuminate\Support\Facades\Log;
 	<form method="post" action="/languagepack/wordlist/{{ $languagePack->id }}">
 		@csrf
 		<div>
-			<label for="add_words">Add Words (one word + translation separated by tab per line):</label><br>
+			<label for="add_words">Add Words (one word + translation separated by semicolon per line):</label><br>
 			<textarea name="add_words" rows=7 cols=45></textarea>
 		</div>
 

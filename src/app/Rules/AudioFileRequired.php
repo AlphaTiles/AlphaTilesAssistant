@@ -3,11 +3,10 @@
 namespace App\Rules;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Contracts\Validation\Rule;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
-class FileRequired implements Rule
+class AudioFileRequired implements Rule
 {
     protected $attribute;
     protected $key;
@@ -21,20 +20,20 @@ class FileRequired implements Rule
 
     public function passes($attribute, $value)
     {
-        $this->key = substr($attribute, -4);
+        $this->key = substr($attribute, -9);
         $this->attribute = $attribute;
         $this->value = $value;        
 
-        if(is_array($value) && !empty($value['file'])) {
-            $this->key = 'file';
-            $value = $value['file'];
+        if(is_array($value) && !empty($value['audioFile'])) {
+            $this->key = 'audioFile';
+            $value = $value['audioFile'];
         }
             
-        if ($this->key != 'file' && (!empty($value['filename']) || !empty($value['delete']))) {
+        if ($this->key != 'audioFile' && (!empty($value['audioFilename']) || !empty($value['delete']))) {
             return true;
         }
 
-        if($this->key === 'file')
+        if($this->key === 'audioFile')
         {
             if($value->getClientOriginalExtension() !== 'mp3') {
                 return false;
@@ -56,7 +55,7 @@ class FileRequired implements Rule
     {
         if(is_array($this->value)) {
             return [
-                $this->attribute . '.file' => "An audio file is required for {$this->value['value']}. It must be an mp3 and the file size no bigger than 1024kb."
+                $this->attribute . '.audioFile' => "An audio file is required for {$this->value['value']}. It must be an mp3 and the file size no bigger than 1024kb."
             ];
         }
     }
