@@ -64,14 +64,13 @@ class ImageFileRequired implements Rule
         $errorMessage = "";
 
         if(is_array($this->value)) {
-            $defaultError = "An image file is required for {$this->value['value']}. It must be of the png type.";
-            $errorMessage = $defaultError;    
+            $errorMessage = "An image file is required for {$this->value['value']}. It must be of the png type.";    
         }
 
         if(!is_array($this->file)) {
             $fileSizeInKB = $this->file->getSize() / 256;
             if($this->file->getClientOriginalExtension() !== 'png') {
-                $errorMessage = $defaultError;
+                $errorMessage = "The image file for {$this->value['value']} must be of the png type.";
             } elseif($fileSizeInKB === 0 || $fileSizeInKB > 256) {
                 $errorMessage = "The file size must be no bigger than 256kb.";
             }
