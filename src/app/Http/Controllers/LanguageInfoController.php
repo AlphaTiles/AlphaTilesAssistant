@@ -5,9 +5,10 @@ namespace App\Http\Controllers;
 use App\Enums\LangInfoEnum;
 use App\Models\LanguagePack;
 use App\Models\LanguageSetting;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\StoreLangPackRequest;
 use App\Repositories\LangInfoRepository;
+use App\Http\Requests\StoreLangPackRequest;
 
 class LanguageInfoController extends Controller
 {
@@ -46,7 +47,7 @@ class LanguageInfoController extends Controller
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function edit(LanguagePack $languagePack)
-    {        
+    {       
         return view('languagepack.info', [
             'languagePack' => $languagePack,
             'completedSteps' => ['lang_info'],
@@ -80,7 +81,7 @@ class LanguageInfoController extends Controller
 
         return redirect("languagepack/edit/{$languagePackSaved->id}");    
     }    
-
+    
     private function saveSettings(LanguagePack $languagePack, StoreLangPackRequest $request): void
     {
         LanguageSetting::where('languagepackid', $languagePack->id)

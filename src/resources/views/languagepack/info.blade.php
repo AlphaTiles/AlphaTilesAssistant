@@ -38,7 +38,7 @@ use App\Enums\FieldTypeEnum;
 					@elseif($setting['type'] === FieldTypeEnum::TEXTBOX)
 						<textarea name="settings[{{ $setting['name'] }}]" rows=3 cols=50>{{ $setting['value'] }}</textarea>
 					@else
-						<input type="text" class="form-control" name="settings[{{ $setting['name'] }}]" size="70" value="{{ $setting['value'] }}">
+						<input type="text" class="form-control" name="settings[{{ $setting['name'] }}]" size="70" value="{{ $setting['value'] }}" placeholder="{{ $setting['placeholder'] }}">
 					@endif
 				</div>
 			</div>

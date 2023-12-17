@@ -2,28 +2,36 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\LangInfoEnum;
+use App\Rules\ThreeLettersRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreLangPackRequest extends FormRequest
 {
     public function rules()
     {
+        foreach(LangInfoEnum::cases() as $langInfo) {
+            $requiredSettings['settings.' . $langInfo->value] = 'required'; 
+        }
+        
         return [
             'id' => 'sometimes',
             'settings' => [
-                'array'
+                'array',
             ],
+            'settings.ethnologue_code' => [new ThreeLettersRule],
+            'settings.game_name' => ['required', 'max:20'],
+            'settings.name_local_language' => ['required', 'max:12'],
             'btnNext' => 'sometimes',
-            'settings.lang_name_local' => 'required',
-            'settings.lang_name_english' => 'required',
-        ];
+        ] + $requiredSettings;        
     }
 
     public function attributes()
     {
-        return [
-            'settings.lang_name_local' => 'Language Name (Local)',
-            'settings.lang_name_english' => 'Language Name (English)',
-        ];
+        foreach(LangInfoEnum::cases() as $langInfo) {
+            $attributes['settings.' . $langInfo->value] = $langInfo->label(); 
+        }
+
+        return $attributes;
     }    
 }
