@@ -19,6 +19,16 @@ enum LangInfoEnum: string
     case PRIVACY_POLICY         = 'privacy_policy';   
     case MEDIA_CREDITS2          = 'media_credits2'; 
 
+    public function defaultValue(): string
+    {
+        return match ($this) {
+            self::VARIANT_INFO      => '1',
+            self::EMAIL             => 'alpha_tiles@sil.org',
+            self::PRIVACY_POLICY    => 'https://alphatilesapps.org/privacypolicy.html',
+            default                 => '',
+        };
+    }
+
     public function label(): string
     {
         return match ($this) {
@@ -31,7 +41,7 @@ enum LangInfoEnum: string
             self::GAME_NAME             => 'Game Name (In Local Lang)',
             self::SCRIPT_DIRECTION      => 'Script direction',
             self::MEDIA_CREDITS         => 'Audio and image credits',
-            self::NAME_LOCAL_LANGUAGE   => 'The word NAME in local language',
+            self::NAME_LOCAL_LANGUAGE   => 'Word NAME in local language',
             self::SCRIPT_TYPE           => 'Script type',
             self::EMAIL                 => 'Email',
             self::PRIVACY_POLICY        => 'Privacy Policy',
@@ -63,7 +73,6 @@ enum LangInfoEnum: string
     {
         return match($this) {
             self::SCRIPT_DIRECTION  => FieldTypeEnum::DROPDOWN,
-            self::MEDIA_CREDITS     => FieldTypeEnum::TEXTBOX,
             self::SCRIPT_TYPE       => FieldTypeEnum::DROPDOWN,
             default                 => FieldTypeEnum::INPUT
         };
@@ -76,8 +85,9 @@ enum LangInfoEnum: string
             self::SCRIPT_TYPE       => [
                                             'Roman' => 'Roman', 
                                             'Arabic' => 'Arabic',
+                                            'Devanagari' => 'Devanagari',
                                             'Thai/Lao' => 'Thai/Lao',
-                                            'Custom' => 'Custom'
+                                            'Other' => 'Other'
                                        ],
             default                 => null
         };
