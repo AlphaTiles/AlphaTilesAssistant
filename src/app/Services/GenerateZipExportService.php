@@ -75,11 +75,14 @@ class GenerateZipExportService
                         "FirstAppearsInStage...(Type3)\n";
 
         foreach ($tiles as $tile) {            
-            $file1 = $tile->file ? basename($tile->file->file_path) : '';            
+            $file1 = $tile->file ? basename($tile->file->file_path) : 'X';     
+            $file1 = str_replace('.mp3', '', $file1);       
             $type1 = !empty($tile->type) ? $tile->type : 'none';
-            $file2 = $tile->file2 ? basename($tile->file2->file_path) : '';            
+            $file2 = $tile->file2 ? basename($tile->file2->file_path) : 'X';            
+            $file2 = str_replace('.mp3', '', $file2);       
             $type2 = !empty($tile->type2) ? $tile->type2 : 'none';
-            $file3 = $tile->file3 ? basename($tile->file3->file_path) : '';            
+            $file3 = $tile->file3 ? basename($tile->file3->file_path) : 'X';            
+            $file3 = str_replace('.mp3', '', $file3);       
             $type3 = !empty($tile->type3) ? $tile->type3 : 'none';
 
             $fileContent .= "{$tile->value}" . self::SEPARATOR .
