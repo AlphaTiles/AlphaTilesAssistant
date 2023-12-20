@@ -45,6 +45,9 @@ class GenerateZipExportService
         $wordsFile = $this->generateWordlistFile($wordlistFileName, $zip, $zipFileName);
         $zip->addFile($wordsFile, "{$zipFileName}/res/raw/{$wordlistFileName}");
 
+        $fontPath = resource_path('font'); 
+        $this->addFolderToZip($fontPath, $zip, "/{$zipFileName}/res/font/");
+
         return $zipFile;
     }
 
@@ -168,4 +171,19 @@ class GenerateZipExportService
             $zip->addFile(storage_path($resourceFile), $outputFolder);        
         }
     }
+
+    private function addFolderToZip($folder, $zip, $outputFolder)
+    {
+        $files = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($folder),
+            \RecursiveIteratorIterator::LEAVES_ONLY
+        );
+
+        foreach ($files as $name => $file) {
+            if (!$file->isDir()) {
+                $filePath = $file->getRealPath();
+                $zip->addFile($filePath, $outputFolder . basename($file));
+            }
+        }
+    }    
 }
