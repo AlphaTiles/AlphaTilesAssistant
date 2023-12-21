@@ -51,6 +51,9 @@ class GenerateZipExportService
         $avatarPath = resource_path('images/avatars'); 
         $this->addFolderToZip($avatarPath, $zip, "/{$zipFileName}/res/drawable-xxxhdpi/");
 
+        $settingsPath = resource_path('settings'); 
+        $this->addFolderToZip($settingsPath, $zip, "/{$zipFileName}/res/raw/");
+
         return $zipFile;
     }
 
