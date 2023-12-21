@@ -48,6 +48,9 @@ class GenerateZipExportService
         $fontPath = resource_path('font'); 
         $this->addFolderToZip($fontPath, $zip, "/{$zipFileName}/res/font/");
 
+        $avatarPath = resource_path('images/avatars'); 
+        $this->addFolderToZip($avatarPath, $zip, "/{$zipFileName}/res/drawable-xxxhdpi/");
+
         return $zipFile;
     }
 
