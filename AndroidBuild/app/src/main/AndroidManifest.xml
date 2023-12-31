@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:largeHeap="false"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".Japan"
+            android:exported="false" />
+        <activity
+            android:name=".Start"
+            android:exported="true"
+            android:theme="@style/AppTheme.Launcher">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".LoadingScreen"
+            android:exported="false" />
+        <activity android:name=".ChoosePlayer" />
+        <activity android:name=".SetPlayerName" />
+        <activity android:name=".Earth" />
+        <activity android:name=".About" />
+        <activity android:name=".Brazil" />
+        <activity android:name=".China" />
+        <activity android:name=".Colombia" />
+        <activity android:name=".Celebration" />
+        <activity android:name=".Ecuador" />
+        <activity android:name=".Georgia" />
+        <activity android:name=".Italy" />
+        <activity android:name=".Mexico" />
+        <activity android:name=".Myanmar" />
+        <activity android:name=".Peru" />
+        <activity android:name=".Resources" />
+        <activity android:name=".Romania" />
+        <activity android:name=".Sudan" />
+        <activity android:name=".Thailand" />
+        <activity android:name=".UnitedStates" />
+    </application>
+
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+
+</manifest>
