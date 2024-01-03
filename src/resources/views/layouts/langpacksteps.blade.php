@@ -1,21 +1,21 @@
 <?php 
 $langInfo = 'Lang Info';
-if($languagePack->langInfo->count() > 0 && end($completedSteps) !== 'lang_info') {
+if(isset($languagePack) && $languagePack->langInfo->count() > 0 && end($completedSteps) !== 'lang_info') {
   $langInfo = "<a href=\"/languagepack/edit/$languagePack->id\">Lang Info</a>";
 }
 
 $tiles = 'Tiles';
-if($languagePack->tiles->count() > 0 && end($completedSteps) !== 'tiles') {
+if(isset($languagePack) && $languagePack->tiles->count() > 0 && end($completedSteps) !== 'tiles') {
   $tiles = "<a href=\"/languagepack/tiles/$languagePack->id\">Tiles</a>";
 }
 
 $wordlist = 'Wordlist';
-if($languagePack->words->count() > 0 && end($completedSteps) !== 'wordlist') {
+if(isset($languagePack) && $languagePack->words->count() > 0 && end($completedSteps) !== 'wordlist') {
   $wordlist = "<a href=\"/languagepack/wordlist/$languagePack->id\">Wordlist</a>";
 }
 
 $export = 'Export';
-if($languagePack->words->count() > 0 && end($completedSteps) !== 'export') {
+if(isset($languagePack) && $languagePack->words->count() > 0 && end($completedSteps) !== 'export') {
   $export = "<a href=\"/languagepack/export/$languagePack->id\">Export</a>";
 }
 ?>
