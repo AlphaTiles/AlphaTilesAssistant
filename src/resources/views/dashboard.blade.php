@@ -36,7 +36,7 @@
                                 </a>
                             </td> 
                             <td>
-                                <a href="/languagepack/{{ $languagepack->id }}">
+                                <a href="/languagepack/edit/{{ $languagepack->id }}">
                                     {{ $languagepack->name }}
                                 </a>
                             </td> 
