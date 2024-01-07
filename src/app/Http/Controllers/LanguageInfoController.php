@@ -34,7 +34,7 @@ class LanguageInfoController extends Controller
     public function create()
     {        
         return view('languagepack.info', [
-            'languagePackId' => '',
+            'languagePack' => null,
             'completedSteps' => ['lang_info'],
             'settings' => $this->langinfoRepository->getSettings(true),
             'tiles' => ''
@@ -49,7 +49,7 @@ class LanguageInfoController extends Controller
     public function edit(LanguagePack $languagePack)
     {       
         return view('languagepack.info', [
-            'languagePackId' => $languagePack->id,
+            'languagePack' => $languagePack,
             'completedSteps' => ['lang_info'],
             'settings' => $this->langinfoRepository->getSettings(false, $languagePack),
             'tiles' => ''

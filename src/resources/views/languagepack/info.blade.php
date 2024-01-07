@@ -1,5 +1,6 @@
 <?php
 use App\Enums\FieldTypeEnum;
+$languagePackId = $languagePack ? $languagePack->id : '';
 ?>
 @extends('layouts.app')
 
