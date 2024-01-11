@@ -9,7 +9,6 @@ use Illuminate\Http\Request;
 use App\Rules\CustomRequired;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
@@ -94,6 +93,9 @@ class TilesController extends Controller
                 'tiles.*.file' => $fileRules,
                 'tiles.*.file2' => $fileRules,
                 'tiles.*.file3' => $fileRules,
+                'tiles.*.stage' => ['sometimes'],    
+                'tiles.*.stage2' => ['sometimes'],    
+                'tiles.*.stage3' => ['sometimes'],    
             ],
             [                
                 'tiles.*.type' => '',
@@ -105,6 +107,9 @@ class TilesController extends Controller
                 'tiles.*.file' => $customErrorMessage,
                 'tiles.*.file2' => $customErrorMessage,
                 'tiles.*.file3' => $customErrorMessage,
+                'tiles.*.stage' => '',    
+                'tiles.*.stage2' => '',    
+                'tiles.*.stage3' => '',    
             ]
         );
 
@@ -114,16 +119,19 @@ class TilesController extends Controller
                 $fileModel1 = $this->uploadFile($tile, 1, $fileRules);
                 $fileModel2 = $this->uploadFile($tile, 2, $fileRules);
                 $fileModel3 = $this->uploadFile($tile, 3, $fileRules);
-
+                
                 $updateData = [
                     'upper' => $tile['upper'],
                     'type' => $tile['type'],
+                    'stage' => $tile['stage'] ?? null,
                     'or_1' => $tile['or_1'],
                     'or_2' => $tile['or_2'],
                     'or_3' => $tile['or_3'],
                     'type2' => $tile['type2'],
+                    'stage2' => $tile['stage2'] ?? null,
                     'type3' => $tile['type3'],
-                ];
+                    'stage3' => $tile['stage3'] ?? null,                    
+                ];                
                 
                 if (isset($fileModel1->id)) {
                     $updateData['file_id'] = $fileModel1->id;

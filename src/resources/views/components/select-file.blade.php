@@ -25,7 +25,7 @@ if(empty($tile->{$typeField}) && $nr > 1) {
         $filename = $tile->{$fileRelation}->name ?? $tile->{$filenameKey};
         $storedFileNumber = str_pad($tile->id, 3, '0', STR_PAD_LEFT); 
         ?>
-        <audio controls style="width: 200px;">
+        <audio controls style="width: 200px; height: 30px;">
             <source src="/languagepack/tiles/{{ $tile->languagepackid }}/download/tile_{{ $storedFileNumber }}_{{ $nr }}.mp3?{{ time() }}" type="audio/mpeg">
             Your browser does not support the audio element.
         </audio> 								

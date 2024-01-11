@@ -73,9 +73,10 @@ use Illuminate\Support\Facades\Log;
 					<col span="1" style="width: 5%;">
 					<col span="1" style="width: 5%;">
 					<col span="1" style="width: 15%;">
-					<col span="1" style="width: 25%;">
-					<col span="1" style="width: 25%;">
-					<col span="1" style="width: 25%;">
+					<col span="1" style="width: 15%;">
+					<col span="1" style="width: 35%;">
+					<col span="1" style="width: 10%;">
+					<col span="1" style="width: 20%;">
 				</colgroup>                        
 				<thead>
 				<tr>
@@ -84,7 +85,8 @@ use Illuminate\Support\Facades\Log;
 					<th>Type</th>
 					<th>Distractors</th>                             
 					<th>Audio instructions</th>
-					<th><input type="checkbox"  onClick="checkAllTiles(this)" /> Delete</th>
+					<th>Stage <a href="#" onClick="openAlert('First Stage', 'Define in which stage the tile should first appear');"><i class="fa-solid fa-circle-info"></i></a></th>
+					<th><input type="checkbox"  /> Delete</th>
 				</tr>
 				</thead> 
 				<tbody>
@@ -100,7 +102,7 @@ use Illuminate\Support\Facades\Log;
 						<input type="text" size=2 name="tiles[{{ $key }}][upper]" value="{{ $tile->upper }}" />
 					</td> 
 					<td>
-						<div>
+						<div class="h-7">
 						<x-select-type 
 							:nr="1"
 							:key=$key
@@ -108,7 +110,7 @@ use Illuminate\Support\Facades\Log;
 							:error-keys="$errorKeys ?? null"
 						/>
 						</div>
-						<div class="mt-1">
+						<div class="mt-1 h-7">
 						<x-select-type 
 							:nr="2"
 							:key=$key
@@ -116,7 +118,7 @@ use Illuminate\Support\Facades\Log;
 							:error-keys="$errorKeys ?? null"
 						/>
 						</div>
-						<div class="mt-1">
+						<div class="mt-1 h-7">
 						<x-select-type 
 							:nr="3"
 							:key=$key
@@ -134,7 +136,7 @@ use Illuminate\Support\Facades\Log;
 						<input type="text" size=2 name="tiles[{{ $key }}][or_3]" value="{{ old('tiles.' . $key . '.or_3') ?? $tile->or_3 }}" class="{{ $errorClass }}" />
 					</td> 
 					<td>
-						<div class="custom-file">
+						<div class="custom-file h-7">
 							<x-select-file
 							:nr="1"
 							:key=$key
@@ -142,7 +144,7 @@ use Illuminate\Support\Facades\Log;
 							:error-keys="$errorKeys ?? null"
 							/>
 						</div>
-						<div class="mt-1 custom-file">						
+						<div class="mt-1 custom-file h-7">						
 							<x-select-file
 							:nr="2"
 							:key=$key
@@ -150,7 +152,7 @@ use Illuminate\Support\Facades\Log;
 							:error-keys="$errorKeys ?? null"
 							/>
 						</div>
-						<div class="mt-1 custom-file">						
+						<div class="mt-1 custom-file h-7">						
 							<x-select-file
 							:nr="3"
 							:key=$key
@@ -159,6 +161,11 @@ use Illuminate\Support\Facades\Log;
 							/>
 						</div>
 					</td> 
+					<td>								
+						<div class="h-7">1: <input type="number" size=3 name="tiles[{{ $key }}][stage]" value="{{ $tile->stage }}" /></div>
+						<div id="stage{{ $key }}_2" class="h-7 {{ empty($tile->type2) ? 'hidden' : '' }}">2: <input type="number" size=3 name="tiles[{{ $key }}][stage2]" value="{{ $tile->stage2 }}" /></div>
+						<div id="stage{{ $key }}_3" class="h-7 {{ empty($tile->type3) ? 'hidden' : '' }}">3: <input type="number" size=3 name="tiles[{{ $key }}][stage3]" value="{{ $tile->stage3 }}" /></div>
+					</td> 					
 					<td>
 						<?php $delete = $deleteValues[$key] === '1'; ?>
 						<input type="checkbox" name="tiles[{{ $key }}][delete]" value="1" 
@@ -221,10 +228,23 @@ function addType(key, nr) {
 	var showFile = document.getElementById('show_' + fileId);
 	showFile.classList.remove('hidden');
 
+	var stageId = 'stage' + key + '_' + nr;
+	console.log(stageId);
+	var showStage = document.getElementById(stageId);
+	showStage.classList.remove('hidden');
+
 	if(nr === 2) {
 		var addSecondLink = document.getElementById('add_type' + key + '_3');
 		addSecondLink.classList.remove('hidden');
 	}
+}
+
+function openAlert(title, text) {
+	Swal.fire({
+                title: title,
+                text: text,
+                confirmButtonText: 'OK'
+            });
 }
 </script>
 @endsection

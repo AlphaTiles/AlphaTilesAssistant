@@ -93,6 +93,9 @@ class GenerateZipExportService
             $file3 = $tile->file3 ? basename($tile->file3->file_path) : 'X';            
             $file3 = str_replace('.mp3', '', $file3);       
             $type3 = !empty($tile->type3) ? $tile->type3 : 'none';
+            $stage1 = $tile->stage ?? '-';
+            $stage2 = $tile->stage2 ?? '-';
+            $stage3 = $tile->stage3 ?? '-';
 
             $fileContent .= "{$tile->value}" . self::SEPARATOR .
             "{$tile->or_1}" . self::SEPARATOR .
@@ -106,7 +109,7 @@ class GenerateZipExportService
             "{$type3}" . self::SEPARATOR .
             "{$file3}" . self::SEPARATOR .
             "0"  . self::SEPARATOR . "0"  . self::SEPARATOR . "0" . self::SEPARATOR .
-            "-"  . self::SEPARATOR . "-"  . self::SEPARATOR . "-" . "\n";
+            "{$stage1}"  . self::SEPARATOR . "{$stage2}"  . self::SEPARATOR . "{$stage3}" . "\n";
         }
 
         $tilesFile = "{$this->tempDir}/{$tilesFileName}";
