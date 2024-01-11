@@ -14,11 +14,14 @@ class Tile extends Model
         'value',
         'upper',
         'type',
+        'stage',
         'or_1',
         'or_2',
         'or_3',
         'type2',
+        'stage2',
         'type3',
+        'stage3',
     ];
 
     public function file(): HasOne
