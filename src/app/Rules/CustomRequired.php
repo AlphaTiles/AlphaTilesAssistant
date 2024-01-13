@@ -37,7 +37,11 @@ class CustomRequired implements Rule
     public function message()
     {
         if(empty($this->value[$this->key])) {
-            return "The {$this->key} is required for {$this->value['value']}";
+            $value = !empty($this->value['value']) ? $this->value['value'] : $this->value['translation'];
+            if($this->key === 'value') {
+                return "A value for word is required";
+            }
+            return "The {$this->key} is required for {$value}";
         }
     }
 }
