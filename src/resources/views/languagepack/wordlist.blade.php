@@ -92,8 +92,8 @@ use Illuminate\Support\Arr;
 					<td>
 						<input type="hidden" name="words[{{ $key }}][languagepackid]" value="{{ $word->languagepackid }}">
 						<input type="hidden" name="words[{{ $key }}][id]" value="{{ $word->id }}" />
-						<input type="hidden" name="words[{{ $key }}][value]" value="{{ $word->value }}" />
-						{{ $word->value }}
+						<?php $errorClass = empty($word->value) ? 'inputError' : ''; ?>									
+						<input type="text" name="words[{{ $key }}][value]" value="{{ old('words.' . $key . '.value') ?? $word->value }}" class="{{ $errorClass }}" />						
 					</td> 
 					<td>					
 						<?php $errorClass = isset($errorKeys) && in_array('words.' . $key . '.translation', $errorKeys) ? 'inputError' : ''; ?>			

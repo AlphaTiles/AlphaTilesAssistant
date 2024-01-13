@@ -82,13 +82,15 @@ class WordlistController extends Controller
             [
                 'words.*' => [
                     'required_unless:words.*.delete,1',
+                    new CustomRequired(request(), 'value'),
                     new CustomRequired(request(), 'translation'),
                     new AudioFileRequired(request()),
                     new ImageFileRequired(request()),
                 ],
                 'words.*.translation' => ['required_unless:words.*.delete,1'],
             ],
-            [                
+            [   
+                'words.*.value' => '',             
                 'words.*.translation' => '',
                 'words.*.mixed_types' => '',
                 'words.*.audioFile' => '',
@@ -105,6 +107,7 @@ class WordlistController extends Controller
                 $imageFileModel = $fileUploadService->handle($languagePack, $word, $imageRuleClass, FileTypeEnum::IMAGE);
                 
                 $updateData = [
+                    'value' => $word['value'] ?? '',
                     'translation' => $word['translation'] ?? '',
                     'mixed_types' => $word['mixed_types'],
                 ];
