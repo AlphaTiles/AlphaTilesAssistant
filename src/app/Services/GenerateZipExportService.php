@@ -63,7 +63,8 @@ class GenerateZipExportService
 
         $settings = app(LangInfoRepository::class)->getSettings(false, $this->languagePack);
         foreach($settings as $setting) {        
-            $fileContent .= $setting['export_key'] . self::SEPARATOR . $setting['value'] . "\n";
+            $value = !empty($setting['value']) ? $setting['value'] : 'none';
+            $fileContent .= $setting['export_key'] . self::SEPARATOR . $value . "\n";
         }
 
         $file = "{$this->tempDir}/{$fileName}";
