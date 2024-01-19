@@ -1,5 +1,11 @@
 <?php
+use App\Enums\LangInfoEnum;
 use Illuminate\Support\Arr;
+use App\Models\LanguageSetting;
+
+$langName = LanguageSetting::where('languagepackid', $languagePack->id)
+	->where('name', LangInfoEnum::LANG_NAME_ENGLISH->value)->first()->value;
+$path = "/storage/languagepacks/" . $languagePack->id . "/res/raw/";	
 ?>
 
 @extends('layouts.app')
@@ -21,7 +27,7 @@ use Illuminate\Support\Arr;
 			@endif
 		</div>	
 		<?php 
-		$wordData = old('words') ?? $words;
+		$wordData = old('words') ?? request()['words'] ?? $words;
 		$deleteValues = old('words') ? Arr::pluck(old('words') , 'delete') : Arr::pluck($wordData , 'delete'); 
 		?>
 		@if($words && in_array(1, $deleteValues))
@@ -78,8 +84,7 @@ use Illuminate\Support\Arr;
 				</colgroup>                        
 				<thead>
 				<tr>
-					<th>Word</th> 
-					<th>Translation</th> 
+					<th>Word in {{ $langName }}</th> 
 					<th>Mixed Types</th>
 					<th>Audio</th>
 					<th>Image</th>
@@ -89,15 +94,11 @@ use Illuminate\Support\Arr;
 				<tbody>
 				@foreach($words as $key => $word)
 				<tr>
-					<td>
-						<input type="hidden" name="words[{{ $key }}][languagepackid]" value="{{ $word->languagepackid }}">
-						<input type="hidden" name="words[{{ $key }}][id]" value="{{ $word->id }}" />
-						<?php $errorClass = empty($word->value) ? 'inputError' : ''; ?>									
-						<input type="text" name="words[{{ $key }}][value]" value="{{ old('words.' . $key . '.value') ?? $word->value }}" class="{{ $errorClass }}" />						
-					</td> 
 					<td>					
-						<?php $errorClass = isset($errorKeys) && in_array('words.' . $key . '.translation', $errorKeys) ? 'inputError' : ''; ?>			
-						<input type="text" name="words[{{ $key }}][translation]" value="{{ old('words.' . $key . '.translation') ?? $word->translation }}" class="{{ $errorClass }}" />
+						<input type="hidden" name="words[{{ $key }}][languagepackid]" value="{{ $word->languagepackid }}">
+						<input type="hidden" name="words[{{ $key }}][id]" value="{{ $word->id }}" />						
+						<?php $errorClass = isset($errorKeys) && in_array('words.' . $key, $errorKeys) ? 'inputError' : ''; ?>			
+						<input type="text" name="words[{{ $key }}][value]" value="{{ old('words.' . $key . '.value') ?? $word->value }}" class="{{ $errorClass }}" />
 					</td> 
 					<td>								
 						<input type="text" name="words[{{ $key }}][mixed_types]" value="{{ old('words.' . $key . '.mixed_types') ?? $word->mixed_types }}" />
@@ -110,11 +111,14 @@ use Illuminate\Support\Arr;
 								<?php 		
 								$audioFilename = isset($word->audioFile) ? (isset($word->audioFile->name) ? $word->audioFile->name : $word->audioFilename) 
 									: (isset($word->audioFilename) ? $word->audioFilename : '');
-								$storedFileName = strtolower(preg_replace("/\s+/", "", $word->translation));
+									$storedFileName = '';
+									if(!empty($word->audioFile->file_path)) {
+										$storedFileName = str_replace($path, '', $word->audioFile->file_path);
+									}									
 								?>
 								<div class="mt-1">
 									<audio controls style="width: 200px;">
-										<source src="/languagepack/wordlist/{{ $word->languagepackid }}/download/{{ $storedFileName }}.mp3?{{ time() }}" type="audio/mpeg">
+										<source src="/languagepack/wordlist/{{ $word->languagepackid }}/download/{{ $storedFileName }}?{{ time() }}" type="audio/mpeg">
 										Your browser does not support the audio element.
 									</audio> 								
 								</div>
@@ -133,11 +137,14 @@ use Illuminate\Support\Arr;
 							@if(isset($word->imageFile) || isset($word->imageFilename))
 								<?php 		
 								$imageFilename = isset($word->imageFile) ? (isset($word->imageFile->name) ? $word->imageFile->name : $word->imageFilename) 
-									: (isset($word->imageFilename) ? $word->imageFilename : '');
-								$storedFileName = strtolower(preg_replace("/\s+/", "", $word->translation));
+									: (isset($word->imageFilename) ? $word->imageFilename : '');								
+								$storedFileName = '';
+								if(!empty($word->imageFile->file_path)) {
+									$storedFileName = str_replace($path, '', $word->imageFile->file_path);
+								}								
 								?>
 								<div class="mt-1">
-									<img width="30" src="/languagepack/wordlist/{{ $word->languagepackid }}/download/{{ $storedFileName }}.png?{{ time() }}" />
+									<img width="30" src="/languagepack/wordlist/{{ $word->languagepackid }}/download/{{ $storedFileName }}?{{ time() }}" />
 								</div>
 								<input type="hidden" name="words[{{ $key }}][imageFilename]" value="{{ $imageFilename }}">
 							@endif
@@ -169,7 +176,7 @@ use Illuminate\Support\Arr;
 	<form method="post" action="/languagepack/wordlist/{{ $languagePack->id }}">
 		@csrf
 		<div>
-			<label for="add_words">Add Words (one word + translation separated by semicolon per line):</label><br>
+			<label for="add_words">Add Words (one word per line):</label><br>
 			<textarea name="add_words" rows=7 cols=45></textarea>
 		</div>
 

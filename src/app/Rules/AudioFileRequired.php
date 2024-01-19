@@ -12,14 +12,16 @@ class AudioFileRequired implements Rule
     protected $key;
     protected $request;
     protected $value;        
+    protected $words;
 
-    public function __construct(Request $request)
+    public function __construct(Request $request, ?array $words = null)
     {
         $this->request = $request;
+        $this->words = $words;
     }
 
     public function passes($attribute, $value)
-    {
+    {        
         $this->key = substr($attribute, -9);
         $this->attribute = $attribute;
         $this->value = $value;        
@@ -53,9 +55,12 @@ class AudioFileRequired implements Rule
 
     public function message()
     {
+        $wordKey = explode('.', $this->attribute)[1];
+        $word = $this->words[$wordKey]['value'] ?? '';
+
         if(is_array($this->value)) {
             return [
-                $this->attribute . '.audioFile' => "An audio file is required for {$this->value['value']}. It must be an mp3 and the file size no bigger than 1024kb."
+                $this->attribute . '.audioFile' => "An audio file is required for {$word}. It must be an mp3 and the file size no bigger than 1024kb."
             ];
         }
     }

@@ -11,7 +11,6 @@ class Word extends Model
     protected $fillable = [
         'languagepackid',
         'value',
-        'translation',
         'mixed_types',
     ];
 
