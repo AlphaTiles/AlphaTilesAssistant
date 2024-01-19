@@ -137,7 +137,8 @@ class GenerateZipExportService
 
         foreach ($words as $word) {            
             $mixedTypes = !empty($word->mixed_types) ? $word->mixed_types : '-';                        
-            $fileContent .= "{$word->translation}" . self::SEPARATOR .
+            $fileName = str_replace('.mp3', '', $word->audioFile->name);
+            $fileContent .= "{$fileName}" . self::SEPARATOR .
             "{$word->value}" . self::SEPARATOR .
             "0" . self::SEPARATOR .
             "{$mixedTypes}" . self::SEPARATOR .

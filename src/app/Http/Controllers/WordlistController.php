@@ -54,9 +54,7 @@ class WordlistController extends Controller
         foreach($words as $key => $word) {
             if(!empty($word)) {
                 $insert[$key]['languagepackid'] = $languagePack->id;
-                $arrWord = explode(';', $word);
-                $insert[$key]['value'] = $arrWord[0];
-                $insert[$key]['translation'] = $arrWord[1] ?? '';
+                $insert[$key]['value'] = $word;
             }
         }
 
@@ -83,15 +81,12 @@ class WordlistController extends Controller
                 'words.*' => [
                     'required_unless:words.*.delete,1',
                     new CustomRequired(request(), 'value'),
-                    new CustomRequired(request(), 'translation'),
-                    new AudioFileRequired(request()),
-                    new ImageFileRequired(request()),
+                    new AudioFileRequired(request(), $words),
+                    new ImageFileRequired(request(), $words),
                 ],
-                'words.*.translation' => ['required_unless:words.*.delete,1'],
             ],
             [   
-                'words.*.value' => '',             
-                'words.*.translation' => '',
+                'words.*.value' => '',
                 'words.*.mixed_types' => '',
                 'words.*.audioFile' => '',
                 'words.*.imageFile' => '',
@@ -100,15 +95,14 @@ class WordlistController extends Controller
 
         DB::transaction(function() use($languagePack, $words) {
             $fileUploadService = app(FileUploadService::class);                        
-            $audioRuleClass = new AudioFileRequired(request());
-            $imageRuleClass = new ImageFileRequired(request());
+            $audioRuleClass = new AudioFileRequired(request(), $words);
+            $imageRuleClass = new ImageFileRequired(request(), $words);
             foreach($words as $key => $word) {
                 $audioFileModel = $fileUploadService->handle($languagePack, $word, $audioRuleClass, FileTypeEnum::AUDIO);
                 $imageFileModel = $fileUploadService->handle($languagePack, $word, $imageRuleClass, FileTypeEnum::IMAGE);
                 
                 $updateData = [
                     'value' => $word['value'] ?? '',
-                    'translation' => $word['translation'] ?? '',
                     'mixed_types' => $word['mixed_types'],
                 ];
                 
@@ -132,15 +126,7 @@ class WordlistController extends Controller
         
         session()->flash('success', 'Records updated successfully');
 
-        $wordCollection = Collection::make($words)->map(function ($item) {
-            if(isset($item['audioFile'])) {
-                $item['audioFilename'] = $item['audioFile']->getClientOriginalName();
-            }
-            if(isset($item['imageFile'])) {
-                $item['imageFilename'] = $item['imageFile']->getClientOriginalName();
-            }
-            return (object) $item;
-        });
+        $wordCollection = Word::where('languagepackid', $languagePack->id)->get();
 
         return view('languagepack.wordlist', [
             'completedSteps' => ['lang_info', 'tiles', 'words'],
@@ -161,14 +147,12 @@ class WordlistController extends Controller
 
         foreach($wordIds as $wordId) {
             $word = Word::find($wordId);
-            $audioFilename = strtolower(preg_replace("/\s+/", "", $word->translation));
-            $newAudioFileName = $audioFilename . '.mp3';
-            $audioFile = "languagepacks/{$languagePack->id}/res/raw/{$newAudioFileName}";
+            $audioFilename = strtolower(preg_replace("/\s+/", "", $word->audioFile->name ?? ''));
+            $audioFile = "languagepacks/{$languagePack->id}/res/raw/{$audioFilename}";
             Storage::disk('public')->delete($audioFile);
 
-            $imageFilename = strtolower(preg_replace("/\s+/", "", $word->translation));
-            $newImageFileName = $imageFilename . '.png';
-            $imageFile = "languagepacks/{$languagePack->id}/res/raw/{$newImageFileName}";
+            $imageFilename = strtolower(preg_replace("/\s+/", "", $word->imageFile->name ?? ''));
+            $imageFile = "languagepacks/{$languagePack->id}/res/raw/{$imageFilename}";
             Storage::disk('public')->delete($imageFile);
 
             Word::where('id', $wordId)->delete();

@@ -21,11 +21,9 @@ class FileUploadService
             ]];            
             $fileValdidation = Validator::make(['words' => [$word]], $fileRules);     
                 if($fileValdidation->passes()){
-                    $filename = strtolower(preg_replace("/\s+/", "", $word['translation']));
-                    $extension = $type === FileTypeEnum::AUDIO->value ? 'mp3' : 'png';
-                    $newFileName = $filename . '.' . $extension;
-                    $languagePackPath = "languagepacks/{$languagePack->id}/res/raw/";
-                    $filePath = $word[$fieldName]->storeAs($languagePackPath, $newFileName, 'public');
+                    $filename = $word[$fieldName]->getClientOriginalName();
+                    $languagePackPath = "languagepacks/{$languagePack->id}/res/raw";
+                    $filePath = $word[$fieldName]->storeAs($languagePackPath, $filename, 'public');
                     $fileModel->name = $word[$fieldName]->getClientOriginalName();
                     $fileModel->type = $type;
                     $fileModel->file_path = '/storage/' . $filePath;

@@ -14,10 +14,12 @@ class ImageFileRequired implements Rule
     protected $value;
     protected $file;    
     protected $validImageDimensionInKb = 512;        
+    protected $words;
 
-    public function __construct(Request $request)
+    public function __construct(Request $request, ?array $words = null)
     {
         $this->request = $request;
+        $this->words = $words;
     }
 
     public function passes($attribute, $value)
@@ -63,14 +65,17 @@ class ImageFileRequired implements Rule
     {
         $errorMessage = "";
 
+        $wordKey = explode('.', $this->attribute)[1];
+        $word = $this->words[$wordKey]['value'] ?? '';
+
         if(is_array($this->value)) {
-            $errorMessage = "An image file is required for {$this->value['value']}. It must be of the png type.";    
+            $errorMessage = "An image file is required for {$word}. It must be of the png type.";    
         }
 
         if(!is_array($this->file)) {
             $fileSizeInKB = $this->file->getSize() / 256;
             if($this->file->getClientOriginalExtension() !== 'png') {
-                $errorMessage = "The image file for {$this->value['value']} must be of the png type.";
+                $errorMessage = "The image file for {$word} must be of the png type.";
             } elseif($fileSizeInKB === 0 || $fileSizeInKB > 256) {
                 $errorMessage = "The file size must be no bigger than 256kb.";
             }
