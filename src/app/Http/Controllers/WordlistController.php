@@ -129,7 +129,7 @@ class WordlistController extends Controller
         $wordCollection = Word::where('languagepackid', $languagePack->id)->get();
 
         return view('languagepack.wordlist', [
-            'completedSteps' => ['lang_info', 'tiles', 'words'],
+            'completedSteps' => ['lang_info', 'tiles', 'wordlist'],
             'languagePack' => $languagePack,
             'words' => $wordCollection
         ]);

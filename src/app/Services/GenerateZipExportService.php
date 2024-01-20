@@ -136,8 +136,10 @@ class GenerateZipExportService
                         "FirstAppearsInStage(IFOverrulingDefault)...\n";        
 
         foreach ($words as $word) {            
-            $mixedTypes = !empty($word->mixed_types) ? $word->mixed_types : '-';                        
-            $fileName = str_replace('.mp3', '', $word->audioFile->name);
+            $mixedTypes = !empty($word->mixed_types) ? $word->mixed_types : '-';  
+            $storagePath = "/storage/languagepacks/{$this->languagePack->id}/res/raw/";
+            $fileName = str_replace($storagePath, '', $word->audioFile->file_path);
+            $fileName = str_replace('.mp3', '',$fileName);
             $fileContent .= "{$fileName}" . self::SEPARATOR .
             "{$word->value}" . self::SEPARATOR .
             "0" . self::SEPARATOR .
