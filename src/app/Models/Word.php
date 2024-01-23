@@ -12,6 +12,7 @@ class Word extends Model
         'languagepackid',
         'value',
         'mixed_types',
+        'stage',
     ];
 
     public function audioFile(): HasOne

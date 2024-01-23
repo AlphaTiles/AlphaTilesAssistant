@@ -162,9 +162,9 @@ use Illuminate\Support\Facades\Log;
 						</div>
 					</td> 
 					<td>								
-						<div class="h-7">1: <input type="number" size=3 name="tiles[{{ $key }}][stage]" value="{{ $tile->stage }}" /></div>
-						<div id="stage{{ $key }}_2" class="h-7 {{ empty($tile->type2) ? 'hidden' : '' }}">2: <input type="number" size=3 name="tiles[{{ $key }}][stage2]" value="{{ $tile->stage2 }}" /></div>
-						<div id="stage{{ $key }}_3" class="h-7 {{ empty($tile->type3) ? 'hidden' : '' }}">3: <input type="number" size=3 name="tiles[{{ $key }}][stage3]" value="{{ $tile->stage3 }}" /></div>
+						<div class="h-7">1: <input type="number" min="0" size=3 name="tiles[{{ $key }}][stage]" value="{{ $tile->stage }}" /></div>
+						<div id="stage{{ $key }}_2" class="h-7 {{ empty($tile->type2) ? 'hidden' : '' }}">2: <input type="number" min="0" size=3 name="tiles[{{ $key }}][stage2]" value="{{ $tile->stage2 }}" /></div>
+						<div id="stage{{ $key }}_3" class="h-7 {{ empty($tile->type3) ? 'hidden' : '' }}">3: <input type="number" min="0" size=3 name="tiles[{{ $key }}][stage3]" value="{{ $tile->stage3 }}" /></div>
 					</td> 					
 					<td>
 						<?php $delete = $deleteValues[$key] === '1'; ?>

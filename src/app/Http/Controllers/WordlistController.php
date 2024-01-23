@@ -83,6 +83,7 @@ class WordlistController extends Controller
                     new CustomRequired(request(), 'value'),
                     new AudioFileRequired(request(), $words),
                     new ImageFileRequired(request(), $words),
+                    'stage' => ['sometimes'],    
                 ],
             ],
             [   
@@ -90,6 +91,7 @@ class WordlistController extends Controller
                 'words.*.mixed_types' => '',
                 'words.*.audioFile' => '',
                 'words.*.imageFile' => '',
+                'words.*.stage' => '',
             ]
         );
 
@@ -104,6 +106,7 @@ class WordlistController extends Controller
                 $updateData = [
                     'value' => $word['value'] ?? '',
                     'mixed_types' => $word['mixed_types'],
+                    'stage' => $word['stage'] ?? null,
                 ];
                 
                 if (isset($audioFileModel->id)) {

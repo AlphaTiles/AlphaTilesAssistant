@@ -78,8 +78,9 @@ $path = "/storage/languagepacks/" . $languagePack->id . "/res/raw/";
 				<colgroup>
 					<col span="1" style="width: 10%;">
 					<col span="1" style="width: 10%;">
-					<col span="1" style="width: 15%;">
+					<col span="1" style="width: 20%;">
 					<col span="1" style="width: 30%;">
+					<col span="1" style="width: 20%;">
 					<col span="1" style="width: 10%;">
 				</colgroup>                        
 				<thead>
@@ -88,6 +89,7 @@ $path = "/storage/languagepacks/" . $languagePack->id . "/res/raw/";
 					<th>Mixed Types</th>
 					<th>Audio</th>
 					<th>Image</th>
+					<th>Stage <a href="#" onClick="openAlert('First appears in stage (overrule default)', 'If you are defining stages for each tile, exceptions can be defined for individual words.');"><i class="fa-solid fa-circle-info"></i></a></th>
 					<th><input type="checkbox"  onClick="checkAllWords(this)" /> Delete</th>
 				</tr>
 				</thead> 
@@ -155,6 +157,10 @@ $path = "/storage/languagepacks/" . $languagePack->id . "/res/raw/";
 					</td> 
 
 					<td>
+						<div class="h-7"><input type="number" min="0" size=3 name="words[{{ $key }}][stage]" value="{{ $word->stage }}" /></div>
+					</td>
+
+					<td>
 						<?php $delete = $deleteValues[$key] === '1'; ?>
 						<input type="checkbox" name="words[{{ $key }}][delete]" value="1" 
 							{{  $delete ? 'checked' : '' }} />
@@ -204,6 +210,14 @@ function checkAllWords(source) {
 	for(var i=0, n=checkboxes.length;i<n;i++) {
 		checkboxes[i].checked = source.checked;
 	}
+}
+
+function openAlert(title, text) {
+	Swal.fire({
+                title: title,
+                text: text,
+                confirmButtonText: 'OK'
+            });
 }
 </script>
 @endsection

@@ -140,12 +140,13 @@ class GenerateZipExportService
             $storagePath = "/storage/languagepacks/{$this->languagePack->id}/res/raw/";
             $fileName = str_replace($storagePath, '', $word->audioFile->file_path);
             $fileName = str_replace('.mp3', '',$fileName);
+            $stage = $word->stage ?? '-';
             $fileContent .= "{$fileName}" . self::SEPARATOR .
             "{$word->value}" . self::SEPARATOR .
             "0" . self::SEPARATOR .
             "{$mixedTypes}" . self::SEPARATOR .
             "0" . self::SEPARATOR .
-            "-" . "\n";
+            "{$stage}" . "\n";
 
             $this->saveWordlistFile($word, $zip, $zipFileName);
         }
