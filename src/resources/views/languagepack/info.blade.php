@@ -1,6 +1,15 @@
 <?php
 use App\Enums\FieldTypeEnum;
 $languagePackId = $languagePack ? $languagePack->id : '';
+
+function getValue($errors, array $setting)
+{	
+	if ($errors->any()) {
+		return old('settings.' . $setting['name']) ?? '';
+	}
+
+	return $setting['value'];
+}
 ?>
 @extends('layouts.app')
 
@@ -39,7 +48,9 @@ $languagePackId = $languagePack ? $languagePack->id : '';
 					@elseif($setting['type'] === FieldTypeEnum::TEXTBOX)
 						<textarea name="settings[{{ $setting['name'] }}]" rows=3 cols=50>{{ $setting['value'] }}</textarea>
 					@else
-						<input type="text" class="form-control" name="settings[{{ $setting['name'] }}]" size="70" value="{{ $setting['value'] }}" placeholder="{{ $setting['placeholder'] }}">
+						<?php $errorClass = !empty($errors->keys()) && in_array('settings.' . $setting['name'], $errors->keys()) ? 'inputError' : ''; 
+						?>
+						<input type="text" class="form-control {{ $errorClass }}" name="settings[{{ $setting['name'] }}]" size="70" value="{{ getValue($errors, $setting) }}" placeholder="{{ $setting['placeholder'] }}">
 					@endif
 				</div>
 			</div>
@@ -48,7 +59,7 @@ $languagePackId = $languagePack ? $languagePack->id : '';
 
 		<div class="mt-3 w-9/12">		
 			<input type="hidden" name="id" value="{{ $languagePackId }}" />
-			<input type="submit" name="btnSave" value="Save" class="btn-sm btn-secondary" />
+			<input type="submit" name="btnSave" id="saveButton" value="Save" class="btn-sm btn-secondary" />
 			<input type="submit" name="btnNext" value="Next" class="btn-sm btn-primary ml-1" />
 		</div>
 	</form>

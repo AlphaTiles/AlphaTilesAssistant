@@ -26,7 +26,7 @@ class CustomRequired implements Rule
 
         $isValid = true;
         $isValid = !empty($value[$this->key]);
-
+            
         if (!$isValid) {
             $this->value = $value;
         }
@@ -39,7 +39,9 @@ class CustomRequired implements Rule
         if(empty($this->value[$this->key])) {
             if($this->key === 'value') {
                 return "A value for word is required";
-            }
+            }             
         }
+
+        return "The {$this->key} is required for {$this->value['value']}";        
     }
 }
