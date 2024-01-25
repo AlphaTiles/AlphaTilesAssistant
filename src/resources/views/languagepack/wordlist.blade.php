@@ -171,7 +171,7 @@ $path = "/storage/languagepacks/" . $languagePack->id . "/res/raw/";
 		</div>
 
 		<p>
-			<input type="submit" name="btnSave" value="Save" class="btn-sm btn-primary ml-1" />
+			<input type="submit" name="btnSave" id="saveButton" value="Save" class="btn-sm btn-primary ml-1" />
 		</p>			
 	@endif
 
