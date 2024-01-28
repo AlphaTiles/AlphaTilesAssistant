@@ -83,7 +83,7 @@ use Illuminate\Support\Facades\Log;
 					<th>Tile</th> 
 					<th>Uppercase</th> 
 					<th>Type</th>
-					<th>Distractors</th>                             
+					<th>Distractors <a href="#" onClick="openAlert('Distractors', 'The three columns (Or1, Or2, Or3) contain “distractors”. They are used to provide alternative (incorrect) answers. For example, in the word-builder game to the right, the player has compared the two purple tiles and has correctly selected |r| and not |i|. The game tile |i| appears as an option because in the gametiles tab, the letter “i” is listed to the right of the row for the letter “r”. You should only select distractors from the tiles found in the first column of the gametiles tab.', '/images/help/distractors.png');"><i class="fa-solid fa-circle-info"></i></a></th>                             
 					<th>Audio instructions</th>
 					<th>Stage <a href="#" onClick="openAlert('First Stage', 'Define in which stage the tile should first appear');"><i class="fa-solid fa-circle-info"></i></a></th>
 					<th><input type="checkbox"  /> Delete</th>
@@ -110,7 +110,7 @@ use Illuminate\Support\Facades\Log;
 							:error-keys="$errorKeys ?? null"
 						/>
 						</div>
-						<div class="mt-1 h-7">
+						<div class="mt-1">
 						<x-select-type 
 							:nr="2"
 							:key=$key
@@ -118,7 +118,7 @@ use Illuminate\Support\Facades\Log;
 							:error-keys="$errorKeys ?? null"
 						/>
 						</div>
-						<div class="mt-1 h-7">
+						<div class="mt-1">
 						<x-select-type 
 							:nr="3"
 							:key=$key
@@ -144,7 +144,7 @@ use Illuminate\Support\Facades\Log;
 							:error-keys="$errorKeys ?? null"
 							/>
 						</div>
-						<div class="mt-1 custom-file h-7">						
+						<div class="mt-1 custom-file">						
 							<x-select-file
 							:nr="2"
 							:key=$key
@@ -152,7 +152,7 @@ use Illuminate\Support\Facades\Log;
 							:error-keys="$errorKeys ?? null"
 							/>
 						</div>
-						<div class="mt-1 custom-file h-7">						
+						<div class="mt-1 custom-file">						
 							<x-select-file
 							:nr="3"
 							:key=$key
@@ -163,8 +163,8 @@ use Illuminate\Support\Facades\Log;
 					</td> 
 					<td>								
 						<div class="h-7">1: <input type="number" min="0" size=3 name="tiles[{{ $key }}][stage]" value="{{ $tile->stage }}" /></div>
-						<div id="stage{{ $key }}_2" class="h-7 {{ empty($tile->type2) ? 'hidden' : '' }}">2: <input type="number" min="0" size=3 name="tiles[{{ $key }}][stage2]" value="{{ $tile->stage2 }}" /></div>
-						<div id="stage{{ $key }}_3" class="h-7 {{ empty($tile->type3) ? 'hidden' : '' }}">3: <input type="number" min="0" size=3 name="tiles[{{ $key }}][stage3]" value="{{ $tile->stage3 }}" /></div>
+						<div id="stage{{ $key }}_2" class="{{ empty($tile->type2) ? 'hidden' : '' }}"><div class='h-7'>2: <input type="number" min="0" size=3 name="tiles[{{ $key }}][stage2]" value="{{ $tile->stage2 }}" /></div></div>
+						<div id="stage{{ $key }}_3" class="{{ empty($tile->type3) ? 'hidden' : '' }}"><div class='h-7'>3: <input type="number" min="0" size=3 name="tiles[{{ $key }}][stage3]" value="{{ $tile->stage3 }}" /></div></div>
 					</td> 					
 					<td>
 						<?php $delete = $deleteValues[$key] === '1'; ?>
@@ -237,14 +237,6 @@ function addType(key, nr) {
 		var addSecondLink = document.getElementById('add_type' + key + '_3');
 		addSecondLink.classList.remove('hidden');
 	}
-}
-
-function openAlert(title, text) {
-	Swal.fire({
-                title: title,
-                text: text,
-                confirmButtonText: 'OK'
-            });
 }
 </script>
 @endsection

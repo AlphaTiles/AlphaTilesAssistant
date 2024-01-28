@@ -85,12 +85,12 @@ $path = "/storage/languagepacks/" . $languagePack->id . "/res/raw/";
 				</colgroup>                        
 				<thead>
 				<tr>
-					<th>Word in {{ $langName }}</th> 
-					<th>Mixed Types</th>
+					<th>Word in {{ $langName }} <a href="#" onClick="openAlert('Words with Syllables', 'If you want to use syllable-based games, you must put periods between syllables in each word. If your words have spaces or dashes, you must put periods around the spaces or dashes. Example: o.pen.-.source');"><i class="fa-solid fa-circle-info"></i></a></th> 					
+					<th>Mixed Types <a href="#" onClick="openAlert('Mixed Types', 'Not used by most languages. Watch this YouTube <a href=\'https://www.youtube.com/watch?v=s-HAUAc6tAg\' target=\'_blank\'>video</a> to learn more.');"><i class="fa-solid fa-circle-info"></i></a></th>
 					<th>Audio</th>
 					<th>Image</th>
 					<th>Stage <a href="#" onClick="openAlert('First appears in stage (overrule default)', 'If you are defining stages for each tile, exceptions can be defined for individual words.');"><i class="fa-solid fa-circle-info"></i></a></th>
-					<th><input type="checkbox"  onClick="checkAllWords(this)" /> Delete</th>
+					<th><input type="checkbox" onClick="checkAllWords(this)" /> Delete</th>
 				</tr>
 				</thead> 
 				<tbody>
@@ -182,7 +182,7 @@ $path = "/storage/languagepacks/" . $languagePack->id . "/res/raw/";
 	<form method="post" action="/languagepack/wordlist/{{ $languagePack->id }}">
 		@csrf
 		<div>
-			<label for="add_words">Add Words (one word per line):</label><br>
+			<label for="add_words">Add Words (one word per line):</label> <a href="#" onClick="openAlert('How many words should be included?', '300 words is recommended, but 100-150 words is a common starting point. A good goal is to include, for every game tile, one word that begins with that game tile (although there are of course some game tiles in some languages that never appear at the beginning of words). If you have more than 300 words, it is worth considering whether multiple apps should be made, perhaps dividing the words into semantic groupings or beginner/advanced groupings, etc.')"><i class="fa-solid fa-circle-info"></i></a><br>
 			<textarea name="add_words" rows=7 cols=45></textarea>
 		</div>
 
@@ -210,14 +210,6 @@ function checkAllWords(source) {
 	for(var i=0, n=checkboxes.length;i<n;i++) {
 		checkboxes[i].checked = source.checked;
 	}
-}
-
-function openAlert(title, text) {
-	Swal.fire({
-                title: title,
-                text: text,
-                confirmButtonText: 'OK'
-            });
 }
 </script>
 @endsection

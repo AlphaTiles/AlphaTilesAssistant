@@ -55,5 +55,21 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <script>
+    function openAlert(title, text, image = '') {
+        htmlText = '<div style="display: flex;">';
+        htmlText += '<div style="flex: 1; text-align: left;">' + text + '</div>';
+        if(image.length > 0) {
+            htmlText += '<div style="flex 1; margin-left: 1rem;"><img src="' + image + '"/><div>';
+        }
+        htmlText += '</div>';
+        Swal.fire({
+                    title: title,
+                    html: htmlText,
+                    confirmButtonText: 'OK'
+                });
+    }
+    </script>
+
 </body>
 </html>
