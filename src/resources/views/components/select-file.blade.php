@@ -14,7 +14,7 @@ if(empty($tile->{$typeField}) && $nr > 1) {
 }
 ?>
 
-<div id="show_file{{ $key }}_{{ $nr }}" class="{{$hideFileSelectionClass}} flex">
+<div id="show_file{{ $key }}_{{ $nr }}" class="h-7 {{$hideFileSelectionClass}} flex">
     <div>
     {{ $nr }}:
     <input type="file" name="tiles[{{ $key }}][{{ $fileField }}]" class="custom-file-input" id="chooseFile" value="{{ $previousFileValue }}">
