@@ -59,8 +59,9 @@ function getValue($errors, array $setting)
 
 		<div class="mt-3 w-9/12">		
 			<input type="hidden" name="id" value="{{ $languagePackId }}" />
-			<input type="submit" name="btnSave" id="saveButton" value="Save" class="btn-sm btn-secondary" />
-			<input type="submit" name="btnNext" value="Next" class="btn-sm btn-primary ml-1" />
+			<input type="submit" name="btnHiddenSave" id="saveButton" value="Save" class="hidden" />
+			<input type="submit" name="btnSave" value="Save" class="btn-sm btn-primary ml-1" onClick='handleSaveReset();' />			
+			<a href="#" onClick='autoSavePage("/languagepack/tiles/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">Next</a>		
 		</div>
 	</form>
 	<div class="mt-4">

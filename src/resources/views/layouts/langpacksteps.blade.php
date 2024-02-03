@@ -1,22 +1,22 @@
 <?php 
 $langInfo = 'Lang Info';
 if(isset($languagePack) && $languagePack->langInfo->count() > 0 && end($completedSteps) !== 'lang_info') {
-  $langInfo = "<a href=\"/languagepack/edit/$languagePack->id\">Lang Info</a>";
+  $langInfo = "<a href=\"#\" onClick='autoSavePage(\"/languagepack/edit/$languagePack->id\");'>Lang Info</a>";
 }
 
 $tiles = 'Tiles';
 if(isset($languagePack) && $languagePack->tiles->count() > 0 && end($completedSteps) !== 'tiles') {
-  $tiles = "<a href=\"#\" onClick='savePage(\"/languagepack/tiles/$languagePack->id\");'>Tiles</a>";
+  $tiles = "<a href=\"#\" onClick='autoSavePage(\"/languagepack/tiles/$languagePack->id\");'>Tiles</a>";
 }
 
 $wordlist = 'Wordlist';
 if(isset($languagePack) && $languagePack->words->count() > 0 && end($completedSteps) !== 'wordlist') {
-  $wordlist = "<a href=\"#\" onClick='savePage(\"/languagepack/wordlist/$languagePack->id\");'>Wordlist</a>";
+  $wordlist = "<a href=\"#\" onClick='autoSavePage(\"/languagepack/wordlist/$languagePack->id\");'>Wordlist</a>";
 }
 
 $export = 'Export';
 if(isset($languagePack) && $languagePack->words->count() > 0 && end($completedSteps) !== 'export') {
-  $export = "<a href=\"#\" onClick='savePage(\"/languagepack/export/$languagePack->id\");'>Export</a>";
+  $export = "<a href=\"#\" onClick='autoSavePage(\"/languagepack/export/$languagePack->id\");'>Export</a>";
 }
 ?>
 <ul class="steps steps-vertical sm:steps-horizontal w-full">
@@ -39,7 +39,7 @@ if(isset($languagePack) && $languagePack->words->count() > 0 && end($completedSt
     }
   });
 
-  function savePage(url) {
+  function autoSavePage(url) {
     var saveButton = document.getElementById('saveButton');
     if(saveButton) {
       saveButton.click();
@@ -47,6 +47,10 @@ if(isset($languagePack) && $languagePack->words->count() > 0 && end($completedSt
     } else {
       window.location.href = url;
     }    
+  }
+
+  function handleSaveReset() {
+    localStorage.removeItem('redirectUrl');    
   }
 
 </script>
