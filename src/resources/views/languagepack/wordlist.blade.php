@@ -171,7 +171,9 @@ $path = "/storage/languagepacks/" . $languagePack->id . "/res/raw/";
 		</div>
 
 		<p>
-			<input type="submit" name="btnSave" id="saveButton" value="Save" class="btn-sm btn-primary ml-1" />
+			<input type="submit" name="btnHiddenSave" id="saveButton" value="Save" class="hidden" />
+			<input type="submit" name="btnSave" value="Save" class="btn-sm btn-primary ml-1" onClick='handleSaveReset();' />			
+
 		</p>			
 	@endif
 
@@ -191,8 +193,8 @@ $path = "/storage/languagepacks/" . $languagePack->id . "/res/raw/";
 			<input type="submit" name="btnAdd" value="Add words" class="btn-sm btn-primary ml-1" />
 		</div>
 		<div class="mt-6 w-9/12">	
-			<input type="submit" name="btnBack" value="Back" class="btn-sm btn-secondary" />
-			<input type="submit" name="btnNext" value="Next" class="btn-sm btn-primary ml-1" />
+			<a href="#" onClick='autoSavePage("/languagepack/tiles/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-secondary pt-0.5 font-normal">Back</a>
+			<a href="#" onClick='autoSavePage("/languagepack/export/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">Next</a>		
 		</div>
 
 	</form>
