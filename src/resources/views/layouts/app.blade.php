@@ -12,15 +12,6 @@
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 
-    @if (config('app.env') !== 'local')
-    <script src="https://t.usermaven.com/lib.js" 
-    data-key="UMzy8FcNX1" 
-    data-tracking-host="https://events.usermaven.com"
-    data-autocapture="true"   
-    defer>
-    </script>
-    <script>window.usermaven = window.usermaven || (function(){(window.usermavenQ = window.usermavenQ || []).push(arguments);})</script>    
-    @endif
 </head>
 <body>
     <div id="app">
@@ -69,7 +60,14 @@
                     confirmButtonText: 'OK'
                 });
     }
-    </script>
+
+    function checkAll(source, key) {
+        let checkboxes = document.querySelectorAll('input[name^="' + key + '["][name$="][delete]"]');
+        for(var i=0, n=checkboxes.length;i<n;i++) {
+            checkboxes[i].checked = source.checked;
+        }
+    }
+        </script>
 
 </body>
 </html>

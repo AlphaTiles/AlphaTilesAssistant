@@ -61,7 +61,9 @@ function getValue($errors, array $setting)
 			<input type="hidden" name="id" value="{{ $languagePackId }}" />
 			<input type="submit" name="btnHiddenSave" id="saveButton" value="Save" class="hidden" />
 			<input type="submit" name="btnSave" value="Save" class="btn-sm btn-primary ml-1" onClick='handleSaveReset();' />			
-			<a href="#" onClick='autoSavePage("/languagepack/tiles/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">Next</a>		
+			@if($languagePack->langInfo->count() > 0)
+				<a href="#" onClick='autoSavePage("/languagepack/tiles/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">Next</a>		
+			@endif
 		</div>
 	</form>
 	<div class="mt-4">

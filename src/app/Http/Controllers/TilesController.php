@@ -13,17 +13,22 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use App\Rules\RequireAtLeastOneDistractor;
+use Illuminate\Support\Facades\Log;
 
-class TilesController extends Controller
+class TilesController extends BaseItemController
 {
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(Request $request)
     {
-        $this->middleware('auth');
+        $this->route = 'tiles';
+        $this->model = new Tile();
+        $this->fileKeyname = 'tile';
+
+        parent::__construct($request);
     }
 
     /**
@@ -33,6 +38,8 @@ class TilesController extends Controller
      */
     public function edit(LanguagePack $languagePack)
     {        
+        session()->forget('success');
+        
         $tiles = Tile::where('languagepackid', $languagePack->id)->get();
 
         return view('languagepack.tiles', [
@@ -58,20 +65,12 @@ class TilesController extends Controller
 
         Tile::insert($insert);
         
-        if($request->btnBack) {
-            return redirect("languagepack/edit/{$languagePack->id}");    
-        }
-
-        if($request->btnNext) {
-            return redirect("languagepack/wordlist/{$languagePack->id}");    
-        }
-
         return redirect("languagepack/tiles/{$languagePack->id}");    
     }        
 
     public function update(LanguagePack $languagePack, Request $request)
     {
-        $tiles = $request->all()['tiles'];
+        $tiles = $request->all()['tiles'];        
                
         $fileRules = 'mimes:mp3|max:1024';
         $customErrorMessage = "The file upload failed. Please verify that the files are of type mp3 and the file size is not bigger than 1 MB.";
@@ -113,7 +112,7 @@ class TilesController extends Controller
             ]
         );
 
-        DB::transaction(function() use($tiles, $fileRules, $validator) {
+        DB::transaction(function() use($tiles, $fileRules, $languagePack) {
             foreach($tiles as $key => $tile) {
 
                 $fileModel1 = $this->uploadFile($tile, 1, $fileRules);
@@ -127,9 +126,12 @@ class TilesController extends Controller
                     'or_1' => $tile['or_1'],
                     'or_2' => $tile['or_2'],
                     'or_3' => $tile['or_3'],
+                    'file_id' => $tile['file_id'] ?? null,
                     'type2' => $tile['type2'],
+                    'file2_id' => $tile['file2_id'] ?? null,
                     'stage2' => $tile['stage2'] ?? null,
                     'type3' => $tile['type3'],
+                    'file3_id' => $tile['file3_id'] ?? null,
                     'stage3' => $tile['stage3'] ?? null,                    
                 ];                
                 
@@ -154,19 +156,19 @@ class TilesController extends Controller
         
         session()->flash('success', 'Records updated successfully');
 
-        $tilesCollection = Collection::make($tiles)->map(function ($item) {
-            if(isset($item['file'])) {
-                $item['filename'] = $item['file']->getClientOriginalName();
-            }
-            if(isset($item['file2'])) {
-                $item['filename2'] = $item['file2']->getClientOriginalName();
-            }
-            if(isset($item['file3'])) {
-                $item['filename3'] = $item['file3']->getClientOriginalName();
-            }
-            return (object) $item;
-        });
-
+        $tilesCollection = Tile::where('languagepackid', $languagePack->id)->with(['file', 'file2', 'file3'])->get();
+        // $tilesCollection = Collection::make($tiles)->map(function ($item) {
+        //     if(isset($item['file'])) {
+        //         $item['filename'] = $item['file']->getClientOriginalName();
+        //     }
+        //     if(isset($item['file2'])) {
+        //         $item['filename2'] = $item['file2']->getClientOriginalName();
+        //     }
+        //     if(isset($item['file3'])) {
+        //         $item['filename3'] = $item['file3']->getClientOriginalName();
+        //     }
+        //     return (object) $item;
+        // });
 
         return view('languagepack.tiles', [
             'completedSteps' => ['lang_info', 'tiles'],
@@ -175,31 +177,37 @@ class TilesController extends Controller
         ]);
 
     }
-    
+        
     public function delete(LanguagePack $languagePack, Request $request) 
     {        
         if(isset($request->btnCancel)) {
-            return redirect("languagepack/tiles/{$languagePack->id}");
+            return redirect("languagepack/{$this->route}/{$languagePack->id}");
         }
 
-        $tileIdsString = $request->tileIds;
-        $tileIds = explode(',', $tileIdsString);
+        $idsString = $request->deleteIds;
+        $ids = explode(',', $idsString);
 
-        foreach($tileIds as $tileId) {
-            $fileName = "tile_" .  str_pad($tileId, 3, '0', STR_PAD_LEFT) . '.mp3';
-            $file = "languagepacks/{$languagePack->id}/res/raw/{$fileName}";
-            Storage::disk('public')->delete($file);
-            Tile::where('id', $tileId)->delete();
+        foreach($ids as $id) {
+            for($i = 1; $i <= 3; $i++) {
+                $fileName = "{$this->fileKeyname}_" .  str_pad($id, 3, '0', STR_PAD_LEFT) . "_{$i}.mp3";
+                $file = "languagepacks/{$languagePack->id}/res/raw/{$fileName}";    
+                if (Storage::disk('public')->exists($file)) {    
+                    Storage::disk('public')->delete($file);    
+                }                    
+            }
+            $this->model::where('id', $id)->delete();
         }
 
-        return redirect("languagepack/tiles/{$languagePack->id}");
-    }
-    
+        return redirect("languagepack/{$this->route}/{$languagePack->id}");
+    }  
+
     public function downloadFile(LanguagePack $languagePack, $filename)
     {        
         $filePath = storage_path("app/public/languagepacks/{$languagePack->id}/res/raw/{$filename}");
 
-        return response()->download($filePath);
+        if(file_exists($filePath)) {
+            return response()->download($filePath);
+        }            
     }
 
     private function uploadFile(array $tile, int $fileNr, string $fileRules): ?File

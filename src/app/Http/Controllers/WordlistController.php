@@ -36,6 +36,8 @@ class WordlistController extends Controller
      */
     public function edit(LanguagePack $languagePack)
     {        
+        session()->forget('success');
+
         $words = Word::where('languagepackid', $languagePack->id)->get();
 
         return view('languagepack.wordlist', [
@@ -59,14 +61,6 @@ class WordlistController extends Controller
         }
 
         Word::insert($insert);
-
-        if($request->btnBack) {
-            return redirect("languagepack/tiles/{$languagePack->id}");    
-        }
-
-        if($request->btnNext) {
-            return redirect("languagepack/export/{$languagePack->id}");    
-        }
 
         return redirect("languagepack/wordlist/{$languagePack->id}");    
     }        
@@ -149,12 +143,11 @@ class WordlistController extends Controller
         $wordIds = explode(',', $wordIdsString);
 
         foreach($wordIds as $wordId) {
-            $word = Word::find($wordId);
-            $audioFilename = strtolower(preg_replace("/\s+/", "", $word->audioFile->name ?? ''));
+            $audioFilename = "word_" .  str_pad($wordId, 3, '0', STR_PAD_LEFT) . ".mp3";
             $audioFile = "languagepacks/{$languagePack->id}/res/raw/{$audioFilename}";
             Storage::disk('public')->delete($audioFile);
 
-            $imageFilename = strtolower(preg_replace("/\s+/", "", $word->imageFile->name ?? ''));
+            $imageFilename = "word_" .  str_pad($wordId, 3, '0', STR_PAD_LEFT) . ".png";
             $imageFile = "languagepacks/{$languagePack->id}/res/raw/{$imageFilename}";
             Storage::disk('public')->delete($imageFile);
 

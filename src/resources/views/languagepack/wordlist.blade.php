@@ -90,7 +90,7 @@ $path = "/storage/languagepacks/" . $languagePack->id . "/res/raw/";
 					<th>Audio</th>
 					<th>Image</th>
 					<th>Stage <a href="#" onClick="openAlert('First appears in stage (overrule default)', 'If you are defining stages for each tile, exceptions can be defined for individual words.');"><i class="fa-solid fa-circle-info"></i></a></th>
-					<th><input type="checkbox" onClick="checkAllWords(this)" /> Delete</th>
+					<th><input type="checkbox" onClick="checkAll(this, 'words')" /> Delete</th>
 				</tr>
 				</thead> 
 				<tbody>
@@ -185,7 +185,7 @@ $path = "/storage/languagepacks/" . $languagePack->id . "/res/raw/";
 		@csrf
 		<div>
 			<label for="add_words">Add Words (one word per line):</label> <a href="#" onClick="openAlert('How many words should be included?', '300 words is recommended, but 100-150 words is a common starting point. A good goal is to include, for every game tile, one word that begins with that game tile (although there are of course some game tiles in some languages that never appear at the beginning of words). If you have more than 300 words, it is worth considering whether multiple apps should be made, perhaps dividing the words into semantic groupings or beginner/advanced groupings, etc.')"><i class="fa-solid fa-circle-info"></i></a><br>
-			<textarea name="add_words" rows=7 cols=45></textarea>
+			<textarea name="add_words" rows=7 cols=45 class="leading-tight"></textarea>
 		</div>
 
 		<div class="mt-3 w-9/12">		
@@ -194,7 +194,9 @@ $path = "/storage/languagepacks/" . $languagePack->id . "/res/raw/";
 		</div>
 		<div class="mt-6 w-9/12">	
 			<a href="#" onClick='autoSavePage("/languagepack/tiles/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-secondary pt-0.5 font-normal">Back</a>
-			<a href="#" onClick='autoSavePage("/languagepack/export/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">Next</a>		
+			@if($languagePack->words->count() > 0)
+				<a href="#" onClick='autoSavePage("/languagepack/keyboard/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">Next</a>		
+			@endif
 		</div>
 
 	</form>
@@ -207,11 +209,5 @@ $path = "/storage/languagepacks/" . $languagePack->id . "/res/raw/";
 
 @section('scripts')
 <script>	
-function checkAllWords(source) {
-	let checkboxes = document.querySelectorAll('input[name^="words["][name$="][delete]"]');
-	for(var i=0, n=checkboxes.length;i<n;i++) {
-		checkboxes[i].checked = source.checked;
-	}
-}
 </script>
 @endsection

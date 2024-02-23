@@ -25,7 +25,7 @@ class CustomRequired implements Rule
         }
 
         $isValid = true;
-        $isValid = !empty($value[$this->key]);
+        $isValid = isset($value[$this->key]);
             
         if (!$isValid) {
             $this->value = $value;
