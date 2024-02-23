@@ -14,8 +14,13 @@ if(isset($languagePack) && $languagePack->words->count() > 0 && end($completedSt
   $wordlist = "<a href=\"#\" onClick='autoSavePage(\"/languagepack/wordlist/$languagePack->id\");'>Wordlist</a>";
 }
 
+$keyboard = 'Keyboard';
+if(isset($languagePack) && $languagePack->keys->count() > 0 && end($completedSteps) !== 'keyboard') {
+  $keyboard = "<a href=\"#\" onClick='autoSavePage(\"/languagepack/keyboard/$languagePack->id\");'>Keyboard</a>";
+}
+
 $export = 'Export';
-if(isset($languagePack) && $languagePack->words->count() > 0 && end($completedSteps) !== 'export') {
+if(isset($languagePack) && $languagePack->keys->count() > 0 && end($completedSteps) !== 'export') {
   $export = "<a href=\"#\" onClick='autoSavePage(\"/languagepack/export/$languagePack->id\");'>Export</a>";
 }
 ?>
@@ -23,6 +28,7 @@ if(isset($languagePack) && $languagePack->words->count() > 0 && end($completedSt
   <li class="step {{ in_array('lang_info', $completedSteps) ? 'step-primary' : '' }}">{!! $langInfo !!}</li>  
   <li class="step  {{ in_array('tiles', $completedSteps) ? 'step-primary' : '' }}">{!! $tiles !!}</li>
   <li class="step {{ in_array('wordlist', $completedSteps) ? 'step-primary' : '' }}">{!! $wordlist !!}</li>
+  <li class="step {{ in_array('keyboard', $completedSteps) ? 'step-primary' : '' }}">{!! $keyboard !!}</li>
   <li class="step {{ in_array('export', $completedSteps) ? 'step-primary' : '' }}">{!! $export !!}</li>
 </ul>
 

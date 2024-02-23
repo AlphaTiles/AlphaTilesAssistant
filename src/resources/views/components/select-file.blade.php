@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Log;
 
 $typeField = $nr > 1 ? 'type' . $nr : 'type';
 $fileField = $nr > 1 ? "file{$nr}" : 'file';
-$filenameKey = $nr > 1 ? "filename{$nr}" : 'filename';
+$fileIdKey = $nr > 1 ? "file{$nr}_id" : 'file_id';
 $fileRelation = $fileField;
 $hideFileSelectionClass = ''; 
 $previousFileValue = old('tiles' . $nr . '.' . $key . '.file');
@@ -20,9 +20,9 @@ if(empty($tile->{$typeField}) && $nr > 1) {
     <input type="file" name="tiles[{{ $key }}][{{ $fileField }}]" class="custom-file-input" id="chooseFile" value="{{ $previousFileValue }}">
     </div>    
     <div>
-    @if(isset($tile->{$fileRelation}) || isset($tile->{$filenameKey}))
+    @if($tile->{$fileRelation} || !empty($tile->{$fileIdKey}))
         <?php 	        
-        $filename = $tile->{$fileRelation}->name ?? $tile->{$filenameKey};
+        $fileid = (string) $tile->{$fileRelation}->id ?? null;
         $storedFileNumber = str_pad($tile->id, 3, '0', STR_PAD_LEFT); 
         ?>
         <audio controls style="width: 200px; height: 30px;">
@@ -30,7 +30,7 @@ if(empty($tile->{$typeField}) && $nr > 1) {
             Your browser does not support the audio element.
         </audio> 								
 
-        <input type="hidden" name="tiles[{{ $key }}][{{ $filenameKey }}]" value="{{ $filename }}">
+        <input type="hidden" name="tiles[{{ $key }}][{{ $fileIdKey }}]" value="{{ $tile->$fileIdKey }}">
     @endif
     </div>
     @if($errors->has('tiles.' . $key . '.' . $fileField))

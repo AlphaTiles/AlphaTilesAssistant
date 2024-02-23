@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Log;
 			@endif
 		</div>	
 		<?php 
-		$tilesData = old('tiles') ?? $tiles;
+		$tilesData = old('tiles') ?? request()['tiles'] ?? $tiles;
 		$deleteValues = old('tiles') ? Arr::pluck(old('tiles') , 'delete') : Arr::pluck($tilesData , 'delete'); 
 		?>
 		@if($tiles && in_array(1, $deleteValues))
@@ -40,7 +40,7 @@ use Illuminate\Support\Facades\Log;
 					@endif
 				@endforeach					
 				<div class="mt-2">
-					<input type="hidden" name="tileIds" value="{{ implode(',', $tileDeleteIds); }}" />
+					<input type="hidden" name="deleteIds" value="{{ implode(',', $tileDeleteIds); }}" />
 					<button name="btnCancel" value="cancel" class="btn btn-sm">Cancel</button>
 					<button name="btnDelete" value="delete" class="btn btn-sm btn-primary">Yes</button>
 				</div>
@@ -86,7 +86,7 @@ use Illuminate\Support\Facades\Log;
 					<th>Distractors <a href="#" onClick="openAlert('Distractors', 'The three columns (Or1, Or2, Or3) contain “distractors”. They are used to provide alternative (incorrect) answers. For example, in the word-builder game to the right, the player has compared the two purple tiles and has correctly selected |r| and not |i|. The game tile |i| appears as an option because in the gametiles tab, the letter “i” is listed to the right of the row for the letter “r”. You should only select distractors from the tiles found in the first column of the gametiles tab.', '/images/help/distractors.png');"><i class="fa-solid fa-circle-info"></i></a></th>                             
 					<th>Audio instructions</th>
 					<th>Stage <a href="#" onClick="openAlert('First Stage', 'Define in which stage the tile should first appear');"><i class="fa-solid fa-circle-info"></i></a></th>
-					<th><input type="checkbox"  /> Delete</th>
+					<th><input type="checkbox" onClick="checkAll(this, 'tiles')" /> Delete</th>
 				</tr>
 				</thead> 
 				<tbody>
@@ -101,7 +101,7 @@ use Illuminate\Support\Facades\Log;
 					<td>								
 						<input type="text" size=2 name="tiles[{{ $key }}][upper]" value="{{ $tile->upper }}" />
 					</td> 
-					<td>
+					<td>						
 						<div class="h-7">
 						<x-select-type 
 							:nr="1"
@@ -189,7 +189,7 @@ use Illuminate\Support\Facades\Log;
 		@csrf
 		<div>
 			<label for="add_tiles">Add tiles (one tile per line):</label><br>
-			<textarea name="add_tiles" rows=7 cols=40></textarea>
+			<textarea name="add_tiles" rows=7 cols=40 class="leading-tight"></textarea>
 		</div>
 
 		<div class="mt-3 w-9/12">		
@@ -199,7 +199,9 @@ use Illuminate\Support\Facades\Log;
 	</form>
 	<div class="mt-6 w-9/12">	
 		<a href="#" onClick='autoSavePage("/languagepack/edit/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-secondary pt-0.5 font-normal">Back</a>
-		<a href="#" onClick='autoSavePage("/languagepack/wordlist/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">Next</a>		
+		@if($languagePack->tiles->count() > 0)
+			<a href="#" onClick='autoSavePage("/languagepack/wordlist/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">Next</a>		
+		@endif
 	</div>
 
 	<div class="mt-4">
@@ -211,13 +213,6 @@ use Illuminate\Support\Facades\Log;
 
 @section('scripts')
 <script>	
-function checkAllTiles(source) {
-	let checkboxes = document.querySelectorAll('input[name^="tiles["][name$="][delete]"]');
-	for(var i=0, n=checkboxes.length;i<n;i++) {
-		checkboxes[i].checked = source.checked;
-	}
-}
-
 function addType(key, nr) {
 	var typeId = 'type' + key + '_' + nr;
 	var addLink = document.getElementById('add_' + typeId);

@@ -5,6 +5,7 @@ use ZipArchive;
 use App\Models\Tile;
 use App\Models\Word;
 use App\Enums\LangInfoEnum;
+use App\Models\Key;
 use App\Models\LanguagePack;
 use App\Models\LanguageSetting;
 use Illuminate\Support\Facades\Log;
@@ -44,6 +45,10 @@ class GenerateZipExportService
         $wordlistFileName = 'aa_wordlist.txt';
         $wordsFile = $this->generateWordlistFile($wordlistFileName, $zip, $zipFileName);
         $zip->addFile($wordsFile, "{$zipFileName}/res/raw/{$wordlistFileName}");
+
+        $keyboardFileName = 'aa_keyboard.txt';
+        $keyboardFile = $this->generateKeyboardFile($keyboardFileName);
+        $zip->addFile($keyboardFile, "{$zipFileName}/res/raw/{$keyboardFileName}");        
 
         $fontPath = resource_path('font'); 
         $this->addFolderToZip($fontPath, $zip, "/{$zipFileName}/res/font/");
@@ -157,6 +162,23 @@ class GenerateZipExportService
         return $wordlistFile;
     }
 
+    public function generateKeyboardFile(string $fileName): string
+    {
+        $keys = Key::where('languagepackid', $this->languagePack->id)
+            ->orderBy('id')
+            ->get();
+        $fileContent = "keys\ttheme_color\n";
+
+        foreach ($keys as $keyItem) {            
+            $fileContent .= "{$keyItem->value}" . self::SEPARATOR . "{$keyItem->color}\n";
+        }
+
+        $file = "{$this->tempDir}/{$fileName}";
+        file_put_contents($file, $fileContent);
+
+        return $file;
+    }
+
     private function saveTileFile(int $nr, Tile $tile, ZipArchive $zip, string $zipFileName): void
     {
         $fileRelation = $nr > 1 ? "file{$nr}" : 'file';
@@ -165,6 +187,8 @@ class GenerateZipExportService
             $file = basename($tile->{$fileRelation}->file_path);
             $resourceFile = "app/public/languagepacks/{$this->languagePack->id}/res/raw/{$file}";
             $outputFolder = "{$zipFileName}/res/raw/{$file}";
+            Log::error($tile->id);
+            Log::error($resourceFile);
             $zip->addFile(storage_path($resourceFile), $outputFolder);        
         }
     }

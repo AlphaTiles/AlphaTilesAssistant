@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Key;
 use App\Models\Tile;
+use App\Models\Word;
 use App\Enums\LangInfoEnum;
 use App\Models\LanguageSetting;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -50,5 +51,10 @@ class LanguagePack extends Model
     public function words(): HasMany
     {
         return $this->hasMany(Word::class, 'languagepackid');
+    }
+
+    public function keys(): HasMany
+    {
+        return $this->hasMany(Key::class, 'languagepackid');
     }
 }

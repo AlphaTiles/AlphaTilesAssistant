@@ -25,7 +25,7 @@ class ExportController extends Controller
     public function show(LanguagePack $languagePack)
     {        
         return view('languagepack.export', [
-            'completedSteps' => ['lang_info', 'tiles', 'wordlist', 'export'],
+            'completedSteps' => ['lang_info', 'tiles', 'wordlist', 'keyboard', 'export'],
             'languagePack' => $languagePack,
         ]);
     }

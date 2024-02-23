@@ -75,10 +75,6 @@ class LanguageInfoController extends Controller
 
         $this->saveSettings($languagePackSaved, $request);
 
-        if($request->btnNext) {
-            return redirect("languagepack/tiles/{$languagePackSaved->id}");    
-        }
-
         return redirect("languagepack/edit/{$languagePackSaved->id}");    
     }    
     

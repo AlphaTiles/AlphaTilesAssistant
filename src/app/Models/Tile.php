@@ -14,13 +14,16 @@ class Tile extends Model
         'value',
         'upper',
         'type',
+        'file_id',
         'stage',
         'or_1',
         'or_2',
         'or_3',
         'type2',
+        'file2_id',
         'stage2',
         'type3',
+        'file3_id',
         'stage3',
     ];
 
