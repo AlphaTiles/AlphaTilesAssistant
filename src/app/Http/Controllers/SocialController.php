@@ -4,14 +4,19 @@ namespace App\Http\Controllers;
 
 use Exception;
 use App\Models\User;
+use Google\Service\Drive;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 use Laravel\Socialite\Facades\Socialite;
 
 class SocialController extends Controller
 {
     public function redirect()
     {
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google')
+            ->scopes([Drive::DRIVE, Drive::DRIVE_FILE])
+            ->redirect();
     }
 
     public function callback()
@@ -19,6 +24,7 @@ class SocialController extends Controller
         try {
                 $googleUser = Socialite::driver('google')->user();
                 $user = User::where('email', $googleUser->email)->first();
+                Session::put('socialite_token', $googleUser->token);                
                 
                 if($user){
                     Auth::login($user);
