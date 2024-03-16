@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\GoogleDriveService;
+use Illuminate\Support\Facades\Session;
 
 class GoogleDriveController extends Controller
 {
@@ -24,5 +25,12 @@ class GoogleDriveController extends Controller
             dump($file->name);
         }        
 
+    }
+
+    public function import()
+    {
+        return view('drive-import', [
+            'accessToken' => Session::get("socialite_token")
+        ]);
     }
 }
