@@ -10,7 +10,7 @@
           <a href="#" id="authorize_button" class="btn btn-primary w-40 mt-1 pt-0.5 text-white font-normal no-underline" onclick="connectGoogleDrive()">Select Google Drive Folder</a>
     </div>
     <div class="mt-5" id="result" style="visibility: hidden;">
-      <div class="font-bold">Selected folder: <span id="folderName"></span></div>
+      <div><span class="font-bold">Selected folder:</span> <span id="folderName"></span></div>
       <div class="mt-5 text-red-700" id="selectionError" style="visibility: hidden;">Error: No XLSX file found in the selected folder.</div>
     </div>
 </div>
@@ -23,8 +23,8 @@
   const SCOPES = 'https://www.googleapis.com/auth/drive.file';
 
   // TODO(developer): Set to client ID and API key from the Developer Console
-  const CLIENT_ID = '364603631857-r5vodhbmtukjrca2anri6vbvac8r5ppf.apps.googleusercontent.com';
-  const API_KEY = 'AIzaSyBjjHSxeuk1MVxClmi-NZE7I-ZiUyqv_II';
+  const CLIENT_ID = '<?php echo env('GOOGLE_CLIENT_ID'); ?>'
+  const API_KEY = '<?php echo env('GOOGLE_DRIVE_API_KEY'); ?>'
 
   // TODO(developer): Replace with your own project number from console.developers.google.com.
   const APP_ID = 'alpha-tiles-assistant';
