@@ -31,6 +31,7 @@
 
   let tokenClient;
   let accessToken = '<?php echo $accessToken; ?>';
+  let userId = <?php echo $userId; ?>;
   let pickerInited = false;
   let gisInited = false;
 
@@ -112,6 +113,7 @@
         .setDeveloperKey(API_KEY)
         .setAppId(APP_ID)
         .setOAuthToken(accessToken)
+        .setTitle("Select a folder") 
         .addView(docsView)
         .addView(new google.picker.DocsUploadView())
         .setCallback(pickerCallback)
@@ -125,30 +127,56 @@
    */
   async function pickerCallback(data) {
     if (data.action === google.picker.Action.PICKED) {
-      let text = `Picker response: \n${JSON.stringify(data, null, 2)}\n`;
-      const document = data[google.picker.Response.DOCUMENTS][0];
-      const fileId = document[google.picker.Document.ID];
+      // let text = `Picker response: \n${JSON.stringify(data, null, 2)}\n`;
       let folder = data.docs[0];
       folderId = folder.id;
-      const res = await gapi.client.drive.files.get({
-        'fileId': fileId,
-        'fields': '*',
-      });
       window.document.getElementById('result').style.visibility = 'visible';
       window.document.getElementById('folderName').innerText = folder.name;
-      checkFolderForXlsx();
+      let folderHasXlsx = await checkFolderHasXlsx();
+      if(folderHasXlsx) {
+        let dataToSend = {
+          userId: userId,
+          token: accessToken,
+          folderId: folderId
+        };
+        fetch('/api/drive/dispatchimport', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(dataToSend)
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json(); // Parse the response body as JSON
+        })
+        .then(data => {
+          // Handle the response data
+          console.log(data);
+        })
+        .catch(error => {
+          // Handle any errors
+          console.error('There was a problem with the fetch operation:', error);
+        });        
+      }
+
     }
   }
 
-  function checkFolderForXlsx() {
-      gapi.client.drive.files.list({
+  async function checkFolderHasXlsx() {
+      return gapi.client.drive.files.list({
         'q': "'" + folderId + "' in parents and mimeType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'",
         'fields': 'files(name, mimeType)'
       }).then(function(response) {
         var files = response.result.files;
         if (files.length === 0) {
           window.document.getElementById('selectionError').style.visibility = 'visible';
+          return false;
         } 
+
+        return true;
       });
     }  
 </script>

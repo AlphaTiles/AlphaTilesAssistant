@@ -4,31 +4,35 @@ namespace App\Services;
 
 use Google\Client;
 use Google\Service\Drive;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Log;
 
 class GoogleDriveService
 {
-    protected $client;
+    protected Client $client;
+    protected Drive $driveService;
 
-    public function __construct()
+    public function __construct(string $token)
     {
         $this->client = new Client();
-        $token = Session::get('socialite_token');
         $this->client->setAccessToken($token);
+        $this->driveService = new Drive($this->client);
     }
 
-    public function listFiles()
+    public function getFolder($folderId)
     {
-        $driveService = new Drive($this->client);
+        return $this->driveService->files->get($folderId, ['fields' => 'name']);        
+    }
 
-        $query = "mimeType='application/vnd.google-apps.folder' and 'root' in parents and trashed=false";
- 
+    public function listFiles($folderId)
+    {        
+        $query = "'{$folderId}' in parents and trashed=false";
+
         $optParams = [
             'fields' => 'files(id, name)',
             'q' => $query
         ];
  
-        $results = $driveService->files->listFiles($optParams);    
+        $results = $this->driveService->files->listFiles($optParams);    
 
         return $results->getFiles();
     }
