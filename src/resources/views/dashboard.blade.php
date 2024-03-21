@@ -39,6 +39,9 @@
                                 <a href="/languagepack/edit/{{ $languagepack->id }}">
                                     {{ $languagepack->name }}
                                 </a>
+                                @if($languagepack->importing)
+                                    <span class="text-blue-800">Import in progress</span>
+                                @endif
                             </td> 
                             <td>{{  $languagepack->created_at->format("d/m/Y") }}</td> 
                         </tr>
