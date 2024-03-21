@@ -35,4 +35,14 @@ class LangInfoRepository
         
         return $settings;
     }
+
+    static function getValue($errors, array $setting)
+    {	
+        if (isset($errors) && $errors->any()) {
+            return old('settings.' . $setting['name']) ?? '';
+        }
+    
+        return $setting['value'];
+    }
+    
 }
