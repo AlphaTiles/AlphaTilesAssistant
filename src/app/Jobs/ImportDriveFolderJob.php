@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Enums\ImportStatus;
 use App\Models\LanguagePack;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Log;
@@ -29,8 +30,7 @@ class ImportDriveFolderJob implements ShouldQueue
     {
         $this->token = $token;
         $this->folderId = $folderId;
-        $this->userId = $userId;
-        $this->googleDriveService = new GoogleDriveService($this->token);   
+        $this->userId = $userId;           
     }
 
     /**
@@ -40,14 +40,15 @@ class ImportDriveFolderJob implements ShouldQueue
      */
     public function handle()
     {        
-        $languagePack = $this->createLanguagePack();
+        $this->googleDriveService = new GoogleDriveService($this->token);        
+        $this->createLanguagePack();
         $files = $this->googleDriveService->listFiles($this->folderId);
         foreach ($files as $file) {
             Log::error($file->name);
         }                
     }
 
-    private function createLanguagePack(): LanguagePack
+    private function createLanguagePack(): void
     {
         $folder = $this->googleDriveService->getFolder($this->folderId);
         $folderName = $folder->getName();
@@ -59,10 +60,10 @@ class ImportDriveFolderJob implements ShouldQueue
             $folderName = $this->generateUniqueItemName($folderName);
         }
 
-        return LanguagePack::create([
+        LanguagePack::create([
             'userid' => $this->userId,
             'name' => $folderName,
-            'importing' => true
+            'import_status' => ImportStatus::IMPORTING
         ]);
     }
 

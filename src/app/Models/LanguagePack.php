@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ImportStatus;
 use App\Models\Key;
 use App\Models\Tile;
 use App\Models\Word;
@@ -19,7 +20,15 @@ class LanguagePack extends Model
     protected $fillable = [
         'userid',
         'name',
+        'import_status'
     ];
+
+    public function casts()
+    {
+        return [
+            'import_status' => ImportStatus::class, 
+        ];
+    }    
 
     public function hasSetting(LangInfoEnum $langInfo): bool
     {

@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('language_packs', function (Blueprint $table) {
-            $table->boolean('importing')->after('name')->default(false);
+            $table->string('import_status')->after('name');
         });
     }
 
@@ -26,7 +26,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('language_packs', function (Blueprint $table) {
-            $table->dropColumn('importing');
+            $table->dropColumn('import_status');
         });
     }
 };

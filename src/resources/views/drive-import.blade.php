@@ -11,7 +11,13 @@
     </div>
     <div class="mt-5" id="result" style="visibility: hidden;">
       <div><span class="font-bold">Selected folder:</span> <span id="folderName"></span></div>
+      <div class="mt-5 text-blue-700" id="selectionSuccess" style="visibility: hidden;">        
+        Import in progress. You will find the imported language pack listed on the dashboard. You may close this page now.
+      </div>
       <div class="mt-5 text-red-700" id="selectionError" style="visibility: hidden;">Error: No XLSX file found in the selected folder.</div>
+      <div class="mt-5">
+        <a href="/dashboard">Back to Dashboard</a>
+      </div>
     </div>
 </div>
 @endsection
@@ -172,10 +178,13 @@
       }).then(function(response) {
         var files = response.result.files;
         if (files.length === 0) {
+          window.document.getElementById('selectionSuccess').style.visibility = 'hidden';
           window.document.getElementById('selectionError').style.visibility = 'visible';
           return false;
         } 
 
+        window.document.getElementById('selectionError').style.visibility = 'hidden';
+        window.document.getElementById('selectionSuccess').style.visibility = 'visible';
         return true;
       });
     }  
