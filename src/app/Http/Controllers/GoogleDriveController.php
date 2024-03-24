@@ -20,7 +20,6 @@ class GoogleDriveController extends Controller
             app('redirect')->setIntendedUrl('/drive/import');
 
             return Socialite::driver('google')
-                ->with(['access_type' => 'offline', 'prompt' => 'consent select_account'])
                 ->scopes([Drive::DRIVE, Drive::DRIVE_FILE])
                 ->redirect();        
         }
