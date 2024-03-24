@@ -15,7 +15,6 @@ class SocialController extends Controller
     public function redirect()
     {
         return Socialite::driver('google')
-            ->scopes([Drive::DRIVE, Drive::DRIVE_FILE])
             ->redirect();
     }
 
@@ -23,8 +22,15 @@ class SocialController extends Controller
     {
         try {
                 $googleUser = Socialite::driver('google')->user();
-                $user = User::where('email', $googleUser->email)->first();
-                Session::put('socialite_token', $googleUser->token);                
+                Session::put('socialite_token', $googleUser->token);      
+                
+                $hasDrivePermissions = in_array(Drive::DRIVE_FILE, $googleUser->approvedScopes);          
+
+                if($hasDrivePermissions) {
+                    Session::put('has_drive_permissions', true);
+                }
+                
+                $user = User::where('email', $googleUser->email)->first();                            
                 
                 if($user){
                     Auth::login($user);
