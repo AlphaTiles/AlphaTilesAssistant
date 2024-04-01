@@ -20,7 +20,7 @@ class StoreLangPackRequest extends FormRequest
                 'array',
             ],
             'settings.ethnologue_code' => [new ThreeLettersRule],
-            'settings.game_name' => ['required', 'max:20'],
+            'settings.game_name' => ['required', 'max:30'],
             'settings.name_local_language' => ['required', 'max:12'],
             'settings.media_credits2' => ['sometimes'],
             'btnNext' => 'sometimes',

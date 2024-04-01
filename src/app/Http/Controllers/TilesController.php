@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use App\Rules\RequireAtLeastOneDistractor;
+use App\Services\TileFileUploadService;
 use Illuminate\Support\Facades\Log;
 
 class TilesController extends BaseItemController
@@ -113,11 +114,13 @@ class TilesController extends BaseItemController
         );
 
         DB::transaction(function() use($tiles, $fileRules, $languagePack) {
+            $fileUploadService = app(TileFileUploadService::class);
+
             foreach($tiles as $key => $tile) {
 
-                $fileModel1 = $this->uploadFile($tile, 1, $fileRules);
-                $fileModel2 = $this->uploadFile($tile, 2, $fileRules);
-                $fileModel3 = $this->uploadFile($tile, 3, $fileRules);
+                $fileModel1 = $fileUploadService->handle($tile, 1, $fileRules);
+                $fileModel2 = $fileUploadService->handle($tile, 2, $fileRules);
+                $fileModel3 = $fileUploadService->handle($tile, 3, $fileRules);
                 
                 $updateData = [
                     'upper' => $tile['upper'],
@@ -208,32 +211,5 @@ class TilesController extends BaseItemController
         if(file_exists($filePath)) {
             return response()->download($filePath);
         }            
-    }
-
-    private function uploadFile(array $tile, int $fileNr, string $fileRules): ?File
-    {
-        $fileField = $fileNr > 1 ? "file{$fileNr}" : 'file';
-
-        if(!isset($tile[$fileField])) {
-            return null;
-        }
-
-        $fileModel = new File;
-        $fileValdidation = Validator::make(
-            ['tiles' => [$tile]], 
-            ["tiles.*.{$fileField}" => $fileRules]
-        );                        
-        if($fileValdidation->passes()){
-            $newFileName = "tile_" .  str_pad($tile['id'], 3, '0', STR_PAD_LEFT) . '_' . $fileNr . '.mp3';
-            $languagePackPath = "languagepacks/{$tile['languagepackid']}/res/raw/";
-            $filePath = $tile[$fileField]->storeAs($languagePackPath, $newFileName, 'public');
-            $fileModel->name = $tile[$fileField]->getClientOriginalName();
-            $fileModel->file_path = '/storage/' . $filePath;
-            $fileModel->save();
-
-            return $fileModel;
-        }           
-
-        return null;
     }
 }

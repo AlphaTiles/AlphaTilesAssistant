@@ -6,7 +6,8 @@ use App\Enums\ImportStatus;
 use App\Models\LanguagePack;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Log;
-use App\Services\GoogleDriveService;
+use App\Services\GoogleService;
+use App\Services\SheetService;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -19,7 +20,7 @@ class ImportDriveFolderJob implements ShouldQueue
     public string $folderId;
     public string $token;
     public int $userId;
-    public GoogleDriveService $googleDriveService;
+    public GoogleService $googleService;
 
     /**
      * Create a new job instance.
@@ -40,17 +41,26 @@ class ImportDriveFolderJob implements ShouldQueue
      */
     public function handle()
     {        
-        $this->googleDriveService = new GoogleDriveService($this->token);        
-        $this->createLanguagePack();
-        $files = $this->googleDriveService->listFiles($this->folderId);
+        $this->googleService = new GoogleService($this->token);        
+        $languagePack = $this->createLanguagePack();
+        $files = $this->googleService->listFiles($this->folderId);
+        $spreadsheetId = null;
         foreach ($files as $file) {
-            Log::error($file->name);
+            $fileExtension = pathinfo($file->name, PATHINFO_EXTENSION);            
+            if($fileExtension === 'xlsx') {
+                $spreadsheetId = $file->id;
+            }            
         }                
+
+        $sheetService = new SheetService($languagePack, $this->token);
+        $downloadPath = storage_path('app/google-drive-file.xlsx');
+        $this->googleService->downloadGoogleSheet($spreadsheetId, $downloadPath);
+        $sheetService->readAndSaveData($downloadPath);
     }
 
-    private function createLanguagePack(): void
+    private function createLanguagePack(): LanguagePack
     {
-        $folder = $this->googleDriveService->getFolder($this->folderId);
+        $folder = $this->googleService->getFolder($this->folderId);
         $folderName = $folder->getName();
         $existingLanguagePack = LanguagePack::where('userid', $this->userId)
             ->where('name', $folderName)->first();
@@ -60,7 +70,7 @@ class ImportDriveFolderJob implements ShouldQueue
             $folderName = $this->generateUniqueItemName($folderName);
         }
 
-        LanguagePack::create([
+        return LanguagePack::create([
             'userid' => $this->userId,
             'name' => $folderName,
             'import_status' => ImportStatus::IMPORTING

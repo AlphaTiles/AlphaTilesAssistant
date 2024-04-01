@@ -9,7 +9,7 @@ use App\Models\LanguagePack;
 use Illuminate\Http\Request;
 use App\Rules\CustomRequired;
 use App\Rules\ImageFileRequired;
-use App\Services\FileUploadService;
+use App\Services\WordFileUploadService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -90,7 +90,7 @@ class WordlistController extends Controller
         );
 
         DB::transaction(function() use($languagePack, $words) {
-            $fileUploadService = app(FileUploadService::class);                        
+            $fileUploadService = app(WordFileUploadService::class);                        
             $audioRuleClass = new AudioFileRequired(request(), $words);
             $imageRuleClass = new ImageFileRequired(request(), $words);
             foreach($words as $key => $word) {
