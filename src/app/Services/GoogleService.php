@@ -4,7 +4,6 @@ namespace App\Services;
 
 use Google\Client;
 use Google\Service\Drive;
-use Google\Service\Sheets;
 use Google\Service\Drive\DriveFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -14,7 +13,6 @@ class GoogleService
     protected Client $client;
     protected DriveFile $driveFile;
     protected Drive $driveService;
-    protected Sheets $sheetService;
 
     public function __construct(string $token)
     {
@@ -22,7 +20,6 @@ class GoogleService
         $this->client->setAccessToken($token);
         $this->driveService = new Drive($this->client);
         $this->driveFile = new DriveFile($this->client);
-        $this->sheetService = new Sheets($this->client);
     }
 
     public function getFolder($folderId)

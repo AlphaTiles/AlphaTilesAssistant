@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use App\Models\File;
 use App\Models\Tile;
 use App\Models\Word;
@@ -28,13 +29,22 @@ class SheetService
     public function readAndSaveData(string $downloadPath)
     {
         $spreadsheet = IOFactory::load($downloadPath);
-        $this->saveLanginfo($spreadsheet);
-        $this->saveTiles($spreadsheet);
-        $this->saveWords($spreadsheet);
 
-        $this->languagePack->import_status = ImportStatus::SUCCESS->value;
-        $this->languagePack->save();
-        Log::error("import complete");
+        try {
+            $this->saveLanginfo($spreadsheet);
+            $this->saveTiles($spreadsheet);
+            $this->saveWords($spreadsheet);    
+
+            $this->languagePack->import_status = ImportStatus::SUCCESS->value;
+            Log::error("import complete");
+        } catch(Exception $ex) {
+            Log::error('exception thrown');
+            Log::error($ex->getMessage());
+            $this->languagePack->import_status = ImportStatus::FAILED->value;    
+        } finally {
+            $this->languagePack->save();
+        }
+                
     }
 
     private function saveLanginfo(Spreadsheet $spreadsheet)
@@ -108,6 +118,11 @@ class SheetService
 
         $file = $fileName . '.mp3';
         $driveFileId = $this->googleService->getFileIdByFileName($file, 'audio_tiles_optional');
+
+        if(empty($driveFileId)) {
+            return;
+        }
+        
         $path = "public/languagepacks/{$this->languagePack->id}/res/raw/";
         $fileNr = 1;
         $newFileName = "tile_" .  str_pad($myTile->id, 3, '0', STR_PAD_LEFT) . '_' . $fileNr . '.mp3';
@@ -155,6 +170,11 @@ class SheetService
         $folder = $fileTypeEnum === FileTypeEnum::AUDIO ? 'audio_words' : 'images_words';                
         $file = $fileName . '.' . $extension;
         $driveFileId = $this->googleService->getFileIdByFileName($file, $folder);
+        
+        if(empty($driveFileId)) {
+            return;
+        }
+        
         $path = "public/languagepacks/{$this->languagePack->id}/res/raw/";
         $newFileName = "word_" .  str_pad($myWord->id, 3, '0', STR_PAD_LEFT) . '.' . $extension;
         $this->googleService->saveFile($path, $driveFileId, $newFileName);

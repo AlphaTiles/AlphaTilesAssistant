@@ -30,8 +30,8 @@ $path = "/storage/languagepacks/" . $languagePack->id . "/res/raw/";
 		$wordData = old('words') ?? request()['words'] ?? $words;
 		$deleteValues = old('words') ? Arr::pluck(old('words') , 'delete') : Arr::pluck($wordData , 'delete'); 
 		?>
-		@if($words && in_array(1, $deleteValues))
-		<form method="post" action="/languagepack/wordlist/{{ $languagePack->id }}" enctype="multipart/form-data">			
+		@if($words && in_array(1, $deleteValues))		
+		<form method="post" action="{{ url('/languagepack/wordlist/' . $languagePack->id) . '?' . http_build_query(request()->query()) }}" enctype="multipart/form-data">			
 		@csrf
 		@method('DELETE')
 		<div class="alert mb-3">  				
@@ -67,9 +67,8 @@ $path = "/storage/languagepacks/" . $languagePack->id . "/res/raw/";
 		</ul>
 	</div>
 	@endif
-
-
-	<form method="post" action="/languagepack/wordlist/{{ $languagePack->id }}" enctype="multipart/form-data">			
+	
+	<form method="post" action ="{{ url('/languagepack/wordlist/' . $languagePack->id) . '?' . http_build_query(request()->query()) }}" enctype="multipart/form-data">			
 	@csrf
 	@method('PATCH')
 	@if(count($words) > 0)
@@ -109,25 +108,26 @@ $path = "/storage/languagepacks/" . $languagePack->id . "/res/raw/";
 						<div class="custom-file">
 							<input type="file" name="words[{{ $key }}][audioFile]" class="custom-file-input" id="chooseFile" value="{{ old('words.' . $key . '.audioFile') }}">
 							<br>
-							@if(isset($word->audioFile) || isset($word->audioFilename))
-								<?php 		
-								$audioFilename = isset($word->audioFile) ? (isset($word->audioFile->name) ? $word->audioFile->name : $word->audioFilename) 
-									: (isset($word->audioFilename) ? $word->audioFilename : '');
-									$storedFileName = '';
-									if(!empty($word->audioFile->file_path)) {
-										$storedFileName = str_replace($path, '', $word->audioFile->file_path);
-									}									
-								?>
-								<div class="mt-1">
-									<audio controls style="width: 200px;">
-										<source src="/languagepack/wordlist/{{ $word->languagepackid }}/download/{{ $storedFileName }}?{{ time() }}" type="audio/mpeg">
-										Your browser does not support the audio element.
-									</audio> 								
-								</div>
-								<input type="hidden" name="words[{{ $key }}][audioFilename]" value="{{ $audioFilename }}">
-							@endif
 							@if($errors->has('words.' . $key . '.audioFile') && old('words.' . $key . '.delete') != '1')							
 								<div class="error">Upload a valid file</div>
+							@else
+								@if(isset($word->audioFile) || isset($word->audioFilename))
+									<?php 		
+									$audioFilename = isset($word->audioFile) ? (isset($word->audioFile->name) ? $word->audioFile->name : $word->audioFilename) 
+										: (isset($word->audioFilename) ? $word->audioFilename : '');
+										$storedFileName = '';
+										if(!empty($word->audioFile->file_path)) {
+											$storedFileName = str_replace($path, '', $word->audioFile->file_path);
+										}									
+									?>
+									<div class="mt-1">
+										<audio controls style="width: 200px;">
+											<source src="/languagepack/wordlist/{{ $word->languagepackid }}/download/{{ $storedFileName }}?{{ time() }}" type="audio/mpeg">
+											Your browser does not support the audio element.
+										</audio> 								
+									</div>
+									<input type="hidden" name="words[{{ $key }}][audioFilename]" value="{{ $audioFilename }}">
+								@endif
 							@endif									
 						</div>
 					</td> 
@@ -136,23 +136,24 @@ $path = "/storage/languagepacks/" . $languagePack->id . "/res/raw/";
 						<div class="custom-file">
 							<input type="file" name="words[{{ $key }}][imageFile]" class="custom-file-input" id="chooseFile" value="{{ old('words.' . $key . '.imageFile') }}">
 							<br>
-							@if(isset($word->imageFile) || isset($word->imageFilename))
-								<?php 		
-								$imageFilename = isset($word->imageFile) ? (isset($word->imageFile->name) ? $word->imageFile->name : $word->imageFilename) 
-									: (isset($word->imageFilename) ? $word->imageFilename : '');								
-								$storedFileName = '';
-								if(!empty($word->imageFile->file_path)) {
-									$storedFileName = str_replace($path, '', $word->imageFile->file_path);
-								}								
-								?>
-								<div class="mt-1">
-									<img width="30" src="/languagepack/wordlist/{{ $word->languagepackid }}/download/{{ $storedFileName }}?{{ time() }}" />
-								</div>
-								<input type="hidden" name="words[{{ $key }}][imageFilename]" value="{{ $imageFilename }}">
-							@endif
 							@if($errors->has('words.' . $key . '.imageFile') && old('words.' . $key . '.delete') != '1')							
 								<div class="error">Upload a valid file</div>
-							@endif									
+							@else
+								@if(isset($word->imageFile) || isset($word->imageFilename))
+									<?php 		
+									$imageFilename = isset($word->imageFile) ? (isset($word->imageFile->name) ? $word->imageFile->name : $word->imageFilename) 
+										: (isset($word->imageFilename) ? $word->imageFilename : '');								
+									$storedFileName = '';
+									if(!empty($word->imageFile->file_path)) {
+										$storedFileName = str_replace($path, '', $word->imageFile->file_path);
+									}								
+									?>
+									<div class="mt-1">
+										<img width="30" src="/languagepack/wordlist/{{ $word->languagepackid }}/download/{{ $storedFileName }}?{{ time() }}" />
+									</div>
+									<input type="hidden" name="words[{{ $key }}][imageFilename]" value="{{ $imageFilename }}">
+								@endif
+							@endif
 						</div>
 					</td> 
 
@@ -170,6 +171,10 @@ $path = "/storage/languagepacks/" . $languagePack->id . "/res/raw/";
 			</table>                    
 		</div>
 
+		<div class="w-3/4">
+			{!! $pagination !!}
+		</div>
+		
 		<p>
 			<input type="submit" name="btnHiddenSave" id="saveButton" value="Save" class="hidden" />
 			<input type="submit" name="btnSave" value="Save" class="btn-sm btn-primary ml-1" onClick='handleSaveReset();' />			
