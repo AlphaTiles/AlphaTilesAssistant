@@ -9,6 +9,7 @@ use App\Models\Word;
 use App\Enums\FileTypeEnum;
 use App\Enums\ImportStatus;
 use App\Enums\LangInfoEnum;
+use App\Models\Key;
 use App\Models\LanguagePack;
 use App\Models\LanguageSetting;
 use Illuminate\Support\Facades\Log;
@@ -34,6 +35,7 @@ class SheetService
             $this->saveLanginfo($spreadsheet);
             $this->saveTiles($spreadsheet);
             $this->saveWords($spreadsheet);    
+            $this->saveKeyboard($spreadsheet);
 
             $this->languagePack->import_status = ImportStatus::SUCCESS->value;
             Log::error("import complete");
@@ -188,5 +190,29 @@ class SheetService
         $columnName = $fileTypeEnum === FileTypeEnum::AUDIO ? 'audiofile_id' : 'imagefile_id';
         $myWord->{$columnName} = $fileModel->id;
         $myWord->save();
+    }
+
+    private function saveKeyboard(Spreadsheet $spreadsheet)
+    {
+        $worksheet = $spreadsheet->getSheetByName('keyboard');
+        $rows = $worksheet->toArray();
+        
+        $firstRow = true;
+        $key = 0;
+        foreach ($rows as $row) {
+            if ($firstRow) {
+                $firstRow = false;
+                continue; 
+            }
+
+            if(!empty($row[0])) {
+                $data[$key]['languagepackid'] = $this->languagePack->id;
+                $data[$key]['value'] = $row[0];
+                $data[$key]['color'] = $row[1];            
+                $key++;
+            }
+        }            
+
+        Key::insert($data);
     }
 }
