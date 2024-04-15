@@ -2,27 +2,36 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\GoogleDriveService;
+use Google\Service\Drive;
+use Illuminate\Http\Request;
+use App\Jobs\ImportDriveFolderJob;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
+use Laravel\Socialite\Facades\Socialite;
 
 class GoogleDriveController extends Controller
-{
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
-    public function index()
+{        
+    public function import()
     {        
-        $googleDriveService = new GoogleDriveService();
-        $files = $googleDriveService->listFiles();
-        foreach ($files as $file) {
-            dump($file->name);
-        }        
+        $this->middleware('auth');
 
+        if(!Session::get('has_drive_permissions')) {
+            app('redirect')->setIntendedUrl('/drive/import');
+
+            return Socialite::driver('google')
+                ->scopes([Drive::DRIVE, Drive::DRIVE_FILE])
+                ->redirect();        
+        }
+
+        return view('drive-import', [
+            'accessToken' => Session::get("socialite_token"),
+            'userId' => Auth::user()->id
+        ]);
     }
+
+    public function dispatchimport(Request $request)
+    {
+        ImportDriveFolderJob::dispatch($request->userId, $request->token, $request->folderId);
+    }    
 }

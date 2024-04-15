@@ -1,3 +1,6 @@
+<?php
+use App\Enums\ImportStatus;
+?>
 @extends('layouts.app')
 
 @section('content')
@@ -39,6 +42,12 @@
                                 <a href="/languagepack/edit/{{ $languagepack->id }}">
                                     {{ $languagepack->name }}
                                 </a>
+                                @if($languagepack->import_status === ImportStatus::IMPORTING->value)
+                                    <span class="text-blue-700 ml-4">Import in progress</span>
+                                @endif
+                                @if($languagepack->import_status === ImportStatus::FAILED->value)
+                                    <span class="text-red-500 ml-4">Import failed</span>
+                                @endif
                             </td> 
                             <td>{{  $languagepack->created_at->format("d/m/Y") }}</td> 
                         </tr>

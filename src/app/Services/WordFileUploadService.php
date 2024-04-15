@@ -8,7 +8,7 @@ use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
-class FileUploadService
+class WordFileUploadService
 {
     public function handle(LanguagePack $languagePack, array $word, Rule $ruleClass, FileTypeEnum $fileTypeEnum): File
     {

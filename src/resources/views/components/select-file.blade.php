@@ -18,22 +18,23 @@ if(empty($tile->{$typeField}) && $nr > 1) {
     <div>
     {{ $nr }}:
     <input type="file" name="tiles[{{ $key }}][{{ $fileField }}]" class="custom-file-input" id="chooseFile" value="{{ $previousFileValue }}">
-    </div>    
-    <div>
-    @if($tile->{$fileRelation} || !empty($tile->{$fileIdKey}))
-        <?php 	        
-        $fileid = (string) $tile->{$fileRelation}->id ?? null;
-        $storedFileNumber = str_pad($tile->id, 3, '0', STR_PAD_LEFT); 
-        ?>
-        <audio controls style="width: 200px; height: 30px;">
-            <source src="/languagepack/tiles/{{ $tile->languagepackid }}/download/tile_{{ $storedFileNumber }}_{{ $nr }}.mp3?{{ time() }}" type="audio/mpeg">
-            Your browser does not support the audio element.
-        </audio> 								
-
-        <input type="hidden" name="tiles[{{ $key }}][{{ $fileIdKey }}]" value="{{ $tile->$fileIdKey }}">
-    @endif
-    </div>
+    </div>   
     @if($errors->has('tiles.' . $key . '.' . $fileField))
         <div class="error">The file upload failed.</div>
+    @else
+        <div>
+        @if($tile->{$fileRelation} || !empty($tile->{$fileIdKey}))
+            <?php 	        
+            $fileid = (string) $tile->{$fileRelation}->id ?? null;
+            $storedFileNumber = str_pad($tile->id, 3, '0', STR_PAD_LEFT); 
+            ?>
+            <audio controls style="width: 200px; height: 30px;">
+                <source src="/languagepack/tiles/{{ $tile->languagepackid }}/download/tile_{{ $storedFileNumber }}_{{ $nr }}.mp3?{{ time() }}" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio> 								
+
+            <input type="hidden" name="tiles[{{ $key }}][{{ $fileIdKey }}]" value="{{ $tile->$fileIdKey }}">
+        @endif
+        </div>
     @endif									
 </div>

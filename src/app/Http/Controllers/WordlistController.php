@@ -9,7 +9,7 @@ use App\Models\LanguagePack;
 use Illuminate\Http\Request;
 use App\Rules\CustomRequired;
 use App\Rules\ImageFileRequired;
-use App\Services\FileUploadService;
+use App\Services\WordFileUploadService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -36,14 +36,14 @@ class WordlistController extends Controller
      */
     public function edit(LanguagePack $languagePack)
     {        
-        session()->forget('success');
-
-        $words = Word::where('languagepackid', $languagePack->id)->get();
+        $words = Word::where('languagepackid', $languagePack->id)->paginate(config('pagination.default'));
 
         return view('languagepack.wordlist', [
             'completedSteps' => ['lang_info', 'tiles', 'wordlist'],
             'languagePack' => $languagePack,
-            'words' => $words    
+            'words' => $words,
+            'pagination' => $words->links()
+
         ]);
     }
 
@@ -62,7 +62,9 @@ class WordlistController extends Controller
 
         Word::insert($insert);
 
-        return redirect("languagepack/wordlist/{$languagePack->id}");    
+        $totalPages = ceil(Word::count() / 10); // Assuming 10 items per page
+
+        return redirect("languagepack/wordlist/{$languagePack->id}?page={$totalPages}");    
     }        
 
     public function update(LanguagePack $languagePack, Request $request)
@@ -90,7 +92,7 @@ class WordlistController extends Controller
         );
 
         DB::transaction(function() use($languagePack, $words) {
-            $fileUploadService = app(FileUploadService::class);                        
+            $fileUploadService = app(WordFileUploadService::class);                        
             $audioRuleClass = new AudioFileRequired(request(), $words);
             $imageRuleClass = new ImageFileRequired(request(), $words);
             foreach($words as $key => $word) {
@@ -123,14 +125,14 @@ class WordlistController extends Controller
         
         session()->flash('success', 'Records updated successfully');
 
-        $wordCollection = Word::where('languagepackid', $languagePack->id)->get();
+        $wordCollection = Word::where('languagepackid', $languagePack->id)->paginate(config('pagination.default'));
 
         return view('languagepack.wordlist', [
             'completedSteps' => ['lang_info', 'tiles', 'wordlist'],
             'languagePack' => $languagePack,
-            'words' => $wordCollection
+            'words' => $wordCollection,
+            'pagination' => $wordCollection->links()
         ]);
-
     }
     
     public function delete(LanguagePack $languagePack, Request $request) 
@@ -154,7 +156,7 @@ class WordlistController extends Controller
             Word::where('id', $wordId)->delete();
         }
 
-        return redirect("languagepack/wordlist/{$languagePack->id}");
+        return Redirect::back();
     }
     
     public function downloadFile(LanguagePack $languagePack, $filename)
