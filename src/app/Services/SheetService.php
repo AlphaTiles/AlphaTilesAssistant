@@ -3,39 +3,46 @@
 namespace App\Services;
 
 use Exception;
+use Google\Client;
+use App\Models\Key;
 use App\Models\File;
 use App\Models\Tile;
 use App\Models\Word;
 use App\Enums\FileTypeEnum;
 use App\Enums\ImportStatus;
 use App\Enums\LangInfoEnum;
-use App\Models\Key;
 use App\Models\LanguagePack;
 use App\Models\LanguageSetting;
+use Google\Service\Sheets;
 use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 class SheetService
-{
+{    
     protected GoogleService $googleService;
+    protected Sheets $googleSheet;
     protected LanguagePack $languagePack;
+    protected string $spreadSheetId;
 
     public function __construct(LanguagePack $languagePack, string $googleToken)
     {
+        $client = new Client();
+        $client->setAccessToken($googleToken);
         $this->languagePack = $languagePack;    
-        $this->googleService = new GoogleService($googleToken);  
+        $this->googleService = new GoogleService($googleToken);      
+        $this->googleSheet = new Sheets($client);    
     }
 
-    public function readAndSaveData(string $downloadPath)
+    public function readAndSaveData(string $spreadSheetId)
     {
-        $spreadsheet = IOFactory::load($downloadPath);
+        $this->spreadSheetId = $spreadSheetId;
 
         try {
-            $this->saveLanginfo($spreadsheet);
-            $this->saveTiles($spreadsheet);
-            $this->saveWords($spreadsheet);    
-            $this->saveKeyboard($spreadsheet);
+            $this->saveLanginfo('langinfo');
+            $this->saveTiles('gametiles');
+            $this->saveWords('wordlist');    
+            $this->saveKeyboard('keyboard');
 
             $this->languagePack->import_status = ImportStatus::SUCCESS->value;
             Log::error("import complete");
@@ -49,11 +56,21 @@ class SheetService
                 
     }
 
-    private function saveLanginfo(Spreadsheet $spreadsheet)
+    private function getWorksheetRows(string $worksheetName): array
     {
-        $worksheet = $spreadsheet->getSheetByName('langinfo');
-        $rows = $worksheet->toArray();
-        
+        $response = $this->googleSheet->spreadsheets_values->get($this->spreadSheetId, $worksheetName);
+        return $response->getValues();    
+
+        //if xlsx file
+        // $worksheet = $spreadsheet->getSheetByName('langinfo');
+        // $rows = $worksheet->toArray();
+    }
+
+
+    private function saveLanginfo(string $worksheetName)
+    {        
+        $rows = $this->getWorksheetRows($worksheetName);
+
         $langInfoExportLabels = [];
         foreach(LangInfoEnum::cases() as $langInfoEnum) {
             $langInfoExportLabels[$langInfoEnum->value] = $langInfoEnum->exportKey();
@@ -74,11 +91,10 @@ class SheetService
         LanguageSetting::insert($settings);
     }
 
-    private function saveTiles(Spreadsheet $spreadsheet)
+    private function saveTiles(string $worksheetName)
     {
-        $worksheet = $spreadsheet->getSheetByName('gametiles');
-        $rows = $worksheet->toArray();
-        
+        $rows = $this->getWorksheetRows($worksheetName);
+
         $firstRow = true;
         foreach ($rows as $row) {
             if ($firstRow) {
@@ -138,10 +154,9 @@ class SheetService
         $myTile->save();
     }
 
-    private function saveWords(Spreadsheet $spreadsheet)
+    private function saveWords(string $worksheetName)
     {
-        $worksheet = $spreadsheet->getSheetByName('wordlist');
-        $rows = $worksheet->toArray();
+        $rows = $this->getWorksheetRows($worksheetName);
         
         $firstRow = true;
         foreach ($rows as $row) {
@@ -192,11 +207,10 @@ class SheetService
         $myWord->save();
     }
 
-    private function saveKeyboard(Spreadsheet $spreadsheet)
+    private function saveKeyboard(string $worksheetName)
     {
-        $worksheet = $spreadsheet->getSheetByName('keyboard');
-        $rows = $worksheet->toArray();
-        
+        $rows = $this->getWorksheetRows($worksheetName);
+
         $firstRow = true;
         $key = 0;
         foreach ($rows as $row) {
