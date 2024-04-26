@@ -14,7 +14,7 @@
       <div class="mt-5 text-blue-700" id="selectionSuccess" style="visibility: hidden;">        
         Import in progress. You will find the imported language pack listed on the dashboard. You may close this page now.
       </div>
-      <div class="mt-5 text-red-700" id="selectionError" style="visibility: hidden;">Error: No XLSX file found in the selected folder.</div>
+      <div class="mt-5 text-red-700" id="selectionError" style="visibility: hidden;">Error: No Google Sheet or XLSX file found in the selected folder.</div>
       <div class="mt-5">
         <a href="/dashboard">Back to Dashboard</a>
       </div>
@@ -173,7 +173,8 @@
 
   async function checkFolderHasSheet() {
       return gapi.client.drive.files.list({
-        'q': "'" + folderId + "' in parents and mimeType='application/vnd.google-apps.spreadsheet'",
+        'q': "'" + folderId + "' in parents and (mimeType='application/vnd.google-apps.spreadsheet' " +
+           " or mimeType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')",
         'fields': 'files(name, mimeType)'
       }).then(function(response) {
         var files = response.result.files;

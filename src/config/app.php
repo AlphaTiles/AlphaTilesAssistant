@@ -212,4 +212,8 @@ return [
         // 'ExampleClass' => App\Example\ExampleClass::class,
     ])->toArray(),
 
+    //xlsx download path
+    'xlsx' => [
+        'path' => 'app/google-drive-file.xlsx'
+    ]
 ];

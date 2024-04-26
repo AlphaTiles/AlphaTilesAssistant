@@ -45,14 +45,28 @@ class ImportDriveFolderJob implements ShouldQueue
         $languagePack = $this->createLanguagePack();
         $files = $this->googleService->listFiles($this->folderId);
         $spreadsheetId = null;
+        $sheetType = 'google';
         foreach ($files as $file) {            
             if($file->getMimeType() === 'application/vnd.google-apps.spreadsheet') {
                 $spreadsheetId = $file->id;
             }            
         }                
 
+        //if no Google sheet found, try importing xlsx file isntead
+        if(empty($spreadsheetId)) {
+            foreach ($files as $file) {
+                $fileExtension = pathinfo($file->name, PATHINFO_EXTENSION);            
+                if($fileExtension === 'xlsx') {
+                    $spreadsheetId = $file->id;
+                    $sheetType = 'xlsx';
+                    $downloadPath = storage_path(config('app.xlsx.path'));
+                    $this->googleService->downloadExcelSheet($spreadsheetId, $downloadPath);                    
+                }            
+            }                       
+        }
+
         $sheetService = new SheetService($languagePack, $this->token);
-        $sheetService->readAndSaveData($spreadsheetId);
+        $sheetService->readAndSaveData($spreadsheetId, $sheetType);
     }
 
     private function createLanguagePack(): LanguagePack

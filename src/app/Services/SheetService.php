@@ -24,6 +24,8 @@ class SheetService
     protected Sheets $googleSheet;
     protected LanguagePack $languagePack;
     protected string $spreadSheetId;
+    protected string $sheetType;
+    protected $spreadsheet;
 
     public function __construct(LanguagePack $languagePack, string $googleToken)
     {
@@ -34,9 +36,15 @@ class SheetService
         $this->googleSheet = new Sheets($client);    
     }
 
-    public function readAndSaveData(string $spreadSheetId)
+    public function readAndSaveData(string $spreadSheetId, string $sheetType)
     {
         $this->spreadSheetId = $spreadSheetId;
+        $this->sheetType = $sheetType;
+
+        if($sheetType === 'xlsx') {
+            $downloadPath = storage_path(config('app.xlsx.path'));
+            $this->spreadsheet = IOFactory::load($downloadPath);    
+        }
 
         try {
             $this->saveLanginfo('langinfo');
@@ -58,12 +66,15 @@ class SheetService
 
     private function getWorksheetRows(string $worksheetName): array
     {
-        $response = $this->googleSheet->spreadsheets_values->get($this->spreadSheetId, $worksheetName);
-        return $response->getValues();    
+        Log::error($worksheetName);
+        if($this->sheetType === 'xlsx') {
+            $worksheet = $this->spreadsheet->getSheetByName($worksheetName);
+            return $worksheet->toArray();
+        }
 
-        //if xlsx file
-        // $worksheet = $spreadsheet->getSheetByName('langinfo');
-        // $rows = $worksheet->toArray();
+        $response = $this->googleSheet->spreadsheets_values->get($this->spreadSheetId, $worksheetName);
+
+        return $response->getValues();    
     }
 
 
@@ -86,8 +97,8 @@ class SheetService
                 $settings[$key]['value'] = $row[1];
                 $key++;
             }
-        }            
-
+        }     
+        
         LanguageSetting::insert($settings);
     }
 
