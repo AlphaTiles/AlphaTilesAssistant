@@ -27,7 +27,7 @@ class GoogleService
         return $this->driveService->files->get($folderId, ['fields' => 'name']);        
     }
 
-    public function downloadGoogleSheet(string $spreadsheetId, string $downloadPath)
+    public function downloadExcelSheet(string $spreadsheetId, string $downloadPath)
     {
         $response = $this->driveService->files->get($spreadsheetId, ['alt' => 'media']);
         file_put_contents($downloadPath, $response->getBody()->getContents());

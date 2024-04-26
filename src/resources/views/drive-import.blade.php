@@ -4,7 +4,7 @@
 <div class="prose">
     <h1>Import Language Pack from Google Drive</h1>
     <div class="mt-5">
-          This is for importing all data including the media for creating a language pack. At the very least you will need to have a Google sheets file ending in .xlsx in the root folder.
+          This is for importing all data including the media for creating a language pack. At the very least you will need to have a Google sheet in the root folder.
     </div>
     <div class="mt-5">
           <a href="#" id="authorize_button" class="btn btn-primary w-40 mt-1 pt-0.5 text-white font-normal no-underline" onclick="connectGoogleDrive()">Select Google Drive Folder</a>
@@ -14,7 +14,7 @@
       <div class="mt-5 text-blue-700" id="selectionSuccess" style="visibility: hidden;">        
         Import in progress. You will find the imported language pack listed on the dashboard. You may close this page now.
       </div>
-      <div class="mt-5 text-red-700" id="selectionError" style="visibility: hidden;">Error: No XLSX file found in the selected folder.</div>
+      <div class="mt-5 text-red-700" id="selectionError" style="visibility: hidden;">Error: No Google Sheet or XLSX file found in the selected folder.</div>
       <div class="mt-5">
         <a href="/dashboard">Back to Dashboard</a>
       </div>
@@ -26,7 +26,7 @@
 <script>
  // Authorization scopes required by the API; multiple scopes can be
   // included, separated by spaces.
-  const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+  const SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets';
 
   // TODO(developer): Set to client ID and API key from the Developer Console
   const CLIENT_ID = '<?php echo env('GOOGLE_CLIENT_ID'); ?>'
@@ -138,8 +138,8 @@
       folderId = folder.id;
       window.document.getElementById('result').style.visibility = 'visible';
       window.document.getElementById('folderName').innerText = folder.name;
-      let folderHasXlsx = await checkFolderHasXlsx();
-      if(folderHasXlsx) {
+      let folderHasSheet = await checkFolderHasSheet();
+      if(folderHasSheet) {
         let dataToSend = {
           userId: userId,
           token: accessToken,
@@ -171,9 +171,10 @@
     }
   }
 
-  async function checkFolderHasXlsx() {
+  async function checkFolderHasSheet() {
       return gapi.client.drive.files.list({
-        'q': "'" + folderId + "' in parents and mimeType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'",
+        'q': "'" + folderId + "' in parents and (mimeType='application/vnd.google-apps.spreadsheet' " +
+           " or mimeType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')",
         'fields': 'files(name, mimeType)'
       }).then(function(response) {
         var files = response.result.files;

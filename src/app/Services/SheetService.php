@@ -3,39 +3,54 @@
 namespace App\Services;
 
 use Exception;
+use Google\Client;
+use App\Models\Key;
 use App\Models\File;
 use App\Models\Tile;
 use App\Models\Word;
 use App\Enums\FileTypeEnum;
 use App\Enums\ImportStatus;
 use App\Enums\LangInfoEnum;
-use App\Models\Key;
 use App\Models\LanguagePack;
 use App\Models\LanguageSetting;
+use Google\Service\Sheets;
 use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 class SheetService
-{
+{    
     protected GoogleService $googleService;
+    protected Sheets $googleSheet;
     protected LanguagePack $languagePack;
+    protected string $spreadSheetId;
+    protected string $sheetType;
+    protected $spreadsheet;
 
     public function __construct(LanguagePack $languagePack, string $googleToken)
     {
+        $client = new Client();
+        $client->setAccessToken($googleToken);
         $this->languagePack = $languagePack;    
-        $this->googleService = new GoogleService($googleToken);  
+        $this->googleService = new GoogleService($googleToken);      
+        $this->googleSheet = new Sheets($client);    
     }
 
-    public function readAndSaveData(string $downloadPath)
+    public function readAndSaveData(string $spreadSheetId, string $sheetType)
     {
-        $spreadsheet = IOFactory::load($downloadPath);
+        $this->spreadSheetId = $spreadSheetId;
+        $this->sheetType = $sheetType;
+
+        if($sheetType === 'xlsx') {
+            $downloadPath = storage_path(config('app.xlsx.path'));
+            $this->spreadsheet = IOFactory::load($downloadPath);    
+        }
 
         try {
-            $this->saveLanginfo($spreadsheet);
-            $this->saveTiles($spreadsheet);
-            $this->saveWords($spreadsheet);    
-            $this->saveKeyboard($spreadsheet);
+            $this->saveLanginfo('langinfo');
+            $this->saveTiles('gametiles');
+            $this->saveWords('wordlist');    
+            $this->saveKeyboard('keyboard');
 
             $this->languagePack->import_status = ImportStatus::SUCCESS->value;
             Log::error("import complete");
@@ -49,11 +64,24 @@ class SheetService
                 
     }
 
-    private function saveLanginfo(Spreadsheet $spreadsheet)
+    private function getWorksheetRows(string $worksheetName): array
     {
-        $worksheet = $spreadsheet->getSheetByName('langinfo');
-        $rows = $worksheet->toArray();
-        
+        Log::error($worksheetName);
+        if($this->sheetType === 'xlsx') {
+            $worksheet = $this->spreadsheet->getSheetByName($worksheetName);
+            return $worksheet->toArray();
+        }
+
+        $response = $this->googleSheet->spreadsheets_values->get($this->spreadSheetId, $worksheetName);
+
+        return $response->getValues();    
+    }
+
+
+    private function saveLanginfo(string $worksheetName)
+    {        
+        $rows = $this->getWorksheetRows($worksheetName);
+
         $langInfoExportLabels = [];
         foreach(LangInfoEnum::cases() as $langInfoEnum) {
             $langInfoExportLabels[$langInfoEnum->value] = $langInfoEnum->exportKey();
@@ -69,16 +97,15 @@ class SheetService
                 $settings[$key]['value'] = $row[1];
                 $key++;
             }
-        }            
-
+        }     
+        
         LanguageSetting::insert($settings);
     }
 
-    private function saveTiles(Spreadsheet $spreadsheet)
+    private function saveTiles(string $worksheetName)
     {
-        $worksheet = $spreadsheet->getSheetByName('gametiles');
-        $rows = $worksheet->toArray();
-        
+        $rows = $this->getWorksheetRows($worksheetName);
+
         $firstRow = true;
         foreach ($rows as $row) {
             if ($firstRow) {
@@ -138,10 +165,9 @@ class SheetService
         $myTile->save();
     }
 
-    private function saveWords(Spreadsheet $spreadsheet)
+    private function saveWords(string $worksheetName)
     {
-        $worksheet = $spreadsheet->getSheetByName('wordlist');
-        $rows = $worksheet->toArray();
+        $rows = $this->getWorksheetRows($worksheetName);
         
         $firstRow = true;
         foreach ($rows as $row) {
@@ -192,11 +218,10 @@ class SheetService
         $myWord->save();
     }
 
-    private function saveKeyboard(Spreadsheet $spreadsheet)
+    private function saveKeyboard(string $worksheetName)
     {
-        $worksheet = $spreadsheet->getSheetByName('keyboard');
-        $rows = $worksheet->toArray();
-        
+        $rows = $this->getWorksheetRows($worksheetName);
+
         $firstRow = true;
         $key = 0;
         foreach ($rows as $row) {
