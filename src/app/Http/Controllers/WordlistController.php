@@ -60,9 +60,10 @@ class WordlistController extends Controller
             }
         }
 
+
         Word::insert($insert);
 
-        $totalPages = ceil(Word::count() / 10); // Assuming 10 items per page
+        $totalPages = ceil(Word::where('languagepackid', $languagePack->id)->count() / 10); // Assuming 10 items per page
 
         return redirect("languagepack/wordlist/{$languagePack->id}?page={$totalPages}");    
     }        
