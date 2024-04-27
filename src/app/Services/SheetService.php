@@ -159,7 +159,7 @@ class SheetService
         
         $fileModel = new File();
         $fileModel->name = $file;
-        $fileModel->file_path = '/storage/' . $path;
+        $fileModel->file_path = '/storage/' . $path . $newFileName;
         $fileModel->save();
         $myTile->file_id = $fileModel->id;
         $myTile->save();

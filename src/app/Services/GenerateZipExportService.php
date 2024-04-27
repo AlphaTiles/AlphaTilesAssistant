@@ -143,8 +143,11 @@ class GenerateZipExportService
         foreach ($words as $word) {            
             $mixedTypes = !empty($word->mixed_types) ? $word->mixed_types : '-';  
             $storagePath = "/storage/languagepacks/{$this->languagePack->id}/res/raw/";
-            $fileName = str_replace($storagePath, '', $word->audioFile->file_path);
-            $fileName = str_replace('.mp3', '',$fileName);
+            $fileName = '';
+            if(isset($word->audioFile->file_path)) {
+                $fileName = str_replace($storagePath, '', $word->audioFile->file_path);
+                $fileName = str_replace('.mp3', '',$fileName);
+            }
             $stage = $word->stage ?? '-';
             $fileContent .= "{$fileName}" . self::SEPARATOR .
             "{$word->value}" . self::SEPARATOR .
@@ -187,8 +190,6 @@ class GenerateZipExportService
             $file = basename($tile->{$fileRelation}->file_path);
             $resourceFile = "app/public/languagepacks/{$this->languagePack->id}/res/raw/{$file}";
             $outputFolder = "{$zipFileName}/res/raw/{$file}";
-            Log::error($tile->id);
-            Log::error($resourceFile);
             $zip->addFile(storage_path($resourceFile), $outputFolder);        
         }
     }
