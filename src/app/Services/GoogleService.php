@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use Google\Client;
 use Google\Service\Drive;
 use Google\Service\Drive\DriveFile;
@@ -78,12 +79,18 @@ class GoogleService
 
     public function saveFile(string $path, string $fileId, string $newFileName): void
     {
+        Log::error(__METHOD__);
         $file = $this->driveService->files->get($fileId);
 
         // Download file content
         $content = $this->driveService->files->get($fileId, ['alt' => 'media']);
 
-        // Save file to Laravel storage
-        Storage::put($path.$newFileName, $content->getBody()->getContents());
+        try {
+            // Save file to Laravel storage
+            Storage::put($path.$newFileName, $content->getBody()->getContents());
+        } catch(Exception $ex) {
+            Log::error('exception thrown');
+            Log::error($ex->getMessage());
+        }
     }
 }
