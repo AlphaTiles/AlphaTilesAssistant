@@ -2,11 +2,13 @@ version: "3.8"
 services:
   app:
     build: ./docker/php
+    restart: always
     volumes:
       - ./src:/workspace
 
   web:
     image: nginx:1.18-alpine
+    restart: always
     ports:
       - 8800:80
     volumes:

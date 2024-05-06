@@ -197,7 +197,9 @@ class SheetService
         $extension = $fileTypeEnum === FileTypeEnum::AUDIO ? 'mp3' : 'png';        
         $folder = $fileTypeEnum === FileTypeEnum::AUDIO ? 'audio_words' : 'images_words';                
         $file = $fileName . '.' . $extension;
+        Log::error("get {$file}");
         $driveFileId = $this->googleService->getFileIdByFileName($file, $folder);
+        Log::error("driveFileId: {$driveFileId}");
         
         if(empty($driveFileId)) {
             return;
@@ -210,7 +212,6 @@ class SheetService
         $fileModel = new File();
         $fileModel->name = $file;
         $fileModel->type = $fileTypeEnum->value;
-        Log::error('/storage' . str_replace('public', '', $path) . $newFileName);
         $fileModel->file_path = '/storage' . str_replace('public', '', $path) . $newFileName;
         $fileModel->save();
         $columnName = $fileTypeEnum === FileTypeEnum::AUDIO ? 'audiofile_id' : 'imagefile_id';
