@@ -10,6 +10,20 @@ use App\Enums\FieldTypeEnum;
 <div class="prose">
 
     <h1>Export Language Pack</h1>
+
+	@if ($errors->any())
+	<div class="alert alert-error">
+		<ul class="block">
+			<?php 
+			$errorKeys = $errors->keys();
+			$errorsUnique = array_unique($errors->all());
+			?>
+			@foreach ($errorsUnique as $error)
+				<li class="block">{{ $error }}</li>
+			@endforeach
+		</ul>
+	</div>
+	@endif
 	
 	<form method="post" action="/languagepack/export/{{ $languagePack->id }}">
 		@csrf

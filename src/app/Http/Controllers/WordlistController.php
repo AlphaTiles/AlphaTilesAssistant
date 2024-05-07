@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\FileTypeEnum;
 use App\Models\Word;
-use App\Rules\AudioFileRequired;
+use App\Enums\FileTypeEnum;
 use App\Models\LanguagePack;
 use Illuminate\Http\Request;
 use App\Rules\CustomRequired;
+use App\Rules\AudioFileRequired;
 use App\Rules\ImageFileRequired;
-use App\Services\WordFileUploadService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Services\WordFileUploadService;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
@@ -43,7 +43,6 @@ class WordlistController extends Controller
             'languagePack' => $languagePack,
             'words' => $words,
             'pagination' => $words->links()
-
         ]);
     }
 
