@@ -50,7 +50,8 @@ class AudioFileRequired implements Rule
             return true;
         }
 
-        return false;
+        //not required at this stage
+        return true;
     }
 
     public function message()

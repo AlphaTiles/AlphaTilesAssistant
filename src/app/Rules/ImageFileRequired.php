@@ -58,7 +58,8 @@ class ImageFileRequired implements Rule
             return true;
         }
 
-        return false;
+        //not required
+        return true;
     }
 
     public function message()
