@@ -5,9 +5,12 @@ namespace App\Models;
 use App\Enums\FileTypeEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Word extends Model
 {
+    use SoftDeletes;
+    
     protected $fillable = [
         'languagepackid',
         'value',

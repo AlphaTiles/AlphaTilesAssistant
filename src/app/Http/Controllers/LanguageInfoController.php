@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Tile;
+use App\Models\Word;
 use App\Enums\LangInfoEnum;
 use App\Models\LanguagePack;
 use App\Models\LanguageSetting;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use App\Repositories\LangInfoRepository;
 use App\Http\Requests\StoreLangPackRequest;
+use App\Models\Key;
 
 class LanguageInfoController extends Controller
 {
@@ -39,6 +43,22 @@ class LanguageInfoController extends Controller
             'settings' => $this->langinfoRepository->getSettings(true),
             'tiles' => ''
         ]);
+    }
+
+    public function destroy(LanguagePack $languagePack)
+    {
+        try {            
+            Storage::move("public/languagepacks/$languagePack->id", "public/languagepacks/old-$languagePack->id");
+            LanguageSetting::where('languagepackid', $languagePack->id)->delete();
+            Tile::where('languagepackid', $languagePack->id)->delete();
+            Word::where('languagepackid', $languagePack->id)->delete();
+            Key::where('languagepackid', $languagePack->id)->delete();
+            $languagePack->delete();
+
+            return response()->json(['message' => 'Language pack deleted successfully'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to delete the language pack'], 500);
+        }
     }
 
     /**
