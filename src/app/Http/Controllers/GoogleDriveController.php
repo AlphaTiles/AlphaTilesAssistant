@@ -32,6 +32,10 @@ class GoogleDriveController extends Controller
 
     public function dispatchimport(Request $request)
     {
+        Log::error(__METHOD__);
+        Log::error('userId: ' . $request->userId);
+        Log::error('token: ' . $request->token);
+        Log::error('folderId: ' . $request->folderId);
         ImportDriveFolderJob::dispatch($request->userId, $request->token, $request->folderId);
     }    
 }

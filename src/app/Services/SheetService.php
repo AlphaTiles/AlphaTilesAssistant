@@ -29,6 +29,8 @@ class SheetService
 
     public function __construct(LanguagePack $languagePack, string $googleToken)
     {
+        Log::error(__METHOD__);
+        Log::error('googleToken: ' . $googleToken);
         $client = new Client();
         $client->setAccessToken($googleToken);
         $this->languagePack = $languagePack;    
