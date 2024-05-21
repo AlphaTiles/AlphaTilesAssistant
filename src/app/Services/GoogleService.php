@@ -79,7 +79,6 @@ class GoogleService
 
     public function saveFile(string $path, string $fileId, string $newFileName): void
     {
-        Log::error(__METHOD__);
         $file = $this->driveService->files->get($fileId);
 
         // Download file content
