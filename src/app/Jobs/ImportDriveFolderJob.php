@@ -17,6 +17,8 @@ class ImportDriveFolderJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public $timeout = 1800;
+
     public string $folderId;
     public string $token;
     public int $userId;
