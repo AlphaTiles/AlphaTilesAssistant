@@ -7,7 +7,7 @@ use App\Models\LanguagePack;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Log;
 use App\Services\GoogleService;
-use App\Services\SheetService;
+use App\Services\ImportSheetService;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -67,7 +67,7 @@ class ImportDriveFolderJob implements ShouldQueue
             }                       
         }
 
-        $sheetService = new SheetService($languagePack, $this->token);
+        $sheetService = new ImportSheetService($languagePack, $this->token);
         $sheetService->readAndSaveData($spreadsheetId, $sheetType);
     }
 

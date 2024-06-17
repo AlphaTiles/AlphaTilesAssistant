@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\LanguagePack;
 use Exception;
 use Google\Client;
 use Google\Service\Drive;
@@ -14,10 +15,12 @@ class GoogleService
     protected Client $client;
     protected DriveFile $driveFile;
     protected Drive $driveService;
+    protected string $token;
 
     public function __construct(string $token)
     {
         $this->client = new Client();
+        $this->token = $token;
         $this->client->setAccessToken($token);
         $this->driveService = new Drive($this->client);
         $this->driveFile = new DriveFile($this->client);
@@ -92,4 +95,71 @@ class GoogleService
             Log::error($ex->getMessage());
         }
     }
+
+    function fileExists(string $fileName, string $folderId, string $mimeType) 
+    {
+        $query = "name='$fileName' and '$folderId' in parents and mimeType='{$mimeType}' and trashed=false";
+        
+        $response = $this->driveService->files->listFiles([
+            'q' => $query,
+            'spaces' => 'drive',
+            'fields' => 'files(id, name)'
+        ]);
+    
+        if (count($response->files) > 0) {
+            return $response->files[0]->id;
+        } else {
+            return false;
+        }
+    }
+
+    function folderExists($folderName, $parentId = null) {
+        $folderName = str_replace("'", "\'", $folderName);
+        $query = "mimeType='application/vnd.google-apps.folder' and name='{$folderName}' and trashed=false";
+        if ($parentId) {
+            $query .= " and '{$parentId}' in parents";
+        }
+    
+        $response = $this->driveService->files->listFiles([
+            'q' => $query,
+            'spaces' => 'drive',
+            'fields' => 'files(id)',
+        ]);
+    
+        if (count($response->files) > 0) {
+            return $response->files[0]->id;
+        } else {
+            return false;
+        }
+    }    
+
+    function createFolder(string $folderName, $parentId = null): string
+    {
+        $folderId = $this->folderExists($folderName, $parentId);
+        if($folderId) {
+            return $folderId;
+        }
+
+        $folderMeta = new DriveFile(array(
+            'name' => $folderName,
+            'mimeType' => 'application/vnd.google-apps.folder'));
+
+        if ($parentId) {
+            $folderMeta->setParents([$parentId]);
+        }
+    
+        $folder = $this->driveService->files->create($folderMeta, array(
+            'fields' => 'id'));
+
+        return $folder->id;
+    }    
+
+    function handleExport(LanguagePack $languagePack): void
+    {
+        $mainFolderId = $this->createFolder('alphatilesassistant');
+        $folderId = $this->createFolder($languagePack->name, $mainFolderId);
+        $exportSheetService = new ExportSheetService($languagePack, $this->token);
+        $exportSheetService->handle($folderId);
+    }
+
 }
