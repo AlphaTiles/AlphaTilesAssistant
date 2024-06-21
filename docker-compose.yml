@@ -14,7 +14,7 @@ services:
     image: nginx:1.18-alpine
     restart: always
     ports:
-      - 8800:80
+      - ${WEB_PORT}:80
     volumes:
       - ./src:/workspace
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
