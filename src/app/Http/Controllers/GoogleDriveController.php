@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Google\Service\Drive;
+use App\Models\LanguagePack;
 use Illuminate\Http\Request;
 use App\Services\GoogleService;
+use App\Jobs\ExportDriveFolderJob;
 use App\Jobs\ImportDriveFolderJob;
-use App\Models\LanguagePack;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
@@ -30,13 +31,11 @@ class GoogleDriveController extends Controller
         }
 
         $token = Session::get("socialite_token");
-        $googleService = new GoogleService($token);     
-        $googleService->handleExport($languagePack);
+        ExportDriveFolderJob::dispatch($token, $languagePack);
 
-        // return view('drive-import', [
-        //     'accessToken' => Session::get("socialite_token"),
-        //     'userId' => Auth::user()->id
-        // ]);
+        return view('drive-export', [
+            'languagepack' => $languagePack,
+        ]);
     }
 
     public function import()
