@@ -154,11 +154,16 @@ class GoogleService
         return $folder->id;
     }    
 
+    function deleteFolder(string $folderId): void
+    {    
+        $this->driveService->files->delete($folderId);
+    }       
+
     function handleExport(LanguagePack $languagePack): void
     {
         $mainFolderId = $this->createFolder('alphatilesassistant');
         $folderId = $this->createFolder($languagePack->name, $mainFolderId);
-        $exportSheetService = new ExportSheetService($languagePack, $this->token);
+        $exportSheetService = new ExportSheetService($languagePack, $this->token, $folderId);
         $exportSheetService->handle($folderId);
     }
 
