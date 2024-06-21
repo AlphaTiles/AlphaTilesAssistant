@@ -27,7 +27,7 @@ class SocialController extends Controller
                 $hasDrivePermissions = in_array(Drive::DRIVE_FILE, $googleUser->approvedScopes);          
 
                 if($hasDrivePermissions) {
-                    Session::put('has_drive_permissions', true);
+                    Session::put('drive_permissions_time', now());
                 }
                 
                 $user = User::where('email', $googleUser->email)->first();                            

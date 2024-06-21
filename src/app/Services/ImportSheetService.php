@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
-class SheetService
+class ImportSheetService
 {    
     protected GoogleService $googleService;
     protected Sheets $googleSheet;

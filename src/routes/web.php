@@ -56,6 +56,7 @@ Route::middleware(['auth', 'authorize.languagepack'])->group(function () {
     Route::post('languagepack/export/{languagePack}', [ExportController::class, 'store']);    
 
     Route::get('drive/import', [GoogleDriveController::class, 'import'])->name('drive.import');    
+    Route::get('drive/export/{languagePack}', [GoogleDriveController::class, 'export'])->name('drive.export');    
 });
 
 Auth::routes(['register' => false]);

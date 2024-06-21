@@ -160,18 +160,6 @@ class TilesController extends BaseItemController
         session()->flash('success', 'Records updated successfully');
 
         $tilesCollection = Tile::where('languagepackid', $languagePack->id)->with(['file', 'file2', 'file3'])->get();
-        // $tilesCollection = Collection::make($tiles)->map(function ($item) {
-        //     if(isset($item['file'])) {
-        //         $item['filename'] = $item['file']->getClientOriginalName();
-        //     }
-        //     if(isset($item['file2'])) {
-        //         $item['filename2'] = $item['file2']->getClientOriginalName();
-        //     }
-        //     if(isset($item['file3'])) {
-        //         $item['filename3'] = $item['file3']->getClientOriginalName();
-        //     }
-        //     return (object) $item;
-        // });
 
         return view('languagepack.tiles', [
             'completedSteps' => ['lang_info', 'tiles'],
