@@ -4,4 +4,6 @@ Setting	Value
 3. After 12 checked trackers	3
 4. Stage correspondence ratio	0.75
 5. First letter stage correspondence	FALSE
-6. Stage 1-2 max word length	10
+6. Stage 1-2 max word length	19
+7. Has syllable audio	FALSE
+8. Differentiates types of multitype symbols	FALSE

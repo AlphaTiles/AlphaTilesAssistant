@@ -51,6 +51,11 @@ class ExportSheetService
         $this->wordlistSheet($spreadsheetId);
         $this->syllablesSheet($spreadsheetId);
         $this->keyboardSheet($spreadsheetId);
+        $this->resourcesSheet($spreadsheetId);
+        $this->settingsSheet($spreadsheetId);
+        $this->namesSheet($spreadsheetId);
+        $this->gamesSheet($spreadsheetId);
+        $this->colorsSheet($spreadsheetId);
     }
 
     private function notesSheet(string $spreadsheetId): void
@@ -264,6 +269,100 @@ class ExportSheetService
         Log::info('export of keyboard completed');
     }      
 
+    private function resourcesSheet(string $spreadsheetId): void
+    {
+        $sheetName = 'resources';
+        $this->createSheetTab($spreadsheetId, $sheetName, 6);
+        $sheetAndRange = "{$sheetName}!A1:C1"; 
+
+        $values = [
+            ['Name', 'Link', 'Image'],
+        ];
+
+        $this->addValuesToSheet($spreadsheetId, $sheetAndRange, $values);
+        Log::info('export of resources completed');
+    }       
+
+    private function settingsSheet(string $spreadsheetId): void
+    {
+        $sheetName = 'settings';
+        $this->createSheetTab($spreadsheetId, $sheetName, 7);
+        $sheetAndRange = "{$sheetName}!A1:B20"; 
+
+        $filePath = resource_path('settings/aa_settings.txt');
+        $fileContents = file_get_contents($filePath);
+        $lines = explode(PHP_EOL, $fileContents);
+
+        $values = [];
+        $i=0;
+        foreach ($lines as $line) {
+            $parts = explode("\t", $line);
+            $values[$i] = $parts;
+            $i++;
+        }
+
+        $this->addValuesToSheet($spreadsheetId, $sheetAndRange, $values);
+        Log::info('export of settings completed');
+    }      
+
+    private function namesSheet(string $spreadsheetId): void
+    {
+        $sheetName = 'names';
+        $this->createSheetTab($spreadsheetId, $sheetName, 8);
+        $sheetAndRange = "{$sheetName}!A1:B1"; 
+
+        $values = [
+            ['Entry', 'Name'],
+        ];
+
+        $this->addValuesToSheet($spreadsheetId, $sheetAndRange, $values);
+        Log::info('export of names completed');
+    }  
+
+    private function gamesSheet(string $spreadsheetId): void
+    {
+        $sheetName = 'games';
+        $this->createSheetTab($spreadsheetId, $sheetName, 9);
+        $sheetAndRange = "{$sheetName}!A1:H200"; 
+
+        $filePath = resource_path('settings/aa_games.txt');
+        $fileContents = file_get_contents($filePath);
+        $lines = explode(PHP_EOL, $fileContents);
+
+        $values = [];
+        $i=0;
+        foreach ($lines as $line) {
+            $parts = explode("\t", $line);
+            $values[$i] = $parts;
+            $i++;
+        }
+
+        $this->addValuesToSheet($spreadsheetId, $sheetAndRange, $values);
+        Log::info('export of games completed');
+    }   
+
+    private function colorsSheet(string $spreadsheetId): void
+    {
+        $sheetName = 'colors';
+        $this->createSheetTab($spreadsheetId, $sheetName, 10);
+        $sheetAndRange = "{$sheetName}!A1:C20"; 
+
+        $filePath = resource_path('settings/aa_colors.txt');
+        $fileContents = file_get_contents($filePath);
+        $lines = explode(PHP_EOL, $fileContents);
+
+        $values = [];
+        $i=0;
+        foreach ($lines as $line) {
+            $parts = explode("\t", $line);
+            $values[$i] = $parts;
+            $i++;
+        }
+
+        $this->addValuesToSheet($spreadsheetId, $sheetAndRange, $values);
+        Log::info('export of colors completed');
+    }       
+
     private function createSheetTab(string $spreadsheetId, string $sheetName, int $index): void
     {
         if($this->sheetExists($spreadsheetId, $sheetName)) {
@@ -351,6 +450,10 @@ class ExportSheetService
 
     private function saveFileToDrive($file, string $folderId, string $fileType, string $fileName)
     {
+        if($file) {
+            return;
+        }
+
         $relativeFilePath = str_replace('/storage/public', '', $file->file_path);
         $relativeFilePath = str_replace('/storage', '', $relativeFilePath);
         $filePath = Storage::disk('public')->path($relativeFilePath);
