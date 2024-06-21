@@ -450,7 +450,7 @@ class ExportSheetService
 
     private function saveFileToDrive($file, string $folderId, string $fileType, string $fileName)
     {
-        if($file) {
+        if(!$file) {
             return;
         }
 
