@@ -38,7 +38,7 @@ WORKDIR /workspace
 
 # Ensure supervisord can read the configuration file
 RUN mkdir -p /var/log/supervisor && \
-    touch /etc/supervisor/conf.d/supervisord.log && \
+    touch /var/log/supervisor/supervisord.log && \
     chmod 644 /etc/supervisor/conf.d/supervisor.conf
 
 # Start supervisord
