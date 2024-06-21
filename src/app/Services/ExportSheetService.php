@@ -108,16 +108,24 @@ class ExportSheetService
             ->get();
         $i = 1;        
         foreach($tiles as $tile) {
-            $this->saveFileToDrive($tile->file, $folderId, 'tile audio', $tile->file->name);
-
-            $file1 = $tile->file ? basename($tile->file->name) : 'X';     
-            $file1 = str_replace('.mp3', '', $file1);       
-            $type1 = !empty($tile->type) ? $tile->type : 'none';
-            $file2 = $tile->file2 ? basename($tile->file2->name) : 'X';            
-            $file2 = str_replace('.mp3', '', $file2);       
-            $type2 = !empty($tile->type2) ? $tile->type2 : 'none';
-            $file3 = $tile->file3 ? basename($tile->file3->name) : 'X';            
-            $file3 = str_replace('.mp3', '', $file3);       
+            $file1 = $tile->file ? basename($tile->file->name) : 'X';   
+            if($tile->file) {
+                $this->saveFileToDrive($tile->file, $folderId, 'tile audio', $file1);
+            }            
+            $file2 = $tile->file2 ? basename($tile->file2->name) : 'X';          
+            if($tile->file2) {
+                $this->saveFileToDrive($tile->file2, $folderId, 'tile audio 2', $file2);  
+            }   
+            $file3 = $tile->file3 ? basename($tile->file3->name) : 'X';                                 
+            if($tile->file3) {
+                $this->saveFileToDrive($tile->file3, $folderId, 'tile audio 3', $file3);  
+            }
+              
+            $fileName1 = str_replace('.mp3', '', $file1);       
+            $type1 = !empty($tile->type) ? $tile->type : 'none';            
+            $fileName2 = str_replace('.mp3', '', $file2);       
+            $type2 = !empty($tile->type2) ? $tile->type2 : 'none';            
+            $fileName3 = str_replace('.mp3', '', $file3);       
             $type3 = !empty($tile->type3) ? $tile->type3 : 'none';
             $stage1 = $tile->stage ?? '-';
             $stage2 = $tile->stage2 ?? '-';
@@ -129,12 +137,12 @@ class ExportSheetService
                 $tile->or_2,
                 $tile->or_3,
                 $type1,
-                $file1,
+                $fileName1,
                 $tile->upper,
                 $type2,
-                $file2,
+                $fileName2,
                 $type3,
-                $file3,
+                $fileName3,
                 "0", 
                 "0", 
                 "0", 
