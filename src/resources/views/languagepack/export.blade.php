@@ -7,9 +7,11 @@ use App\Enums\FieldTypeEnum;
 
 @include('layouts/langpacksteps')    
 
-<div class="prose">
+<div class="container">
 
-    <h1>Export Language Pack</h1>
+	<div class="prose">
+		<h1>Export Language Pack</h1>
+	</div>
 
 	@if ($errors->any())
 	<div class="alert alert-error">
@@ -28,11 +30,26 @@ use App\Enums\FieldTypeEnum;
 	<form method="post" action="/languagepack/export/{{ $languagePack->id }}">
 		@csrf
 
-		<div class="mt-3 w-9/12">		
+		<div class="mt-5 mb-3 w-9/12">		
 			<input type="hidden" name="id" value="{{ $languagePack->id }}" />
-			<input type="submit" name="btnExport" value="Download language pack" class="btn-sm btn-primary" />
-		</div>
+			<input type="submit" name="btnExport" value="Download language pack" class="btn-sm btn-primary cursor-pointer" />
+		</div>		
 	</form>
+
+	<hr>
+
+	<div class="mt-3 w-9/12 flex">
+		<div>
+			<a href="/drive/export/{{ $languagePack->id }}" class="btn btn-primary w-40 mt-1">Save data on Google Drive</a>
+		</div>
+		<div class="ml-5">
+			This will export all the media files into folders on Google Drive and the data into a Google sheet.
+			You will find the language pack inside a folder named "alphatilesassistant". 
+			Please note, that the export currently won't work with an SIL Google account as it doesn't give access to third party apps. 
+			Therefore you will need to use a private Google account.
+		</div>
+	</div>
+
 	<div class="mt-4">
 		<a href="/dashboard">Back to Dashboard</a>
 	</div>
