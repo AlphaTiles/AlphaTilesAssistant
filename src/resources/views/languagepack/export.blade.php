@@ -45,8 +45,6 @@ use App\Enums\FieldTypeEnum;
 		<div class="ml-5">
 			This will export all the media files into folders on Google Drive and the data into a Google sheet.
 			You will find the language pack inside a folder named "alphatilesassistant". 
-			Please note, that the export currently won't work with an SIL Google account as it doesn't give access to third party apps. 
-			Therefore you will need to use a private Google account.
 		</div>
 	</div>
 

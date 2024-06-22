@@ -26,14 +26,16 @@ class ImportSheetService
     protected string $spreadSheetId;
     protected string $sheetType;
     protected $spreadsheet;
+    protected string $folderId;
 
-    public function __construct(LanguagePack $languagePack, string $googleToken)
+    public function __construct(LanguagePack $languagePack, string $googleToken, string $folderId)
     {
         $client = new Client();
         $client->setAccessToken($googleToken);
         $this->languagePack = $languagePack;    
         $this->googleService = new GoogleService($googleToken);      
         $this->googleSheet = new Sheets($client);    
+        $this->folderId = $folderId;
     }
 
     public function readAndSaveData(string $spreadSheetId, string $sheetType)
@@ -146,7 +148,7 @@ class ImportSheetService
         }
 
         $file = $fileName . '.mp3';
-        $driveFileId = $this->googleService->getFileIdByFileName($file, 'audio_tiles_optional');
+        $driveFileId = $this->googleService->getFileIdByFileName($file, 'audio_tiles_optional', $this->folderId);
 
         if(empty($driveFileId)) {
             return;
@@ -198,7 +200,7 @@ class ImportSheetService
         $folder = $fileTypeEnum === FileTypeEnum::AUDIO ? 'audio_words' : 'images_words';                
         $file = $fileName . '.' . $extension;
         Log::error("get {$file}");
-        $driveFileId = $this->googleService->getFileIdByFileName($file, $folder);
+        $driveFileId = $this->googleService->getFileIdByFileName($file, $folder, $this->folderId);
         Log::error("driveFileId: {$driveFileId}");
         
         if(empty($driveFileId)) {

@@ -51,10 +51,10 @@ class GoogleService
         return $results->getFiles();
     }
 
-    function getFileIdByFileName(string $fileName, string $parentPath)
+    function getFileIdByFileName(string $fileName, string $folderPath, string $parentFolderId)
     {
         $optParams = [
-            'q' => "name='$parentPath' and mimeType='application/vnd.google-apps.folder'",
+            'q' => "'$parentFolderId' in parents and name='$folderPath' and mimeType='application/vnd.google-apps.folder'",
             'fields' => 'files(id)',
         ];
         $results = $this->driveService->files->listFiles($optParams);
