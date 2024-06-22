@@ -67,7 +67,7 @@ class ImportDriveFolderJob implements ShouldQueue
             }                       
         }
 
-        $sheetService = new ImportSheetService($languagePack, $this->token);
+        $sheetService = new ImportSheetService($languagePack, $this->token, $this->folderId);
         $sheetService->readAndSaveData($spreadsheetId, $sheetType);
     }
 
