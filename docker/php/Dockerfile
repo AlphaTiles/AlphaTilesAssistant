@@ -36,6 +36,8 @@ COPY ./docker/php/supervisor.conf /etc/supervisor/conf.d/supervisor.conf
 # Set the working directory
 WORKDIR /workspace
 
+RUN chown -R www-data:www-data /workspace
+
 # Ensure supervisord can read the configuration file
 RUN mkdir -p /var/log/supervisor && \
     touch /var/log/supervisor/supervisord.log && \
