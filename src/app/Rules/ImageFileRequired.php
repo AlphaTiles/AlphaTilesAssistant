@@ -45,7 +45,7 @@ class ImageFileRequired implements Rule
                 return false;
             }
 
-            $fileSizeInKB = $value->getSize() / 256;
+            $fileSizeInKB = $value->getSize() / 1024;
             //if file is too big to be uploaded, it will return as size 0
             if($fileSizeInKB === 0 || $fileSizeInKB > 256) {
                 return false;
@@ -74,7 +74,7 @@ class ImageFileRequired implements Rule
         }
 
         if(!is_array($this->file)) {
-            $fileSizeInKB = $this->file->getSize() / 256;
+            $fileSizeInKB = $this->file->getSize() / 1024;
             if($this->file->getClientOriginalExtension() !== 'png') {
                 $errorMessage = "The image file for {$word} must be of the png type.";
             } elseif($fileSizeInKB === 0 || $fileSizeInKB > 256) {
