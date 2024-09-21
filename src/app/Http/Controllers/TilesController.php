@@ -41,12 +41,13 @@ class TilesController extends BaseItemController
     {        
         session()->forget('success');
         
-        $tiles = Tile::where('languagepackid', $languagePack->id)->get();
+        $tiles = Tile::where('languagepackid', $languagePack->id)->paginate(config('pagination.default'));
 
         return view('languagepack.tiles', [
             'completedSteps' => ['lang_info', 'tiles'],
             'languagePack' => $languagePack,
-            'tiles' => $tiles    
+            'tiles' => $tiles,
+            'pagination' => $tiles->links()
         ]);
     }
 
@@ -66,7 +67,9 @@ class TilesController extends BaseItemController
 
         Tile::insert($insert);
         
-        return redirect("languagepack/tiles/{$languagePack->id}");    
+        $totalPages = ceil(Tile::where('languagepackid', $languagePack->id)->count() / 10); // Assuming 10 items per page
+
+        return redirect("languagepack/tiles/{$languagePack->id}?page={$totalPages}");    
     }        
 
     public function update(LanguagePack $languagePack, Request $request)
@@ -159,12 +162,13 @@ class TilesController extends BaseItemController
         
         session()->flash('success', 'Records updated successfully');
 
-        $tilesCollection = Tile::where('languagepackid', $languagePack->id)->with(['file', 'file2', 'file3'])->get();
+        $tilesCollection = Tile::where('languagepackid', $languagePack->id)->with(['file', 'file2', 'file3'])->paginate(config('pagination.default'));
 
         return view('languagepack.tiles', [
             'completedSteps' => ['lang_info', 'tiles'],
             'languagePack' => $languagePack,
-            'tiles' => $tilesCollection
+            'tiles' => $tilesCollection,
+            'pagination' => $tilesCollection->links()
         ]);
 
     }

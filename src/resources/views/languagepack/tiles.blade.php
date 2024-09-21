@@ -176,6 +176,10 @@ use Illuminate\Support\Facades\Log;
 			</table>                    
 		</div>
 
+		<div>
+			{!! $pagination !!}
+		</div>
+
 		<p>
 			<input type="submit" name="btnHiddenSave" id="saveButton" value="Save" class="hidden" />
 			<input type="submit" name="btnSave" value="Save" class="btn-sm btn-primary ml-1" onClick='handleSaveReset();' />
