@@ -171,7 +171,7 @@ $path = "/storage/languagepacks/" . $languagePack->id . "/res/raw/";
 			</table>                    
 		</div>
 
-		<div class="w-3/4">
+		<div>
 			{!! $pagination !!}
 		</div>
 		
