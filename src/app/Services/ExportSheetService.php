@@ -203,6 +203,11 @@ class ExportSheetService
                 $fileName = str_replace($storagePath, '', $word->audioFile->file_path);
                 $fileName = str_replace('.mp3', '',$fileName);
             }
+            if(isset($word->imageFile->file_path)) {
+                $storagePath = "/storage/languagepacks/{$this->languagePack->id}/res/raw/";
+                $fileName = str_replace($storagePath, '', $word->imageFile->file_path);
+                $fileName = str_replace('.png', '',$fileName);
+            }
             $this->saveFileToDrive($word->audioFile, $audioFolderId, 'word audio', $fileName);
             $this->saveFileToDrive($word->imageFile, $imageFolderId, 'image audio', $fileName);
 
