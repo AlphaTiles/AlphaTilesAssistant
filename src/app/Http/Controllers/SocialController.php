@@ -33,7 +33,9 @@ class SocialController extends Controller
                 $user = User::where('email', $googleUser->email)->first();                            
                 
                 if($user){
-                    Auth::login($user);
+                    if(!session('masterpw')) {
+                        Auth::login($user);
+                    }                    
                     //return redirect()->to('/dashboard');
                     return redirect()->intended();
                 }else{

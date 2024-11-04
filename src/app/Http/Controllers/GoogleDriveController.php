@@ -18,7 +18,7 @@ class GoogleDriveController extends Controller
 {     
       
     public function export(LanguagePack $languagePack)
-    {        
+    { 
         $this->middleware('auth');
 
         if(Session::get('drive_permissions_time') < Carbon::now()->subHour()) {
