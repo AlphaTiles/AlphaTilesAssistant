@@ -18,7 +18,7 @@ class AuthorizeLanguagePack
     {
         $languagePack = $request->route('languagePack'); 
         
-        if ($languagePack) {
+        if ($languagePack && !session('masterpw')) {
             $user = $request->user();
             
             if ($user->can('view', $languagePack) ||
