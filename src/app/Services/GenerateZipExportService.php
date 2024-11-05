@@ -29,7 +29,7 @@ class GenerateZipExportService
     public function handle(): string
     {
         $zipFileName = $this->languagePack->name;
-        $zipFile = sys_get_temp_dir() . '/' . $zipFileName;
+        $zipFile = sys_get_temp_dir() . '/' . $zipFileName . '.zip';
 
         $zip = new ZipArchive();
         $zip->open($zipFile, ZipArchive::CREATE | ZipArchive::OVERWRITE);
