@@ -49,7 +49,7 @@ class ExportController extends Controller
         $errorBag = new MessageBag(['audiofile_id' => $errors]);
 
         return view('languagepack.export', [
-            'completedSteps' => ['lang_info', 'tiles', 'wordlist', 'keyboard', 'export'],
+            'completedSteps' => ['lang_info', 'tiles', 'wordlist', 'keyboard', 'game_settings', 'export'],
             'languagePack' => $languagePack,
             'errors' => $errorBag
         ]);

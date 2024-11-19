@@ -20,7 +20,6 @@ class AuthorizeLanguagePack
         
         if ($languagePack && !session('masterpw')) {
             $user = $request->user();
-            
             if ($user->can('view', $languagePack) ||
                 $user->can('update', $languagePack) ||
                 $user->can('delete', $languagePack)) {
