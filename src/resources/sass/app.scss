@@ -41,3 +41,8 @@ select, textarea {
 .inputError {
     border: red solid 1px !important;
 }
+
+div:where(.swal2-container) div:where(.swal2-popup) {
+    width: auto !important;
+    max-width: 80% !important;
+}

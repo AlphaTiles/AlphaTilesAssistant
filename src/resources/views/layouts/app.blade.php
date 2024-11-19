@@ -57,6 +57,7 @@
         Swal.fire({
                     title: title,
                     html: htmlText,
+                    showCloseButton: true,
                     confirmButtonText: 'OK'
                 });
     }

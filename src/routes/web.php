@@ -8,6 +8,7 @@ use App\Http\Controllers\SocialController;
 use App\Http\Controllers\KeyboardController;
 use App\Http\Controllers\WordlistController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GameSettingsController;
 use App\Http\Controllers\GoogleDriveController;
 use App\Http\Controllers\LanguageInfoController;
 
@@ -51,6 +52,9 @@ Route::middleware(['auth', 'authorize.languagepack'])->group(function () {
     Route::get('languagepack/keyboard/{languagePack}', [KeyboardController::class, 'edit']);
     Route::patch('languagepack/keyboard/{languagePack}', [KeyboardController::class, 'update']);
     Route::delete('languagepack/keyboard/{languagePack}', [KeyboardController::class, 'delete']);
+
+    Route::patch('languagepack/game_settings/{languagePack}', [GameSettingsController::class, 'update']);
+    Route::get('languagepack/game_settings/{languagePack}', [GameSettingsController::class, 'edit']);
 
     Route::get('languagepack/export/{languagePack}', [ExportController::class, 'show']);    
     Route::post('languagepack/export/{languagePack}', [ExportController::class, 'store']);    

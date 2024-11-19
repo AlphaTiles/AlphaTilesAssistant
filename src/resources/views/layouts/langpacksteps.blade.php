@@ -19,6 +19,11 @@ if(isset($languagePack) && $languagePack->keys->count() > 0 && end($completedSte
   $keyboard = "<a href=\"#\" onClick='autoSavePage(\"/languagepack/keyboard/$languagePack->id\");'>Keyboard</a>";
 }
 
+$gameSettings = 'Settings';
+if(isset($languagePack) && $languagePack->keys->count() > 0 && end($completedSteps) !== 'game_settings') {
+  $gameSettings = "<a href=\"#\" onClick='autoSavePage(\"/languagepack/game_settings/$languagePack->id\");'>Settings</a>";
+}
+
 $export = 'Export';
 if(isset($languagePack) && $languagePack->keys->count() > 0 && end($completedSteps) !== 'export') {
   $export = "<a href=\"#\" onClick='autoSavePage(\"/languagepack/export/$languagePack->id\");'>Export</a>";
@@ -29,6 +34,7 @@ if(isset($languagePack) && $languagePack->keys->count() > 0 && end($completedSte
   <li class="step  {{ in_array('tiles', $completedSteps) ? 'step-primary' : '' }}">{!! $tiles !!}</li>
   <li class="step {{ in_array('wordlist', $completedSteps) ? 'step-primary' : '' }}">{!! $wordlist !!}</li>
   <li class="step {{ in_array('keyboard', $completedSteps) ? 'step-primary' : '' }}">{!! $keyboard !!}</li>
+  <li class="step {{ in_array('game_settings', $completedSteps) ? 'step-primary' : '' }}">{!! $gameSettings !!}</li>
   <li class="step {{ in_array('export', $completedSteps) ? 'step-primary' : '' }}">{!! $export !!}</li>
 </ul>
 
