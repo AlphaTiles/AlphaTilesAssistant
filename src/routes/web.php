@@ -53,7 +53,7 @@ Route::middleware(['auth', 'authorize.languagepack'])->group(function () {
     Route::patch('languagepack/keyboard/{languagePack}', [KeyboardController::class, 'update']);
     Route::delete('languagepack/keyboard/{languagePack}', [KeyboardController::class, 'delete']);
 
-    Route::patch('languagepack/game_settings/{languagePack}', [GameSettingsController::class, 'update']);
+    Route::post('languagepack/game_settings/{languagePack}', [GameSettingsController::class, 'update']);
     Route::get('languagepack/game_settings/{languagePack}', [GameSettingsController::class, 'edit']);
 
     Route::get('languagepack/export/{languagePack}', [ExportController::class, 'show']);    
