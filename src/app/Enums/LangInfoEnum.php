@@ -49,6 +49,20 @@ enum LangInfoEnum: string
         };
     }
 
+    public function helpImage(): ?string
+    {
+        return match($this) {
+            default => null
+        };
+    }
+
+    public function helpText(): ?string
+    {
+        return match($this) {
+            default => null
+        };
+    }
+
     public function exportKey(): string
     {
         return match ($this) {
@@ -92,4 +106,12 @@ enum LangInfoEnum: string
             default                 => null
         };
     }
+
+    public function max(): ?int
+    {
+        return match($this) {
+            default                 => null
+        };
+    }    
+
 }
