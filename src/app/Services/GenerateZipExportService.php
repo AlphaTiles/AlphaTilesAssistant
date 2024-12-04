@@ -1,6 +1,8 @@
 <?php
+
 namespace App\Services;
 
+use App\Enums\FieldTypeEnum;
 use ZipArchive;
 use App\Models\Tile;
 use App\Models\Word;
@@ -8,6 +10,7 @@ use App\Enums\LangInfoEnum;
 use App\Models\Key;
 use App\Models\LanguagePack;
 use App\Models\LanguageSetting;
+use App\Repositories\GameSettingsRepository;
 use Illuminate\Support\Facades\Log;
 use App\Repositories\LangInfoRepository;
 
@@ -15,7 +18,7 @@ class GenerateZipExportService
 {
     protected string $tempDir;
     protected LanguagePack $languagePack;
-    const SEPARATOR = "\t";                               
+    public const SEPARATOR = "\t";
 
     public function __construct(LanguagePack $languagePack)
     {
@@ -23,7 +26,7 @@ class GenerateZipExportService
         $this->tempDir = sys_get_temp_dir() . '/temp_files';
         if (!file_exists($this->tempDir)) {
             mkdir($this->tempDir);
-        }        
+        }
     }
 
     public function handle(): string
@@ -48,15 +51,20 @@ class GenerateZipExportService
 
         $keyboardFileName = 'aa_keyboard.txt';
         $keyboardFile = $this->generateKeyboardFile($keyboardFileName);
-        $zip->addFile($keyboardFile, "{$zipFileName}/res/raw/{$keyboardFileName}");        
+        $zip->addFile($keyboardFile, "{$zipFileName}/res/raw/{$keyboardFileName}");
 
-        $fontPath = resource_path('font'); 
+        $settingsFileName = 'aa_settings.txt';
+        $settingsFile = $this->generateSettingsFile($settingsFileName, $zip, $zipFileName);
+        $zip->addFile($settingsFile, "{$zipFileName}/res/raw/{$settingsFileName}");
+
+
+        $fontPath = resource_path('font');
         $this->addFolderToZip($fontPath, $zip, "/{$zipFileName}/res/font/");
 
-        $avatarPath = resource_path('images/avatars'); 
+        $avatarPath = resource_path('images/avatars');
         $this->addFolderToZip($avatarPath, $zip, "/{$zipFileName}/res/drawable-xxxhdpi/");
 
-        $settingsPath = resource_path('settings'); 
+        $settingsPath = resource_path('settings');
         $this->addFolderToZip($settingsPath, $zip, "/{$zipFileName}/res/raw/");
 
         return $zipFile;
@@ -64,18 +72,32 @@ class GenerateZipExportService
 
     public function generateLanginfoFile(string $fileName, ZipArchive $zip, string $zipFileName): string
     {
-        $fileContent = "Item\tAnswer\n";
+        return $this->returnSettingValues(['Item', 'Answer'], $fileName, LangInfoRepository::class);
+    }
 
-        $settings = app(LangInfoRepository::class)->getSettings(false, $this->languagePack);
-        foreach($settings as $setting) {        
-            $value = !empty($setting['value']) ? $setting['value'] : 'none';
+    public function generateSettingsFile(string $fileName, ZipArchive $zip, string $zipFileName): string
+    {
+        return $this->returnSettingValues(['Setting', 'Value'], $fileName, GameSettingsRepository::class);
+    }
+
+    protected function returnSettingValues(array $headerValues, string $fileName, string $repositoryClass): string
+    {
+        $fileContent = "{$headerValues[0]}\t{$headerValues[1]}\n";
+        $settings = app($repositoryClass)->getSettings(false, $this->languagePack);
+        foreach ($settings as $setting) {
+            if ($setting['type'] === FieldTypeEnum::CHECKBOX) {
+                $value = $setting['value'] ? 'TRUE' : 'FALSE';
+            } else {
+                $value = !empty($setting['value']) ? $setting['value'] : 'none';
+            }
             $fileContent .= $setting['export_key'] . self::SEPARATOR . $value . "\n";
         }
 
         $file = "{$this->tempDir}/{$fileName}";
         file_put_contents($file, $fileContent);
-        
+
         return $file;
+
     }
 
     public function generateTilesFile(string $tilesFileName, ZipArchive $zip, string $zipFileName): string
@@ -89,15 +111,15 @@ class GenerateZipExportService
                         "FirstAppearsInStage...\tFirstAppearsInStage...(Type2)\t" .
                         "FirstAppearsInStage...(Type3)\n";
 
-        foreach ($tiles as $tile) {            
-            $file1 = $tile->file ? basename($tile->file->file_path) : 'X';     
-            $file1 = str_replace('.mp3', '', $file1);       
+        foreach ($tiles as $tile) {
+            $file1 = $tile->file ? basename($tile->file->file_path) : 'X';
+            $file1 = str_replace('.mp3', '', $file1);
             $type1 = !empty($tile->type) ? $tile->type : 'none';
-            $file2 = $tile->file2 ? basename($tile->file2->file_path) : 'X';            
-            $file2 = str_replace('.mp3', '', $file2);       
+            $file2 = $tile->file2 ? basename($tile->file2->file_path) : 'X';
+            $file2 = str_replace('.mp3', '', $file2);
             $type2 = !empty($tile->type2) ? $tile->type2 : 'none';
-            $file3 = $tile->file3 ? basename($tile->file3->file_path) : 'X';            
-            $file3 = str_replace('.mp3', '', $file3);       
+            $file3 = $tile->file3 ? basename($tile->file3->file_path) : 'X';
+            $file3 = str_replace('.mp3', '', $file3);
             $type3 = !empty($tile->type3) ? $tile->type3 : 'none';
             $stage1 = $tile->stage ?? '-';
             $stage2 = $tile->stage2 ?? '-';
@@ -138,15 +160,15 @@ class GenerateZipExportService
         $localLangName = LanguageSetting::where('languagepackid', $this->languagePack->id)
             ->where('name', LangInfoEnum::LANG_NAME_LOCAL->value)->first()->value;
         $fileContent = "FileName\t$localLangName\tDuration\tMixedTypes\tAdjustment\t" .
-                        "FirstAppearsInStage(IFOverrulingDefault)...\n";        
+                        "FirstAppearsInStage(IFOverrulingDefault)...\n";
 
-        foreach ($words as $word) {            
-            $mixedTypes = !empty($word->mixed_types) ? $word->mixed_types : '-';  
+        foreach ($words as $word) {
+            $mixedTypes = !empty($word->mixed_types) ? $word->mixed_types : '-';
             $storagePath = "/storage/languagepacks/{$this->languagePack->id}/res/raw/";
             $fileName = '';
-            if(isset($word->audioFile->file_path)) {
+            if (isset($word->audioFile->file_path)) {
                 $fileName = str_replace($storagePath, '', $word->audioFile->file_path);
-                $fileName = str_replace('.mp3', '',$fileName);
+                $fileName = str_replace('.mp3', '', $fileName);
             }
             $stage = $word->stage ?? '-';
             $fileContent .= "{$fileName}" . self::SEPARATOR .
@@ -172,7 +194,7 @@ class GenerateZipExportService
             ->get();
         $fileContent = "keys\ttheme_color\n";
 
-        foreach ($keys as $keyItem) {            
+        foreach ($keys as $keyItem) {
             $fileContent .= "{$keyItem->value}" . self::SEPARATOR . "{$keyItem->color}\n";
         }
 
@@ -186,28 +208,28 @@ class GenerateZipExportService
     {
         $fileRelation = $nr > 1 ? "file{$nr}" : 'file';
 
-        if($tile->{$fileRelation}) {
+        if ($tile->{$fileRelation}) {
             $file = basename($tile->{$fileRelation}->file_path);
             $resourceFile = "app/public/languagepacks/{$this->languagePack->id}/res/raw/{$file}";
             $outputFolder = "{$zipFileName}/res/raw/{$file}";
-            $zip->addFile(storage_path($resourceFile), $outputFolder);        
+            $zip->addFile(storage_path($resourceFile), $outputFolder);
         }
     }
 
     private function saveWordlistFile(Word $word, ZipArchive $zip, string $zipFileName): void
     {
-        if($word->audioFile) {
+        if ($word->audioFile) {
             $file = basename($word->audioFile->file_path);
             $resourceFile = "app/public/languagepacks/{$this->languagePack->id}/res/raw/{$file}";
             $outputFolder = "{$zipFileName}/res/raw/{$file}";
-            $zip->addFile(storage_path($resourceFile), $outputFolder);        
+            $zip->addFile(storage_path($resourceFile), $outputFolder);
         }
 
-        if($word->imageFile) {
+        if ($word->imageFile) {
             $file = basename($word->imageFile->file_path);
             $resourceFile = "app/public/languagepacks/{$this->languagePack->id}/res/raw/{$file}";
             $outputFolder = "{$zipFileName}/res/drawable-xxxhdpi/{$file}";
-            $zip->addFile(storage_path($resourceFile), $outputFolder);        
+            $zip->addFile(storage_path($resourceFile), $outputFolder);
         }
     }
 
@@ -224,5 +246,5 @@ class GenerateZipExportService
                 $zip->addFile($filePath, $outputFolder . basename($file));
             }
         }
-    }    
+    }
 }

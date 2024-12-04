@@ -10,6 +10,7 @@ use App\Models\Word;
 use Google\Service\Drive;
 use Google\Service\Sheets;
 use App\Enums\LangInfoEnum;
+use App\Enums\FieldTypeEnum;
 use App\Models\LanguagePack;
 use App\Models\LanguageSetting;
 use Google\Service\Drive\DriveFile;
@@ -17,6 +18,7 @@ use Illuminate\Support\Facades\Log;
 use Google\Service\Sheets\ValueRange;
 use Illuminate\Support\Facades\Storage;
 use App\Repositories\LangInfoRepository;
+use App\Repositories\GameSettingsRepository;
 use Google\Service\Sheets\BatchUpdateSpreadsheetRequest;
 
 class ExportSheetService
@@ -294,15 +296,18 @@ class ExportSheetService
         $this->createSheetTab($spreadsheetId, $sheetName, 7);
         $sheetAndRange = "{$sheetName}!A1:B20"; 
 
-        $filePath = resource_path('settings/aa_settings.txt');
-        $fileContents = file_get_contents($filePath);
-        $lines = explode(PHP_EOL, $fileContents);
+        $values = [
+            ["Setting", "Value"],
+        ];
 
-        $values = [];
-        $i=0;
-        foreach ($lines as $line) {
-            $parts = explode("\t", $line);
-            $values[$i] = $parts;
+        $items = app(GameSettingsRepository::class)->getSettings(false, $this->languagePack);
+        $i = 1;
+        foreach($items as $item) {
+            $value = $item['value'];
+            if ($item['type'] === FieldTypeEnum::CHECKBOX) {
+                $value = $item['value'] ? 'TRUE' : 'FALSE';
+            } 
+            $values[$i] = [$item['export_key'], $value];
             $i++;
         }
 
