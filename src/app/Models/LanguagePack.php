@@ -66,4 +66,9 @@ class LanguagePack extends Model
     {
         return $this->hasMany(Key::class, 'languagepackid');
     }
+
+    public function syllables(): HasMany
+    {
+        return $this->hasMany(Syllable::class, 'languagepackid');
+    }    
 }
