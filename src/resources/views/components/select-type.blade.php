@@ -4,7 +4,7 @@ use App\Enums\TileTypeEnum;
 
 <?php 
 $typeField = $nr > 1 ? 'type' . $nr : 'type';
-$errorClass = isset($errorKeys) && in_array('tiles{{ $nr }}.' . $key . '.type', $errorKeys) ? 'inputError' : ''; 
+$errorClass = isset($errorKeys) && in_array('items{{ $nr }}.' . $key . '.type', $errorKeys) ? 'inputError' : ''; 
 $hideTypeSelectionClass = '';
 $hideAddLinkClass = $nr === 3 && empty($tile->type2) ? 'hidden' : '';
 ?>
@@ -14,11 +14,11 @@ $hideAddLinkClass = $nr === 3 && empty($tile->type2) ? 'hidden' : '';
 @endif
 <div id="show_type{{ $key }}_{{ $nr }}" class="{{$hideTypeSelectionClass}} h-7">
     {{ $nr }}:
-    <select name="tiles[{{ $key }}][{{ $typeField }}]" class="{{ $errorClass }}">
+    <select name="items[{{ $key }}][{{ $typeField }}]" class="{{ $errorClass }}">
         <option value=""></option>
     @foreach(TileTypeEnum::cases() as $optionKey => $typeEnum)
         <?php 
-        $typeValue = old('tiles{{ $nr }}.' . $key . '.type') ?? $tile->{$typeField};
+        $typeValue = old('items{{ $nr }}.' . $key . '.type') ?? $tile->{$typeField};
         $selected = $typeValue === $typeEnum->value ? 'selected' : ''; 
         ?>								
         <option value="{{ $typeEnum->value }}" {{ $selected }}>{{ $typeEnum->label() }}</option>

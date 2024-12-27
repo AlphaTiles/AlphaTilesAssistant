@@ -14,7 +14,8 @@ class SelectFile extends Component
     public function __construct(
         public int $nr,        
         public string $key,
-        public object $tile,
+        public string $prefix,
+        public object $item,
         public ?array $errorKeys
     ) {}
     

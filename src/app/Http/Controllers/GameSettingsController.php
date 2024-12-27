@@ -36,7 +36,7 @@ class GameSettingsController extends Controller
 
         return view('languagepack.game_settings', [
             'languagePack' => $languagePack,
-            'completedSteps' => ['lang_info', 'tiles', 'wordlist', 'keyboard', 'game_settings'],
+            'completedSteps' => ['lang_info', 'tiles', 'wordlist', 'keyboard', 'syllables', 'game_settings'],
             'settings' => $this->gameSettingsRepository->getSettings($create, $languagePack),
             'tiles' => ''
         ]);

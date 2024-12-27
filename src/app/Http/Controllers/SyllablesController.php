@@ -7,6 +7,8 @@ use App\Models\LanguagePack;
 use Illuminate\Http\Request;
 use App\Rules\CustomRequired;
 use Illuminate\Support\Facades\DB;
+use App\Services\Mp3FileUploadService;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 
@@ -85,36 +87,36 @@ class SyllablesController extends BaseItemController
                 'items.*.or_1' => ['required_unless:items.*.delete,1'],
                 'items.*.or_2' => ['required_unless:items.*.delete,1'],
                 'items.*.or_3' => ['required_unless:items.*.delete,1'],
-                // 'items.*.file' => $fileRules,
+                'items.*.file' => $fileRules,
                 'items.*.color' => ['required_unless:keys.*.delete,1'],
             ],
             [                
                 'items.*.or_1' => '',
                 'items.*.or_2' => '',
                 'items.*.or_3' => '',
-                // 'items.*.file' => $customErrorMessage,
+                'items.*.file' => $customErrorMessage,
                 'items.*.color' => '',
             ]
         );
 
         DB::transaction(function() use($syllables, $fileRules, $languagePack) {
-            // $fileUploadService = app(SyllableFileUploadService::class);
+            $fileUploadService = app(Mp3FileUploadService::class);
 
             foreach($syllables as $key => $syllable) {
 
-                // $fileModel1 = $fileUploadService->handle($syllable, 1, $fileRules);
+                $fileModel1 = $fileUploadService->handle($syllable, 'syllable', 1, $fileRules);
                 
                 $updateData = [
                     'or_1' => $syllable['or_1'],
                     'or_2' => $syllable['or_2'],
                     'or_3' => $syllable['or_3'],
-                    // 'file_id' => $syllable['file_id'] ?? null,
+                    'file_id' => $syllable['file_id'] ?? null,
                     'color' => $syllable['color'],
                 ];                
                 
-                // if (isset($fileModel1->id)) {
-                //     $updateData['file_id'] = $fileModel1->id;
-                // }
+                if (isset($fileModel1->id)) {
+                    $updateData['file_id'] = $fileModel1->id;
+                }
 
                 Syllable::where(['id' => $syllable['id']])
                 ->update($updateData);
@@ -137,38 +139,4 @@ class SyllablesController extends BaseItemController
         ]);
 
     }
-     
-    /*
-    public function delete(LanguagePack $languagePack, Request $request) 
-    {        
-        if(isset($request->btnCancel)) {
-            return redirect("languagepack/{$this->route}/{$languagePack->id}");
-        }
-
-        $idsString = $request->deleteIds;
-        $ids = explode(',', $idsString);
-
-        foreach($ids as $id) {
-            for($i = 1; $i <= 3; $i++) {
-                $fileName = "{$this->fileKeyname}_" .  str_pad($id, 3, '0', STR_PAD_LEFT) . "_{$i}.mp3";
-                $file = "languagepacks/{$languagePack->id}/res/raw/{$fileName}";    
-                if (Storage::disk('public')->exists($file)) {    
-                    Storage::disk('public')->delete($file);    
-                }                    
-            }
-            $this->model::where('id', $id)->delete();
-        }
-
-        return redirect("languagepack/{$this->route}/{$languagePack->id}");
-    }  
-
-    public function downloadFile(LanguagePack $languagePack, $filename)
-    {        
-        $filePath = storage_path("app/public/languagepacks/{$languagePack->id}/res/raw/{$filename}");
-
-        if(file_exists($filePath)) {
-            return response()->download($filePath);
-        }            
-    }
-    */
 }

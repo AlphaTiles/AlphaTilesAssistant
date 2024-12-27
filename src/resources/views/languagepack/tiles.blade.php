@@ -22,18 +22,18 @@ use Illuminate\Support\Facades\Log;
 			@endif
 		</div>	
 		<?php 
-		$tilesData = old('tiles') ?? request()['tiles'] ?? $tiles;
-		$deleteValues = old('tiles') ? Arr::pluck(old('tiles') , 'delete') : Arr::pluck($tilesData , 'delete'); 
+		$itemsData = old('items') ?? request()['items'] ?? $items;
+		$deleteValues = old('items') ? Arr::pluck(old('items') , 'delete') : Arr::pluck($itemsData , 'delete'); 
 		?>
-		@if($tiles && in_array(1, $deleteValues))
+		@if($items && in_array(1, $deleteValues))
 		<form method="post" action="/languagepack/tiles/{{ $languagePack->id }}" enctype="multipart/form-data">			
 		@csrf
 		@method('DELETE')
 		<div class="alert mb-3">  				
 			<div class="block p-2">
-				<h3 class="mt-0">Are you sure want to delete the following tiles?</h3>
+				<h3 class="mt-0">Are you sure want to delete the following items?</h3>
 				<?php $tileDeleteIds = []; ?>
-				@foreach ($tiles as $key => $tile)					
+				@foreach ($items as $key => $tile)					
 					@if(isset($deleteValues[$key]))
 						<?php array_push($tileDeleteIds, $tile->id); ?>
 						<div>{{ $tile->value }}</div>
@@ -66,7 +66,7 @@ use Illuminate\Support\Facades\Log;
 	<form method="post" action="/languagepack/tiles/{{ $languagePack->id }}" enctype="multipart/form-data">			
 	@csrf
 	@method('PATCH')
-	@if(count($tiles) > 0)
+	@if(count($items) > 0)
 		<div>
 			<table class="table table-compact w-full">
 				<colgroup>
@@ -83,23 +83,23 @@ use Illuminate\Support\Facades\Log;
 					<th>Tile</th> 
 					<th>Uppercase</th> 
 					<th>Type</th>
-					<th>Distractors <a href="#" onClick="openAlert('Distractors', 'The three columns (Or1, Or2, Or3) contain “distractors”. They are used to provide alternative (incorrect) answers. For example, in the word-builder game to the right, the player has compared the two purple tiles and has correctly selected |r| and not |i|. The game tile |i| appears as an option because in the gametiles tab, the letter “i” is listed to the right of the row for the letter “r”. You should only select distractors from the tiles found in the first column of the gametiles tab.', '/images/help/distractors.png');"><i class="fa-solid fa-circle-info"></i></a></th>                             
+					<th>Distractors <a href="#" onClick="openAlert('Distractors', 'The three columns (Or1, Or2, Or3) contain “distractors”. They are used to provide alternative (incorrect) answers. For example, in the word-builder game to the right, the player has compared the two purple items and has correctly selected |r| and not |i|. The game tile |i| appears as an option because in the gameitems tab, the letter “i” is listed to the right of the row for the letter “r”. You should only select distractors from the items found in the first column of the gameitems tab.', '/images/help/distractors.png');"><i class="fa-solid fa-circle-info"></i></a></th>                             
 					<th>Audio instructions</th>
 					<th>Stage <a href="#" onClick="openAlert('First Stage', 'Define in which stage the tile should first appear');"><i class="fa-solid fa-circle-info"></i></a></th>
-					<th><input type="checkbox" onClick="checkAll(this, 'tiles')" /> Delete</th>
+					<th><input type="checkbox" onClick="checkAll(this, 'items')" /> Delete</th>
 				</tr>
 				</thead> 
 				<tbody>
-				@foreach($tiles as $key => $tile)
+				@foreach($items as $key => $tile)
 				<tr>
 					<td>
-					<input type="hidden" name="tiles[{{ $key }}][languagepackid]" value="{{ $tile->languagepackid }}">
-						<input type="hidden" name="tiles[{{ $key }}][id]" value="{{ $tile->id }}" />
-						<input type="hidden" name="tiles[{{ $key }}][value]" value="{{ $tile->value }}" />
+					<input type="hidden" name="items[{{ $key }}][languagepackid]" value="{{ $tile->languagepackid }}">
+						<input type="hidden" name="items[{{ $key }}][id]" value="{{ $tile->id }}" />
+						<input type="hidden" name="items[{{ $key }}][value]" value="{{ $tile->value }}" />
 						{{ $tile->value }}
 					</td> 
 					<td>								
-						<input type="text" size=2 name="tiles[{{ $key }}][upper]" value="{{ $tile->upper }}" />
+						<input type="text" size=2 name="items[{{ $key }}][upper]" value="{{ $tile->upper }}" />
 					</td> 
 					<td>						
 						<div class="h-7">
@@ -128,19 +128,20 @@ use Illuminate\Support\Facades\Log;
 						</div>
 					</td> 
 					<td>
-						<?php $errorClass = isset($errorKeys) && in_array('tiles.' . $key . '.or_1', $errorKeys) ? 'inputError' : ''; ?>
-						<input type="text" size=2 name="tiles[{{ $key }}][or_1]" value="{{ old('tiles.' . $key . '.or_1') ?? $tile->or_1 }}" class="{{ $errorClass }}" />
-						<?php $errorClass = isset($errorKeys) && in_array('tiles.' . $key . '.or_2', $errorKeys) ? 'inputError' : ''; ?>
-						<input type="text" size=2 name="tiles[{{ $key }}][or_2]" value="{{ old('tiles.' . $key . '.or_2') ?? $tile->or_2 }}" class="{{ $errorClass }}" />
-						<?php $errorClass = isset($errorKeys) && in_array('tiles.' . $key . '.or_3', $errorKeys) ? 'inputError' : ''; ?>
-						<input type="text" size=2 name="tiles[{{ $key }}][or_3]" value="{{ old('tiles.' . $key . '.or_3') ?? $tile->or_3 }}" class="{{ $errorClass }}" />
+						<?php $errorClass = isset($errorKeys) && in_array('items.' . $key . '.or_1', $errorKeys) ? 'inputError' : ''; ?>
+						<input type="text" size=2 name="items[{{ $key }}][or_1]" value="{{ old('items.' . $key . '.or_1') ?? $tile->or_1 }}" class="{{ $errorClass }}" />
+						<?php $errorClass = isset($errorKeys) && in_array('items.' . $key . '.or_2', $errorKeys) ? 'inputError' : ''; ?>
+						<input type="text" size=2 name="items[{{ $key }}][or_2]" value="{{ old('items.' . $key . '.or_2') ?? $tile->or_2 }}" class="{{ $errorClass }}" />
+						<?php $errorClass = isset($errorKeys) && in_array('items.' . $key . '.or_3', $errorKeys) ? 'inputError' : ''; ?>
+						<input type="text" size=2 name="items[{{ $key }}][or_3]" value="{{ old('items.' . $key . '.or_3') ?? $tile->or_3 }}" class="{{ $errorClass }}" />
 					</td> 
 					<td>
 						<div class="custom-file h-7">
 							<x-select-file
 							:nr="1"
 							:key=$key
-							:tile=$tile
+							:prefix="'tile'"
+							:item=$tile
 							:error-keys="$errorKeys ?? null"
 							/>
 						</div>
@@ -148,7 +149,8 @@ use Illuminate\Support\Facades\Log;
 							<x-select-file
 							:nr="2"
 							:key=$key
-							:tile=$tile
+							:prefix="'tile'"
+							:item=$tile
 							:error-keys="$errorKeys ?? null"
 							/>
 						</div>
@@ -156,19 +158,20 @@ use Illuminate\Support\Facades\Log;
 							<x-select-file
 							:nr="3"
 							:key=$key
-							:tile=$tile
+							:prefix="'tile'"
+							:item=$tile
 							:error-keys="$errorKeys ?? null"
 							/>
 						</div>
 					</td> 
 					<td>								
-						<div class="h-7">1: <input type="number" min="0" size=3 name="tiles[{{ $key }}][stage]" value="{{ $tile->stage }}" /></div>
-						<div id="stage{{ $key }}_2" class="{{ empty($tile->type2) ? 'hidden' : '' }}"><div class='h-7'>2: <input type="number" min="0" size=3 name="tiles[{{ $key }}][stage2]" value="{{ $tile->stage2 }}" /></div></div>
-						<div id="stage{{ $key }}_3" class="{{ empty($tile->type3) ? 'hidden' : '' }}"><div class='h-7'>3: <input type="number" min="0" size=3 name="tiles[{{ $key }}][stage3]" value="{{ $tile->stage3 }}" /></div></div>
+						<div class="h-7">1: <input type="number" min="0" size=3 name="items[{{ $key }}][stage]" value="{{ $tile->stage }}" /></div>
+						<div id="stage{{ $key }}_2" class="{{ empty($tile->type2) ? 'hidden' : '' }}"><div class='h-7'>2: <input type="number" min="0" size=3 name="items[{{ $key }}][stage2]" value="{{ $tile->stage2 }}" /></div></div>
+						<div id="stage{{ $key }}_3" class="{{ empty($tile->type3) ? 'hidden' : '' }}"><div class='h-7'>3: <input type="number" min="0" size=3 name="items[{{ $key }}][stage3]" value="{{ $tile->stage3 }}" /></div></div>
 					</td> 					
 					<td>
 						<?php $delete = $deleteValues[$key] === '1'; ?>
-						<input type="checkbox" name="tiles[{{ $key }}][delete]" value="1" 
+						<input type="checkbox" name="items[{{ $key }}][delete]" value="1" 
 							{{  $delete ? 'checked' : '' }} />
 					</td>
 				</tr>
@@ -192,13 +195,13 @@ use Illuminate\Support\Facades\Log;
 	<form method="post" action="/languagepack/tiles/{{ $languagePack->id }}">
 		@csrf
 		<div>
-			<label for="add_tiles">Add tiles (one tile per line):</label><br>
-			<textarea name="add_tiles" rows=7 cols=40 class="leading-tight"></textarea>
+			<label for="add_items">Add items (one tile per line):</label><br>
+			<textarea name="add_items" rows=7 cols=40 class="leading-tight"></textarea>
 		</div>
 
 		<div class="mt-3 w-9/12">		
 			<input type="hidden" name="id" value="{{ $languagePack->id }}" />
-			<input type="submit" name="btnAdd" value="Add tiles" class="btn-sm btn-primary ml-1" />
+			<input type="submit" name="btnAdd" value="Add items" class="btn-sm btn-primary ml-1" />
 		</div>
 	</form>
 	<div class="mt-6 w-9/12">	

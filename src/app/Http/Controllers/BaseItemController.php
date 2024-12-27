@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\File;
 use App\Models\LanguagePack;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -33,9 +34,23 @@ class BaseItemController extends Controller
         $ids = explode(',', $idsString);
 
         foreach($ids as $id) {
-            $this->model::where('id', $id)->delete();
+            $item = $this->model::find($id);
+            for($i = 1; $i <= 3; $i++) {
+                $nr = $i > 1 ? $i : '';  
+                $fileField = "file{$nr}_id";
+                if($item->$fileField) {
+                    $fileName = "{$this->fileKeyname}_" .  str_pad($id, 3, '0', STR_PAD_LEFT) . "_{$i}.mp3";
+                    $filePath = "languagepacks/{$languagePack->id}/res/raw/{$fileName}";    
+                    if (Storage::disk('public')->exists($filePath)) {                        
+                        Storage::disk('public')->delete($filePath);                                          
+                        File::find($item->$fileField)->delete();
+                    }      
+                }              
+            }
+            $this->model::find($id)->delete();
         }
 
         return redirect("languagepack/{$this->route}/{$languagePack->id}");
     }  
+
 }
