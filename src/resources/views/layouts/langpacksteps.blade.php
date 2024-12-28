@@ -10,23 +10,21 @@ $sections = [
 ];
 
 $links = [];
-if (isset($languagePack)) {
-  foreach ($sections as $key => $details) {
-      $label = $details['label'];
-      $attribute = $details['attribute'];
-      $route = $details['route'];
+foreach ($sections as $key => $details) {
+    $label = $details['label'];
+    $attribute = $details['attribute'];
+    $route = $details['route'];
 
-      $links[$key] = $label; 
-      if ($languagePack->$attribute->count() > 0 && end($completedSteps) !== $key) {
-          $links[$key] = "<a href=\"#\" onClick='autoSavePage(\"/languagepack/$route/$languagePack->id\");'>$label</a>";
-      }
-  }
+    $links[$key] = $label; 
+    if (isset($languagePack) && $languagePack->$attribute->count() > 0 && end($completedSteps) !== $key) {
+        $links[$key] = "<a href=\"#\" onClick='autoSavePage(\"/languagepack/$route/$languagePack->id\");'>$label</a>";
+    }
 }
 ?>
 <ul class="steps steps-vertical sm:steps-horizontal w-full">
-<?php foreach ($sections as $key => $details): ?>
-  <li class="step {{ in_array($key, $completedSteps) ? 'step-primary' : '' }}">{!! $links[$key] !!}</li>
-<?php endforeach; ?>
+<?php foreach ($sections as $key => $details): ?>  
+    <li class="step {{ in_array($key, $completedSteps) ? 'step-primary' : '' }}">{!! $links[$key] !!}</li>
+<?php endforeach; ?>    
 </ul>
 
 <script>
