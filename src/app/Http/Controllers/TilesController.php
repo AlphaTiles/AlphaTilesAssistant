@@ -9,12 +9,13 @@ use Illuminate\Http\Request;
 use App\Rules\CustomRequired;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use App\Services\Mp3FileUploadService;
+use App\Services\TileFileUploadService;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use App\Rules\RequireAtLeastOneDistractor;
-use App\Services\TileFileUploadService;
-use Illuminate\Support\Facades\Log;
 
 class TilesController extends BaseItemController
 {
@@ -46,7 +47,7 @@ class TilesController extends BaseItemController
         return view('languagepack.tiles', [
             'completedSteps' => ['lang_info', 'tiles'],
             'languagePack' => $languagePack,
-            'tiles' => $tiles,
+            'items' => $tiles,
             'pagination' => $tiles->links()
         ]);
     }
@@ -54,7 +55,7 @@ class TilesController extends BaseItemController
     public function store(LanguagePack $languagePack, Request $request)
     {
         $data = $request->all();
-        $tiles = explode("\r\n", $data['add_tiles']);
+        $tiles = explode("\r\n", $data['add_items']);
 
         $insert = [];
         foreach($tiles as $key => $tile) {
@@ -74,56 +75,56 @@ class TilesController extends BaseItemController
 
     public function update(LanguagePack $languagePack, Request $request)
     {
-        $tiles = $request->all()['tiles'];        
+        $items = $request->all()['items'];        
                
         $fileRules = 'mimes:mp3|max:1024';
         $customErrorMessage = "The file upload failed. Please verify that the files are of type mp3 and the file size is not bigger than 1 MB.";
         $validator = Validator::make(
             $request->all(), 
             [
-                'tiles.*' => [
-                    'required_unless:tiles.*.delete,1',
+                'items.*' => [
+                    'required_unless:items.*.delete,1',
                     new RequireAtLeastOneDistractor(request()),
                     new CustomRequired(request(), 'type')
                 ],
-                'tiles.*.languagepackid' => ['required', 'integer'],
-                'tiles.*.type' => ['required_unless:tiles.*.delete,1'],
-                'tiles.*.or_1' => ['required_unless:tiles.*.delete,1'],
-                'tiles.*.or_2' => ['required_unless:tiles.*.delete,1'],
-                'tiles.*.or_3' => ['required_unless:tiles.*.delete,1'],
-                'tiles.*.type2' => ['sometimes'],    
-                'tiles.*.type3' => ['sometimes'],    
-                'tiles.*.file' => $fileRules,
-                'tiles.*.file2' => $fileRules,
-                'tiles.*.file3' => $fileRules,
-                'tiles.*.stage' => ['sometimes'],    
-                'tiles.*.stage2' => ['sometimes'],    
-                'tiles.*.stage3' => ['sometimes'],    
+                'items.*.languagepackid' => ['required', 'integer'],
+                'items.*.type' => ['required_unless:items.*.delete,1'],
+                'items.*.or_1' => ['required_unless:items.*.delete,1'],
+                'items.*.or_2' => ['required_unless:items.*.delete,1'],
+                'items.*.or_3' => ['required_unless:items.*.delete,1'],
+                'items.*.type2' => ['sometimes'],    
+                'items.*.type3' => ['sometimes'],    
+                'items.*.file' => $fileRules,
+                'items.*.file2' => $fileRules,
+                'items.*.file3' => $fileRules,
+                'items.*.stage' => ['sometimes'],    
+                'items.*.stage2' => ['sometimes'],    
+                'items.*.stage3' => ['sometimes'],    
             ],
             [                
-                'tiles.*.type' => '',
-                'tiles.*.or_1' => '',
-                'tiles.*.or_2' => '',
-                'tiles.*.or_3' => '',
-                'tiles.*.type2' => '',
-                'tiles.*.type3' => '',
-                'tiles.*.file' => $customErrorMessage,
-                'tiles.*.file2' => $customErrorMessage,
-                'tiles.*.file3' => $customErrorMessage,
-                'tiles.*.stage' => '',    
-                'tiles.*.stage2' => '',    
-                'tiles.*.stage3' => '',    
+                'items.*.type' => '',
+                'items.*.or_1' => '',
+                'items.*.or_2' => '',
+                'items.*.or_3' => '',
+                'items.*.type2' => '',
+                'items.*.type3' => '',
+                'items.*.file' => $customErrorMessage,
+                'items.*.file2' => $customErrorMessage,
+                'items.*.file3' => $customErrorMessage,
+                'items.*.stage' => '',    
+                'items.*.stage2' => '',    
+                'items.*.stage3' => '',    
             ]
         );
 
-        DB::transaction(function() use($tiles, $fileRules, $languagePack) {
-            $fileUploadService = app(TileFileUploadService::class);
+        DB::transaction(function() use($items, $fileRules, $languagePack) {
+            $fileUploadService = app(Mp3FileUploadService::class);
 
-            foreach($tiles as $key => $tile) {
+            foreach($items as $key => $tile) {
 
-                $fileModel1 = $fileUploadService->handle($tile, 1, $fileRules);
-                $fileModel2 = $fileUploadService->handle($tile, 2, $fileRules);
-                $fileModel3 = $fileUploadService->handle($tile, 3, $fileRules);
+                $fileModel1 = $fileUploadService->handle($tile, 'tile', 1, $fileRules);
+                $fileModel2 = $fileUploadService->handle($tile, 'tile', 2, $fileRules);
+                $fileModel3 = $fileUploadService->handle($tile, 'tile', 3, $fileRules);
                 
                 $updateData = [
                     'upper' => $tile['upper'],
@@ -162,46 +163,14 @@ class TilesController extends BaseItemController
         
         session()->flash('success', 'Records updated successfully');
 
-        $tilesCollection = Tile::where('languagepackid', $languagePack->id)->with(['file', 'file2', 'file3'])->paginate(config('pagination.default'));
+        $itemsCollection = Tile::where('languagepackid', $languagePack->id)->with(['file', 'file2', 'file3'])->paginate(config('pagination.default'));
 
         return view('languagepack.tiles', [
-            'completedSteps' => ['lang_info', 'tiles'],
+            'completedSteps' => ['lang_info', 'items'],
             'languagePack' => $languagePack,
-            'tiles' => $tilesCollection,
-            'pagination' => $tilesCollection->links()
+            'items' => $itemsCollection,
+            'pagination' => $itemsCollection->links()
         ]);
 
-    }
-        
-    public function delete(LanguagePack $languagePack, Request $request) 
-    {        
-        if(isset($request->btnCancel)) {
-            return redirect("languagepack/{$this->route}/{$languagePack->id}");
-        }
-
-        $idsString = $request->deleteIds;
-        $ids = explode(',', $idsString);
-
-        foreach($ids as $id) {
-            for($i = 1; $i <= 3; $i++) {
-                $fileName = "{$this->fileKeyname}_" .  str_pad($id, 3, '0', STR_PAD_LEFT) . "_{$i}.mp3";
-                $file = "languagepacks/{$languagePack->id}/res/raw/{$fileName}";    
-                if (Storage::disk('public')->exists($file)) {    
-                    Storage::disk('public')->delete($file);    
-                }                    
-            }
-            $this->model::where('id', $id)->delete();
-        }
-
-        return redirect("languagepack/{$this->route}/{$languagePack->id}");
-    }  
-
-    public function downloadFile(LanguagePack $languagePack, $filename)
-    {        
-        $filePath = storage_path("app/public/languagepacks/{$languagePack->id}/res/raw/{$filename}");
-
-        if(file_exists($filePath)) {
-            return response()->download($filePath);
-        }            
-    }
+    }        
 }

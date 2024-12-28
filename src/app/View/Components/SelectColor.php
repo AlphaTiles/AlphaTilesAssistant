@@ -2,9 +2,10 @@
 
 namespace App\View\Components;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\Component;
 
-class SelectFile extends Component
+class SelectColor extends Component
 {
     /**
      * Create a new component instance.
@@ -12,13 +13,11 @@ class SelectFile extends Component
      * @return void
      */
     public function __construct(
-        public int $nr,        
         public string $key,
-        public string $prefix,
-        public object $item,
+        public ?int $color,
         public ?array $errorKeys
     ) {}
-    
+
     /**
      * Get the view / contents that represent the component.
      *
@@ -26,6 +25,6 @@ class SelectFile extends Component
      */
     public function render()
     {
-        return view('components.select-file');
+        return view('components.select-color');
     }
 }

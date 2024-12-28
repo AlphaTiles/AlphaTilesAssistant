@@ -53,13 +53,24 @@ class KeyboardController extends BaseItemController
         $data = $request->all();
         $keys = explode("\r\n", $data['add_keys']);
 
-        $insert = [];
         foreach($keys as $i => $key) {
             if(!empty($key)) {
-                Key::firstOrCreate([
+                $keyRecord = Key::withTrashed()->where([
                     'languagepackid' => $languagePack->id,
                     'value' => $key
-                ]);
+                ])->first();
+                
+                if ($keyRecord) {
+                    // If the record is soft-deleted, restore it
+                    if ($keyRecord->trashed()) {
+                        $keyRecord->restore();
+                    }
+                } else {
+                    $keyRecord = Key::create([
+                        'languagepackid' => $languagePack->id,
+                        'value' => $key
+                    ]);
+                }               
             }
         }
         
@@ -69,24 +80,24 @@ class KeyboardController extends BaseItemController
 
     public function update(LanguagePack $languagePack, Request $request)
     {
-        $keys = $request->all()['keys'];
+        $keys = $request->all()['items'];
 
         $validator = Validator::make(
             $request->all(), 
             [
-                'keys.*' => [
-                    'required_unless:keys.*.delete,1',
+                'items.*' => [
+                    'required_unless:items.*.delete,1',
                     new CustomRequired(request(), 'color')
                 ],
-                'keys.*.languagepackid' => ['required', 'integer'],
-                'keys.*.value' => [
-                    'required_unless:keys.*.delete,1',
+                'items.*.languagepackid' => ['required', 'integer'],
+                'items.*.value' => [
+                    'required_unless:items.*.delete,1',
                 ],
-                'keys.*.color' => ['required_unless:keys.*.delete,1'],
+                'items.*.color' => ['required_unless:items.*.delete,1'],
             ],
             [                
-                'keys.*.value' => '',
-                'keys.*.color' => '',
+                'items.*.value' => '',
+                'items.*.color' => '',
             ]
         );
 

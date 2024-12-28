@@ -2,14 +2,16 @@
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ItemsController;
 use App\Http\Controllers\TilesController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\SocialController;
 use App\Http\Controllers\KeyboardController;
 use App\Http\Controllers\WordlistController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\GameSettingsController;
+use App\Http\Controllers\SyllablesController;
 use App\Http\Controllers\GoogleDriveController;
+use App\Http\Controllers\GameSettingsController;
 use App\Http\Controllers\LanguageInfoController;
 
 /*
@@ -40,7 +42,8 @@ Route::middleware(['auth', 'authorize.languagepack'])->group(function () {
     Route::post('languagepack/tiles/{languagePack}', [TilesController::class, 'store']);
     Route::patch('languagepack/tiles/{languagePack}', [TilesController::class, 'update']);
     Route::delete('languagepack/tiles/{languagePack}', [TilesController::class, 'delete']);
-    Route::get('languagepack/tiles/{languagePack}/download/{filename}', [TilesController::class, 'downloadFile']);
+    
+    Route::get('languagepack/items/{languagePack}/download/{filename}', [ItemsController::class, 'downloadFile']);
     
     Route::post('languagepack/wordlist/{languagePack}', [WordlistController::class, 'store']);
     Route::get('languagepack/wordlist/{languagePack}', [WordlistController::class, 'edit']);
@@ -52,6 +55,11 @@ Route::middleware(['auth', 'authorize.languagepack'])->group(function () {
     Route::get('languagepack/keyboard/{languagePack}', [KeyboardController::class, 'edit']);
     Route::patch('languagepack/keyboard/{languagePack}', [KeyboardController::class, 'update']);
     Route::delete('languagepack/keyboard/{languagePack}', [KeyboardController::class, 'delete']);
+
+    Route::get('languagepack/syllables/{languagePack}', [SyllablesController::class, 'edit']);
+    Route::post('languagepack/syllables/{languagePack}', [SyllablesController::class, 'store']);
+    Route::patch('languagepack/syllables/{languagePack}', [SyllablesController::class, 'update']);
+    Route::delete('languagepack/syllables/{languagePack}', [SyllablesController::class, 'delete']);
 
     Route::post('languagepack/game_settings/{languagePack}', [GameSettingsController::class, 'update']);
     Route::get('languagepack/game_settings/{languagePack}', [GameSettingsController::class, 'edit']);

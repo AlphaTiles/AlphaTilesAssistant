@@ -22,8 +22,8 @@ use Illuminate\Support\Arr;
 			@endif
 		</div>	
 		<?php 
-		$keyData = old('keys') ?? request()['keys'] ?? $keys;
-		$deleteValues = old('keys') ? Arr::pluck(old('keys') , 'delete') : Arr::pluck($keyData , 'delete'); 
+		$keyData = old('items') ?? request()['items'] ?? $keys;
+		$deleteValues = old('items') ? Arr::pluck(old('items') , 'delete') : Arr::pluck($keyData , 'delete'); 
 		?>
 		@if($keys && in_array(1, $deleteValues))
 		<form method="post" action="/languagepack/keyboard/{{ $languagePack->id }}" enctype="multipart/form-data">			
@@ -78,23 +78,23 @@ use Illuminate\Support\Arr;
 				<tr>
 					<th>Key</th> 
 					<th>Color <a href="#" onClick="openAlert('Keyboard colors', 'Group keys by color, e.g. consonants vs vocals.')"><i class="fa-solid fa-circle-info"></i></a></th> 
-					<th><input type="checkbox" onClick="checkAll(this, 'keys')" /> Delete</th>
+					<th><input type="checkbox" onClick="checkAll(this, 'items')" /> Delete</th>
 				</tr>
 				</thead> 
 				<tbody>
 				@foreach($keys as $key => $keyItem)
 				<tr>
 					<td>
-					<input type="hidden" name="keys[{{ $key }}][languagepackid]" value="{{ $keyItem->languagepackid }}">
-						<input type="hidden" name="keys[{{ $key }}][id]" value="{{ $keyItem->id }}" />
-						<input type="text" size=2 name="keys[{{ $key }}][value]" value="{{ $keyItem->value }}" />
+					<input type="hidden" name="items[{{ $key }}][languagepackid]" value="{{ $keyItem->languagepackid }}">
+						<input type="hidden" name="items[{{ $key }}][id]" value="{{ $keyItem->id }}" />
+						<input type="text" size=2 name="items[{{ $key }}][value]" value="{{ $keyItem->value }}" />
 					</td> 
 					<td>								
-						<select name="keys[{{ $key }}][color]" id=selectColor{{ $key }} onChange='changeColor(this);'>
+						<select name="items[{{ $key }}][color]" id=selectColor{{ $key }} onChange='changeColor(this);'>
 							<option value=""></option>
 						@foreach(ColorEnum::cases() as $optionKey => $colorEnum)
 							<?php 
-							$colorNr = old('keys.' . $key . '.color') ?? $keyItem->color;
+							$colorNr = old('items.' . $key . '.color') ?? $keyItem->color;
 							if(isset($colorNr)) {
 								$colorNr = (int) $colorNr;
 							}
@@ -115,7 +115,7 @@ use Illuminate\Support\Arr;
 					</td> 
 					<td>
 						<?php $delete = $deleteValues[$key] === '1'; ?>
-						<input type="checkbox" name="keys[{{ $key }}][delete]" value="1" 
+						<input type="checkbox" name="items[{{ $key }}][delete]" value="1" 
 							{{  $delete ? 'checked' : '' }} />
 					</td>
 				</tr>
@@ -148,7 +148,7 @@ use Illuminate\Support\Arr;
 		<div class="mt-6 w-9/12">	
 			<a href="#" onClick='autoSavePage("/languagepack/wordlist/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-secondary pt-0.5 font-normal">Back</a>
 			@if($languagePack->keys->count() > 0)
-				<a href="#" onClick='autoSavePage("/languagepack/game_settings/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">Next</a>		
+				<a href="#" onClick='autoSavePage("/languagepack/syllables/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">Next</a>		
 			@endif
 		</div>
 	</div>

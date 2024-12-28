@@ -42,6 +42,6 @@ class CustomRequired implements Rule
             }             
         }
 
-        return "The {$this->key} is required for {$this->value['value']}";        
+        return "{$this->key} is required for {$this->value['value']}";        
     }
 }

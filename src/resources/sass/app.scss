@@ -12,6 +12,11 @@ a {
     padding-left: 5px;
 }
 
+.prose h1 {
+    margin-top: 5px;
+    margin-bottom: 2px;
+}
+
 [type="text"], [type="email"], [type="url"], [type="password"],
 select, textarea {
     padding-right: 2px !important;
