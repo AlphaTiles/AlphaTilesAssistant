@@ -11,6 +11,7 @@ use App\Services\Mp3FileUploadService;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
+use App\Rules\RequireAtLeastOneDistractor;
 
 class SyllablesController extends BaseItemController
 {
@@ -78,17 +79,14 @@ class SyllablesController extends BaseItemController
             [
                 'items.*' => [
                     'required_unless:items.*.delete,1',
-                    new CustomRequired(request(), 'or_1', 'Or1'),
-                    new CustomRequired(request(), 'or_2', 'Or2'),
-                    new CustomRequired(request(), 'or_3', 'Or3'),
-                    new CustomRequired(request(), 'color')
+                    new RequireAtLeastOneDistractor(request()),
                 ],
                 'items.*.languagepackid' => ['required', 'integer'],
                 'items.*.or_1' => ['required_unless:items.*.delete,1'],
                 'items.*.or_2' => ['required_unless:items.*.delete,1'],
                 'items.*.or_3' => ['required_unless:items.*.delete,1'],
                 'items.*.file' => $fileRules,
-                'items.*.color' => ['required_unless:keys.*.delete,1'],
+                'items.*.color' => ['sometimes'],
             ],
             [                
                 'items.*.or_1' => '',

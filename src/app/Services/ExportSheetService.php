@@ -7,6 +7,7 @@ use Google\Client;
 use App\Models\Key;
 use App\Models\Tile;
 use App\Models\Word;
+use App\Models\Syllable;
 use Google\Service\Drive;
 use Google\Service\Sheets;
 use App\Enums\LangInfoEnum;
@@ -50,9 +51,9 @@ class ExportSheetService
         $this->notesSheet($spreadsheetId);
         $this->langInfoSheet($spreadsheetId);
         $this->tilesSheet($spreadsheetId);
-        $this->wordlistSheet($spreadsheetId);
-        $this->syllablesSheet($spreadsheetId);
+        $this->wordlistSheet($spreadsheetId);        
         $this->keyboardSheet($spreadsheetId);
+        $this->syllablesSheet($spreadsheetId);
         $this->resourcesSheet($spreadsheetId);
         $this->settingsSheet($spreadsheetId);
         $this->namesSheet($spreadsheetId);
@@ -238,21 +239,58 @@ class ExportSheetService
     private function syllablesSheet(string $spreadsheetId): void
     {
         $sheetName = 'syllables';
-        $this->createSheetTab($spreadsheetId, $sheetName, 4);
-        $sheetAndRange = "{$sheetName}!A1:G1"; 
+        $this->createSheetTab($spreadsheetId, $sheetName, 5);
+        $sheetAndRange = "{$sheetName}!A1:G100"; 
 
         $values = [
             ["Syllable", "Or1", "Or2", "Or3", "SyllableAudioName", "Duration", "Color"],
         ];
 
+        $folderName = 'audio_syllables_optional';
+        $oldFolderId = $this->googleService->folderExists($folderName, $this->exportFolderId);
+        if($oldFolderId) {
+            $this->googleService->deleteFolder($oldFolderId);             
+        }
+        
+        $folderId = $this->googleService->createFolder($folderName, $this->exportFolderId);        
+        $sheetName = 'syllables';
+        $this->createSheetTab($spreadsheetId, $sheetName, 2);
+        
+        $items = Syllable::where('languagepackid', $this->languagePack->id)
+            ->orderBy('value')
+            ->get();
+        $i = 1;        
+        foreach($items as $item) {
+            $file1 = $item->file ? basename($item->file->name) : 'X';   
+            if($item->file) {
+                $this->saveFileToDrive($item->file, $folderId, 'syllable audio', $file1);
+            }            
+              
+            $fileName1 = str_replace('.mp3', '', $file1);       
+
+            $values[$i] = [
+                $item->value,
+                $item->or_1,
+                $item->or_2,
+                $item->or_3,
+                $fileName1,
+                "0", 
+                $item->color,
+            ];
+            if($this->debug && $i == 2) {
+                break;
+            }
+            $i++;
+        }        
+
         $this->addValuesToSheet($spreadsheetId, $sheetAndRange, $values);
-        Log::info('export of syllables completed');
+        Log::error('export of syllables completed');        
     }    
 
     private function keyboardSheet(string $spreadsheetId): void
     {
         $sheetName = 'keyboard';
-        $this->createSheetTab($spreadsheetId, $sheetName, 5);
+        $this->createSheetTab($spreadsheetId, $sheetName, 4);
         $sheetAndRange = "{$sheetName}!A1:B100"; 
 
         $values = [

@@ -12,7 +12,8 @@ use Illuminate\Support\Facades\Log;
 <div class="prose">
 
     <h1>Syllables</h1>
-	
+	<div>Adding syllables is optional. You can make the app without syllable-based games.</div>
+
 	<div>
 		<div x-data="{ showMessage: true }" x-show="showMessage" x-init="setTimeout(() => showMessage = false, 3000)">
 			@if (session()->has('success'))
@@ -81,11 +82,9 @@ use Illuminate\Support\Facades\Log;
 				<thead>
 				<tr>
 					<th>Syllable</th> 
-					<th>Or1</th>                             
-					<th>Or2</th>  
-					<th>Or3</th>  
+					<th>Distractors <a href="#" onClick="openAlert('Distractors', 'The three columns (Or1, Or2, Or3) contain “distractors”. They are used to provide alternative (incorrect) answers. For example, in the word-builder game to the right, the player has compared the syllables in the first column and has correctly selected |chá| below and not |ché| above. The syllable |ché| appears as an option because, in the syllables tab, “ché” is listed as a distractor of “chá”. For distractor syllables, only use syllables that appear in column A as well.', '/images/help/distractor_syllables.png');"><i class="fa-solid fa-circle-info"></i></a></th> 
 					<th>Audio instructions</th>
-					<th>Color</th>
+					<th>Color <a href="#" onClick="openAlert('Colors', 'The “Color” column indicates which color from your colors tab will appear as the background for that syllable in the Sudan game. This may help you to visually group syllables based on similarity in the Sudan game.')"><i class="fa-solid fa-circle-info"></i></a></th>
 					<th><input type="checkbox" onClick="checkAll(this, 'items')" /> Delete</th>
 				</tr>
 				</thead> 
@@ -101,12 +100,10 @@ use Illuminate\Support\Facades\Log;
 					<td>
 						<?php $errorClass = isset($errorKeys) && in_array('items.' . $key . '.or_1', $errorKeys) ? 'inputError' : ''; ?>
 						<input type="text" size=2 name="items[{{ $key }}][or_1]" value="{{ old('items.' . $key . '.or_1') ?? $syllable->or_1 }}" class="{{ $errorClass }}" />
-					</td>
-					<td>
+
 						<?php $errorClass = isset($errorKeys) && in_array('items.' . $key . '.or_2', $errorKeys) ? 'inputError' : ''; ?>
 						<input type="text" size=2 name="items[{{ $key }}][or_2]" value="{{ old('items.' . $key . '.or_2') ?? $syllable->or_2 }}" class="{{ $errorClass }}" />
-					</td>
-					<td>
+
 						<?php $errorClass = isset($errorKeys) && in_array('items.' . $key . '.or_3', $errorKeys) ? 'inputError' : ''; ?>
 						<input type="text" size=2 name="items[{{ $key }}][or_3]" value="{{ old('items.' . $key . '.or_3') ?? $syllable->or_3 }}" class="{{ $errorClass }}" />
 					</td> 
@@ -155,6 +152,7 @@ use Illuminate\Support\Facades\Log;
 		@csrf
 		<div>
 			<label for="add_syllables">Add syllables (one syllable per line):</label><br>
+
 			<textarea name="add_syllables" rows=7 cols=40 class="leading-tight"></textarea>
 		</div>
 

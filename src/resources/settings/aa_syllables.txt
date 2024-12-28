@@ -1,1 +1,0 @@
-Syllable	Or1	Or2	Or3	SyllableAudioName	Duration	Color

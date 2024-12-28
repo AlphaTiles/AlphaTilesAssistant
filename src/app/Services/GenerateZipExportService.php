@@ -10,9 +10,11 @@ use App\Enums\LangInfoEnum;
 use App\Models\Key;
 use App\Models\LanguagePack;
 use App\Models\LanguageSetting;
+use App\Models\Syllable;
 use App\Repositories\GameSettingsRepository;
 use Illuminate\Support\Facades\Log;
 use App\Repositories\LangInfoRepository;
+use Illuminate\Database\Eloquent\Model;
 
 class GenerateZipExportService
 {
@@ -52,6 +54,10 @@ class GenerateZipExportService
         $keyboardFileName = 'aa_keyboard.txt';
         $keyboardFile = $this->generateKeyboardFile($keyboardFileName);
         $zip->addFile($keyboardFile, "{$zipFileName}/res/raw/{$keyboardFileName}");
+
+        $syllablesFileName = 'aa_syllables.txt';
+        $syllableFile = $this->generateSyllablesFile($syllablesFileName, $zip, $zipFileName);
+        $zip->addFile($syllableFile, "{$zipFileName}/res/raw/{$syllablesFileName}");
 
         $settingsFileName = 'aa_settings.txt';
         $settingsFile = $this->generateSettingsFile($settingsFileName, $zip, $zipFileName);
@@ -144,9 +150,9 @@ class GenerateZipExportService
         file_put_contents($tilesFile, $fileContent);
 
         foreach ($tiles as $tile) {
-            $this->saveTileFile(1, $tile, $zip, $zipFileName);
-            $this->saveTileFile(2, $tile, $zip, $zipFileName);
-            $this->saveTileFile(3, $tile, $zip, $zipFileName);
+            $this->saveFile(1, $tile, $zip, $zipFileName);
+            $this->saveFile(2, $tile, $zip, $zipFileName);
+            $this->saveFile(3, $tile, $zip, $zipFileName);
         }
 
         return $tilesFile;
@@ -204,12 +210,44 @@ class GenerateZipExportService
         return $file;
     }
 
-    private function saveTileFile(int $nr, Tile $tile, ZipArchive $zip, string $zipFileName): void
+
+    public function generateSyllablesFile(string $syllablesFileName, ZipArchive $zip, string $zipFileName): string
+    {
+        $items = Syllable::where('languagepackid', $this->languagePack->id)
+            ->orderBy('value')
+            ->get();
+        $fileContent = "Syllable\tOr1\tOr2\tOr3\tType\tSyllableAudioName\tDuration\t" .
+                        "Color\n";
+
+        foreach ($items as $item) {
+            $file1 = $item->file ? basename($item->file->file_path) : 'X';
+            $file1 = str_replace('.mp3', '', $file1);
+
+            $fileContent .= "{$item->value}" . self::SEPARATOR .
+            "{$item->or_1}" . self::SEPARATOR .
+            "{$item->or_2}" . self::SEPARATOR .
+            "{$item->or_3}" . self::SEPARATOR .
+            "{$file1}" . self::SEPARATOR .
+            "0" . self::SEPARATOR .
+            "{$item->color}" . self::SEPARATOR . "\n";
+        }
+
+        $syllablesFile = "{$this->tempDir}/{$syllablesFileName}";
+        file_put_contents($syllablesFile, $fileContent);
+
+        foreach ($items as $item) {
+            $this->saveFile(1, $item, $zip, $zipFileName);
+        }
+
+        return $syllablesFile;
+    }    
+
+    private function saveFile(int $nr, Model $item, ZipArchive $zip, string $zipFileName): void
     {
         $fileRelation = $nr > 1 ? "file{$nr}" : 'file';
 
-        if ($tile->{$fileRelation}) {
-            $file = basename($tile->{$fileRelation}->file_path);
+        if ($item->{$fileRelation}) {
+            $file = basename($item->{$fileRelation}->file_path);
             $resourceFile = "app/public/languagepacks/{$this->languagePack->id}/res/raw/{$file}";
             $outputFolder = "{$zipFileName}/res/raw/{$file}";
             $zip->addFile(storage_path($resourceFile), $outputFolder);
