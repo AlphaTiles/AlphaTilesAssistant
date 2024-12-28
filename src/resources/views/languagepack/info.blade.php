@@ -1,7 +1,7 @@
 <?php
 use App\Enums\ImportStatus;
 $repositoryClass = \App\Repositories\LangInfoRepository::class;
-$languagePackId = $languagePack ? $languagePack->id : '';
+$languagePackId = $languagePack ? $languagePack->id : null;
 
 $showNext = false;
 if(isset($languagePack->langInfo) &&  $languagePack->langInfo->count() > 0) {

@@ -13,7 +13,7 @@ class EditSettings extends Component
      * @return void
      */
     public function __construct(
-        public int $languagePackId,
+        public ?int $languagePackId,
         public array $settings,
         public string $repositoryClass,
         public bool $showNext,
