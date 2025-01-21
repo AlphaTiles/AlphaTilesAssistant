@@ -2,19 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Syllable;
+use App\Models\Resource;
 use App\Models\LanguagePack;
 use Illuminate\Http\Request;
 use App\Rules\CustomRequired;
 use Illuminate\Support\Facades\DB;
 use App\Services\FileUploadService;
-use App\Services\Mp3FileUploadService;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use App\Rules\RequireAtLeastOneDistractor;
 
-class SyllablesController extends BaseItemController
+class ResourcesController extends BaseItemController
 {
     /**
      * Create a new controller instance.
@@ -23,9 +22,9 @@ class SyllablesController extends BaseItemController
      */
     public function __construct(Request $request)
     {
-        $this->route = 'syllables';
-        $this->model = new Syllable();
-        $this->fileKeyname = 'syllable';
+        $this->route = 'resources';
+        $this->model = new Resource();
+        $this->fileKeyname = 'resource';
 
         parent::__construct($request);
     }
@@ -42,9 +41,9 @@ class SyllablesController extends BaseItemController
         $items = $this->model::where('languagepackid', $languagePack->id)->paginate(config('pagination.default'));
 
         return view('languagepack.' . $this->route, [
-            'completedSteps' => ['lang_info', 'tiles', 'wordlist', 'keyboard', 'syllables'],
+            'completedSteps' => ['lang_info', 'tiles', 'wordlist', 'keyboard', 'syllables', 'resources'],
             'languagePack' => $languagePack,
-            'syllables' => $items,
+            'items' => $items,
             'pagination' => $items->links()
         ]);
     }
@@ -52,13 +51,13 @@ class SyllablesController extends BaseItemController
     public function store(LanguagePack $languagePack, Request $request)
     {
         $data = $request->all();
-        $items = explode("\r\n", $data['add_syllables']);
+        $items = explode("\r\n", $data['add_resources']);
 
         $insert = [];
         foreach($items as $key => $item) {
             if(!empty($item)) {
                 $insert[$key]['languagepackid'] = $languagePack->id;
-                $insert[$key]['value'] = $item;
+                $insert[$key]['link'] = $item;
             }
         }
 
@@ -66,58 +65,51 @@ class SyllablesController extends BaseItemController
         
         $totalPages = ceil($this->model::where('languagepackid', $languagePack->id)->count() / 10); // Assuming 10 items per page
 
-        return redirect("languagepack/syllables/{$languagePack->id}?page={$totalPages}");    
+        return redirect("languagepack/resources/{$languagePack->id}?page={$totalPages}");    
     }        
 
     public function update(LanguagePack $languagePack, Request $request)
     {
-        $syllables = $request->all()['items'];        
+        $items = $request->all()['items'];        
                
-        $fileRules = 'mimes:mp3|max:1024';
-        $customErrorMessage = "The file upload failed. Please verify that the files are of type mp3 and the file size is not bigger than 1 MB.";
+        $fileRules = 'mimes:png|max:512';
+        $customErrorMessage = "The file upload failed. Please verify that the files are of type png and the file size is not bigger than 512kb.";
         $validator = Validator::make(
             $request->all(), 
             [
                 'items.*' => [
                     'required_unless:items.*.delete,1',
-                    new RequireAtLeastOneDistractor(request()),
                 ],
                 'items.*.languagepackid' => ['required', 'integer'],
-                'items.*.or_1' => ['required_unless:items.*.delete,1'],
-                'items.*.or_2' => ['required_unless:items.*.delete,1'],
-                'items.*.or_3' => ['required_unless:items.*.delete,1'],
+                'items.*.name' => ['required_unless:items.*.delete,1'],
+                'items.*.link' => ['url', 'required_unless:items.*.delete,1'],
                 'items.*.file' => $fileRules,
-                'items.*.color' => ['sometimes'],
             ],
             [                
-                'items.*.or_1' => '',
-                'items.*.or_2' => '',
-                'items.*.or_3' => '',
+                'items.*.name' => 'The name field is required.',
+                'items.*.link' => 'Please enter a valid link.',
                 'items.*.file' => $customErrorMessage,
-                'items.*.color' => '',
             ]
         );
 
-        DB::transaction(function() use($syllables, $fileRules, $languagePack) {
+        DB::transaction(function() use($items, $fileRules, $languagePack) {
             $fileUploadService = app(FileUploadService::class);
 
-            foreach($syllables as $key => $syllable) {
+            foreach($items as $key => $item) {
 
-                $fileModel1 = $fileUploadService->handle($syllable, 'syllable', 1, $fileRules, 'mp3');
+                $fileModel1 = $fileUploadService->handle($item, 'resource', 1, $fileRules, 'png');
                 
                 $updateData = [
-                    'or_1' => $syllable['or_1'],
-                    'or_2' => $syllable['or_2'],
-                    'or_3' => $syllable['or_3'],
-                    'file_id' => $syllable['file_id'] ?? null,
-                    'color' => $syllable['color'],
+                    'name' => $item['name'],
+                    'link' => $item['link'],
+                    'file_id' => $item['file_id'] ?? null,
                 ];                
-                
+                                
                 if (isset($fileModel1->id)) {
                     $updateData['file_id'] = $fileModel1->id;
                 }
 
-                Syllable::where(['id' => $syllable['id']])
+                $this->model::where(['id' => $item['id']])
                 ->update($updateData);
             }
         });
@@ -128,13 +120,13 @@ class SyllablesController extends BaseItemController
         
         session()->flash('success', 'Records updated successfully');
 
-        $syllablesCollection = Syllable::where('languagepackid', $languagePack->id)->with(['file'])->paginate(config('pagination.default'));
+        $itemCollection = $this->model::where('languagepackid', $languagePack->id)->with(['file'])->paginate(config('pagination.default'));
 
-        return view('languagepack.syllables', [
-            'completedSteps' => ['lang_info', 'tiles', 'wordlist', 'keyboard', 'syllables'],
+        return view('languagepack.resources', [
+            'completedSteps' => ['lang_info', 'tiles', 'wordlist', 'keyboard', 'syllables', 'resources'],
             'languagePack' => $languagePack,
-            'syllables' => $syllablesCollection,
-            'pagination' => $syllablesCollection->links()
+            'items' => $itemCollection,
+            'pagination' => $itemCollection->links()
         ]);
 
     }

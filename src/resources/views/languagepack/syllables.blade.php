@@ -162,10 +162,8 @@ use Illuminate\Support\Facades\Log;
 		</div>
 	</form>
 	<div class="mt-6 w-9/12">	
-		<a href="#" onClick='autoSavePage("/languagepack/edit/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-secondary pt-0.5 font-normal">Back</a>
-		@if($languagePack->syllables->count() > 0)
-			<a href="#" onClick='autoSavePage("/languagepack/game_settings/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">Next</a>		
-		@endif
+		<a href="#" onClick='autoSavePage("/languagepack/keyboard/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-secondary pt-0.5 font-normal">Back</a>
+		<a href="#" onClick='autoSavePage("/languagepack/resources/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">Next</a>		
 	</div>
 
 	<div class="mt-4">

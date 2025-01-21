@@ -9,6 +9,7 @@ use App\Http\Controllers\SocialController;
 use App\Http\Controllers\KeyboardController;
 use App\Http\Controllers\WordlistController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ResourcesController;
 use App\Http\Controllers\SyllablesController;
 use App\Http\Controllers\GoogleDriveController;
 use App\Http\Controllers\GameSettingsController;
@@ -55,6 +56,11 @@ Route::middleware(['auth', 'authorize.languagepack'])->group(function () {
     Route::get('languagepack/keyboard/{languagePack}', [KeyboardController::class, 'edit']);
     Route::patch('languagepack/keyboard/{languagePack}', [KeyboardController::class, 'update']);
     Route::delete('languagepack/keyboard/{languagePack}', [KeyboardController::class, 'delete']);
+
+    Route::get('languagepack/resources/{languagePack}', [ResourcesController::class, 'edit']);
+    Route::post('languagepack/resources/{languagePack}', [ResourcesController::class, 'store']);
+    Route::patch('languagepack/resources/{languagePack}', [ResourcesController::class, 'update']);
+    Route::delete('languagepack/resources/{languagePack}', [ResourcesController::class, 'delete']);    
 
     Route::get('languagepack/syllables/{languagePack}', [SyllablesController::class, 'edit']);
     Route::post('languagepack/syllables/{languagePack}', [SyllablesController::class, 'store']);
