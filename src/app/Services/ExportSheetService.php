@@ -13,6 +13,7 @@ use Google\Service\Sheets;
 use App\Enums\LangInfoEnum;
 use App\Enums\FieldTypeEnum;
 use App\Models\LanguagePack;
+use App\Enums\GameSettingEnum;
 use App\Models\LanguageSetting;
 use Google\Service\Drive\DriveFile;
 use Illuminate\Support\Facades\Log;
@@ -56,6 +57,7 @@ class ExportSheetService
         $this->syllablesSheet($spreadsheetId);
         $this->resourcesSheet($spreadsheetId);
         $this->settingsSheet($spreadsheetId);
+        $this->shareSheet($spreadsheetId);
         $this->namesSheet($spreadsheetId);
         $this->gamesSheet($spreadsheetId);
         $this->colorsSheet($spreadsheetId);
@@ -341,6 +343,10 @@ class ExportSheetService
         $items = app(GameSettingsRepository::class)->getSettings(false, $this->languagePack);
         $i = 1;
         foreach($items as $item) {
+            if($item['name'] === GameSettingEnum::SHARE_LINK->value) {
+                continue;
+            }
+
             $value = $item['value'];
             if ($item['type'] === FieldTypeEnum::CHECKBOX) {
                 $value = $item['value'] ? 'TRUE' : 'FALSE';
@@ -353,10 +359,30 @@ class ExportSheetService
         Log::info('export of settings completed');
     }      
 
+    private function shareSheet(string $spreadsheetId): void
+    {
+        $sheetName = 'share';
+        $this->createSheetTab($spreadsheetId, $sheetName, 8);
+        $sheetAndRange = "{$sheetName}!A1:A2"; 
+
+        $items = app(GameSettingsRepository::class)->getSettings(false, $this->languagePack);
+        $values = [
+            ['Link'], 
+        ];
+        foreach($items as $item) {
+            if($item['name'] === GameSettingEnum::SHARE_LINK->value) {
+                $values[] = [$item['value']];
+            }
+        }
+
+        $this->addValuesToSheet($spreadsheetId, $sheetAndRange, $values);
+        Log::info('export of share link completed');
+    }      
+
     private function namesSheet(string $spreadsheetId): void
     {
         $sheetName = 'names';
-        $this->createSheetTab($spreadsheetId, $sheetName, 8);
+        $this->createSheetTab($spreadsheetId, $sheetName, 9);
         $sheetAndRange = "{$sheetName}!A1:B1"; 
 
         $values = [
@@ -370,7 +396,7 @@ class ExportSheetService
     private function gamesSheet(string $spreadsheetId): void
     {
         $sheetName = 'games';
-        $this->createSheetTab($spreadsheetId, $sheetName, 9);
+        $this->createSheetTab($spreadsheetId, $sheetName, 10);
         $sheetAndRange = "{$sheetName}!A1:H200"; 
 
         $filePath = resource_path('settings/aa_games.txt');
@@ -392,7 +418,7 @@ class ExportSheetService
     private function colorsSheet(string $spreadsheetId): void
     {
         $sheetName = 'colors';
-        $this->createSheetTab($spreadsheetId, $sheetName, 10);
+        $this->createSheetTab($spreadsheetId, $sheetName, 11);
         $sheetAndRange = "{$sheetName}!A1:C20"; 
 
         $filePath = resource_path('settings/aa_colors.txt');
