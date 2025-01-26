@@ -68,8 +68,14 @@ use App\Enums\FieldTypeEnum;
 			<input type="hidden" name="id" value="{{ $languagePackId }}" />
 			<input type="submit" name="btnHiddenSave" id="saveButton" value="Save" class="hidden" />
 			<input type="submit" name="btnSave" value="Save" class="btn-sm btn-primary ml-1 cursor-pointer" onClick='handleSaveReset();' />											
-			@if($showNext)
+			@if($showNext && empty($backPath))
 				<a href="#" onClick='autoSavePage("/languagepack/{{ $nextPath }}/{{ $languagePackId }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">Next</a>		
 			@endif
 		</div>
+		@if(!empty($backPath))
+		<div class="mt-6 w-9/12">	
+			<a href="#" onClick='autoSavePage("/languagepack/{{ $backPath }}/{{ $languagePackId }}");' class="inline-block no-underline btn-sm btn-secondary pt-0.5 font-normal">Back</a>
+			<a href="#" onClick='autoSavePage("/languagepack/{{ $nextPath }}/{{ $languagePackId }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">Next</a>		
+		</div>
+		@endif
 	</form>		

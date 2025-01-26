@@ -11,7 +11,7 @@ class ItemsController extends Controller
         $filePath = storage_path("app/public/languagepacks/{$languagePack->id}/res/raw/{$filename}");
 
         if(file_exists($filePath)) {
-            return response()->download($filePath);
+            return response()->download($filePath, null, ['Cache-Control' => 'no-cache, must-revalidate']);
         }            
     }
 }

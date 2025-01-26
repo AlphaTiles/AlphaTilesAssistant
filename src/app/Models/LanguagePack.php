@@ -71,4 +71,14 @@ class LanguagePack extends Model
     {
         return $this->hasMany(Syllable::class, 'languagepackid');
     }    
+
+    public function resources(): HasMany
+    {
+        return $this->hasMany(Resource::class, 'languagepackid');
+    }        
+
+    public function gameSettings(): HasMany
+    {
+        return $this->hasMany(GameSetting::class, 'languagepackid');
+    }  
 }

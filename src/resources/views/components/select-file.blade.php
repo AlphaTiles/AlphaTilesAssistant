@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\File;
 
 $typeField = $nr > 1 ? 'type' . $nr : 'type';
 $fileField = $nr > 1 ? "file{$nr}" : 'file';
@@ -27,12 +28,16 @@ if(empty($item->{$typeField}) && $nr > 1) {
             <?php 	        
             $fileid = (string) $item->{$fileRelation}->id ?? null;
             $storedFileNumber = str_pad($item->id, 3, '0', STR_PAD_LEFT); 
+            $extension = File::extension($item->{$fileRelation}->file_path);            
             ?>
-            <audio controls style="width: 200px; height: 30px;">
-                <source src="/languagepack/items/{{ $item->languagepackid }}/download/{{ $prefix }}_{{ $storedFileNumber }}_{{ $nr }}.mp3?{{ time() }}" type="audio/mpeg">
-                Your browser does not support the audio element.
-            </audio> 								
-
+            @if($extension === 'mp3')
+                <audio controls style="width: 200px; height: 30px;">
+                    <source src="/languagepack/items/{{ $item->languagepackid }}/download/{{ $prefix }}_{{ $storedFileNumber }}_{{ $nr }}.mp3?{{ time() }}" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio> 								
+            @else
+                <img width="30" src="/languagepack/items/{{ $item->languagepackid }}/download/{{ $prefix }}_{{ $storedFileNumber }}_{{ $nr }}.png?{{ time() }}" />
+            @endif
             <input type="hidden" name="items[{{ $key }}][{{ $fileIdKey }}]" value="{{ $item->$fileIdKey }}">
         @endif
         </div>

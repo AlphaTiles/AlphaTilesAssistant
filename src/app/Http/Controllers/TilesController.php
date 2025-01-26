@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Rules\CustomRequired;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use App\Services\FileUploadService;
 use Illuminate\Support\Facades\Log;
 use App\Services\Mp3FileUploadService;
 use App\Services\TileFileUploadService;
@@ -118,13 +119,13 @@ class TilesController extends BaseItemController
         );
 
         DB::transaction(function() use($items, $fileRules, $languagePack) {
-            $fileUploadService = app(Mp3FileUploadService::class);
+            $fileUploadService = app(FileUploadService::class);
 
             foreach($items as $key => $tile) {
 
-                $fileModel1 = $fileUploadService->handle($tile, 'tile', 1, $fileRules);
-                $fileModel2 = $fileUploadService->handle($tile, 'tile', 2, $fileRules);
-                $fileModel3 = $fileUploadService->handle($tile, 'tile', 3, $fileRules);
+                $fileModel1 = $fileUploadService->handle($tile, 'tile', 1, $fileRules, 'mp3');
+                $fileModel2 = $fileUploadService->handle($tile, 'tile', 2, $fileRules, 'mp3');
+                $fileModel3 = $fileUploadService->handle($tile, 'tile', 3, $fileRules, 'mp3');
                 
                 $updateData = [
                     'upper' => $tile['upper'],
@@ -166,7 +167,7 @@ class TilesController extends BaseItemController
         $itemsCollection = Tile::where('languagepackid', $languagePack->id)->with(['file', 'file2', 'file3'])->paginate(config('pagination.default'));
 
         return view('languagepack.tiles', [
-            'completedSteps' => ['lang_info', 'items'],
+            'completedSteps' => ['lang_info', 'tiles'],
             'languagePack' => $languagePack,
             'items' => $itemsCollection,
             'pagination' => $itemsCollection->links()

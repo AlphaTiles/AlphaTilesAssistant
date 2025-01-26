@@ -19,6 +19,7 @@ $languagePackId = $languagePack ? $languagePack->id : '';
 		:show-next=true
 		form-path="game_settings"
 		next-path="export"
+		back-path="resources"
 	/>
 	
 	<div class="mt-4">

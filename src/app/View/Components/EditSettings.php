@@ -18,7 +18,8 @@ class EditSettings extends Component
         public string $repositoryClass,
         public bool $showNext,
         public string $formPath,
-        public string $nextPath
+        public string $nextPath,
+        public ?string $backPath = null
     ) {}
 
     /**

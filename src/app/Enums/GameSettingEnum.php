@@ -23,6 +23,7 @@ enum GameSettingEnum: string
     case CHILE_MAX_WORD_LENGTH = 'chile_max_word_length';
     case BOLD_NON_INITIAL_TILES = 'bold_non_initial_tiles';
     case BOLD_INITIAL_TILES = 'bold_initial_tiles';
+    case SHARE_LINK = 'share_link';
 
     public function defaultValue(): string
     {
@@ -67,7 +68,8 @@ enum GameSettingEnum: string
             self::CHILE_MIN_WORD_LENGTH => 'Chile minimum word length',
             self::CHILE_MAX_WORD_LENGTH => 'Chile maximum word length',
             self::BOLD_NON_INITIAL_TILES => 'Game 001 bold non-initial tiles',
-            self::BOLD_INITIAL_TILES => 'Game 001 bold initial tiles'
+            self::BOLD_INITIAL_TILES => 'Game 001 bold initial tiles',
+            self::SHARE_LINK => 'Share link',
         };
     }
 
@@ -93,6 +95,7 @@ enum GameSettingEnum: string
             self::CHILE_KEYBOARD_WIDTH => 'For the Guess the Word (Chile.java) game, you can specify the keyboard width, the number of guesses per round and the range of word sizes (in tile length) allowed.',
             self::BOLD_NON_INITIAL_TILES => 'In Game 001 (Romania) bold non-initial tiles when in focus? (boldNonInitialFocusTiles)',
             self::BOLD_INITIAL_TILES => 'In Game 001 (Romania) bold initial tiles when in focus? (boldInitialFocusTiles)',
+            self::SHARE_LINK => 'The share button allows you to point the user directly to the Play Store or another link. If link included, Share icon will appear at the bottom of Game selection screen. Clicking Share icon will display QR code.',
             default => null
         };
     }
@@ -116,7 +119,8 @@ enum GameSettingEnum: string
             self::CHILE_MIN_WORD_LENGTH => '14. Chile minimum word length',
             self::CHILE_MAX_WORD_LENGTH => '15. Chile maximum word length',
             self::BOLD_NON_INITIAL_TILES => '16. In Game 001 (Romania) bold non-initial tiles when in focus? (boldNonInitialFocusTiles)',
-            self::BOLD_INITIAL_TILES => '17. In Game 001 (Romania) bold initial tiles when in focus? (boldInitialFocusTiles)'
+            self::BOLD_INITIAL_TILES => '17. In Game 001 (Romania) bold initial tiles when in focus? (boldInitialFocusTiles)',
+            self::SHARE_LINK => 'aa_share.txt',
         };
     }
 
