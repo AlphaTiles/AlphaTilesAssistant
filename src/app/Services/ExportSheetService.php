@@ -15,6 +15,7 @@ use App\Enums\FieldTypeEnum;
 use App\Models\LanguagePack;
 use App\Enums\GameSettingEnum;
 use App\Models\LanguageSetting;
+use App\Models\Resource;
 use Google\Service\Drive\DriveFile;
 use Illuminate\Support\Facades\Log;
 use Google\Service\Sheets\ValueRange;
@@ -279,9 +280,6 @@ class ExportSheetService
                 "0", 
                 $item->color,
             ];
-            if($this->debug && $i == 2) {
-                break;
-            }
             $i++;
         }        
 
@@ -320,11 +318,40 @@ class ExportSheetService
     {
         $sheetName = 'resources';
         $this->createSheetTab($spreadsheetId, $sheetName, 6);
-        $sheetAndRange = "{$sheetName}!A1:C1"; 
+        $sheetAndRange = "{$sheetName}!A1:C50"; 
+
+        $folderName = 'audio_resources_optional';
+        $oldFolderId = $this->googleService->folderExists($folderName, $this->exportFolderId);
+        if($oldFolderId) {
+            $this->googleService->deleteFolder($oldFolderId);             
+        }
+        
+        $folderId = $this->googleService->createFolder($folderName, $this->exportFolderId);        
 
         $values = [
             ['Name', 'Link', 'Image'],
         ];
+
+        $items = Resource::where('languagepackid', $this->languagePack->id)
+            ->orderBy('name')
+            ->get();
+        $i = 1;        
+        foreach($items as $item) {
+            $file1 = $item->file ? basename($item->file->name) : 'X';   
+            if($item->file) {
+                $this->saveFileToDrive($item->file, $folderId, 'syllable audio', $file1);
+            }            
+              
+            $fileName1 = str_replace('.mp3', '', $file1);       
+
+            $values[$i] = [
+                $item->name,
+                $item->link,
+                $fileName1,
+            ];
+            $i++;
+        }        
+
 
         $this->addValuesToSheet($spreadsheetId, $sheetAndRange, $values);
         Log::info('export of resources completed');

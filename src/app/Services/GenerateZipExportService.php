@@ -11,6 +11,7 @@ use App\Enums\LangInfoEnum;
 use App\Models\Key;
 use App\Models\LanguagePack;
 use App\Models\LanguageSetting;
+use App\Models\Resource;
 use App\Models\Syllable;
 use App\Repositories\GameSettingsRepository;
 use Illuminate\Support\Facades\Log;
@@ -64,6 +65,10 @@ class GenerateZipExportService
         $settingsFile = $this->generateSettingsFile($settingsFileName, $zip, $zipFileName);
         $zip->addFile($settingsFile, "{$zipFileName}/res/raw/{$settingsFileName}");
 
+        $resourcesFileName = 'aa_resources.txt';
+        $resourcesFile = $this->generateResourcesFile($resourcesFileName, $zip, $zipFileName);
+        $zip->addFile($resourcesFile, "{$zipFileName}/res/raw/{$resourcesFileName}");
+
         $settingsFileName = 'aa_share.txt';
         $settingsFile = $this->generateShareFile($settingsFileName, $zip, $zipFileName);
         $zip->addFile($settingsFile, "{$zipFileName}/res/raw/{$settingsFileName}");
@@ -89,6 +94,32 @@ class GenerateZipExportService
     public function generateSettingsFile(string $fileName, ZipArchive $zip, string $zipFileName): string
     {
         return $this->returnSettingValues(['Setting', 'Value'], $fileName, GameSettingsRepository::class);
+    }
+
+    public function generateResourcesFile(string $fileName, ZipArchive $zip, string $zipFileName): string
+    {
+        $items = Resource::where('languagepackid', $this->languagePack->id)
+            ->orderBy('name')
+            ->get();
+        $fileContent = "Name\tLink\tImage\n";
+
+        foreach ($items as $item) {
+            $file1 = $item->file ? basename($item->file->file_path) : 'X';
+            $file1 = str_replace('.png', '', $file1);
+
+            $fileContent .= "{$item->name}" . self::SEPARATOR .
+            "{$item->link}" . self::SEPARATOR .
+            "{$file1}" . self::SEPARATOR . "\n";
+        }
+
+        $file = "{$this->tempDir}/{$fileName}";
+        file_put_contents($file, $fileContent);
+
+        foreach ($items as $item) {
+            $this->saveFile(1, $item, $zip, $zipFileName);
+        }
+
+        return $file;        
     }
 
     public function generateShareFile(string $fileName, ZipArchive $zip, string $zipFileName): string
