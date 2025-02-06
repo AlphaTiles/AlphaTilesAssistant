@@ -42,6 +42,21 @@ services:
     networks:
         - app-network      
 
+  dbtest:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: testing_db
+      MYSQL_USER: test_user
+      MYSQL_PASSWORD: test_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - test-data:/var/lib/mysql
+    networks:
+      - laravel        
+
   queue:
     build:
       context: .
@@ -59,3 +74,4 @@ networks:
 
 volumes:
   db-store:
+  test-data:
