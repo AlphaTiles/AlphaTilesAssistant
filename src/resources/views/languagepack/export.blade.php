@@ -13,15 +13,13 @@ use App\Enums\FieldTypeEnum;
 		<h1>Export Language Pack</h1>
 	</div>
 
-	@if ($errors->any())
+	@if (count($errors) > 0)
 	<div class="alert alert-error">
 		<ul class="block">
 			<?php 
-			$errorKeys = $errors->keys();
-			$errorsUnique = array_unique($errors->all());
 			?>
-			@foreach ($errorsUnique as $error)
-				<li class="block">{{ $error }}</li>
+			@foreach ($errors as $error)
+				<li class="block">{{ $error['message'] }}: <a href="/languagepack/wordlist/{{ $languagePack->id }}/{{ $error['value'] }}">{{ $error['value'] }}</a></li>
 			@endforeach
 		</ul>
 	</div>

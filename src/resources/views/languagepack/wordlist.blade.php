@@ -29,6 +29,7 @@ $path = "/storage/languagepacks/" . $languagePack->id . "/res/raw/";
 		<?php 
 		$wordData = old('words') ?? request()['words'] ?? $words;
 		$deleteValues = old('words') ? Arr::pluck(old('words') , 'delete') : Arr::pluck($wordData , 'delete'); 
+		$deleteValues = array_pad($deleteValues, count($words), null);
 		?>
 		@if($words && in_array(1, $deleteValues))		
 		<form method="post" action="{{ url('/languagepack/wordlist/' . $languagePack->id) . '?' . http_build_query(request()->query()) }}" enctype="multipart/form-data">			

@@ -34,9 +34,13 @@ class WordlistController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function edit(LanguagePack $languagePack)
+    public function edit(LanguagePack $languagePack, string $word = null)
     {        
-        $words = Word::where('languagepackid', $languagePack->id)->paginate(config('pagination.default'));
+        $words = Word::where('languagepackid', $languagePack->id)
+        ->when(!empty($word), function ($query) use ($word) {
+            return $query->where('value', $word);
+        })
+        ->paginate(config('pagination.default'));
 
         return view('languagepack.wordlist', [
             'completedSteps' => ['lang_info', 'tiles', 'wordlist'],
