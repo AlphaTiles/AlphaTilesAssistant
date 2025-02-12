@@ -48,6 +48,7 @@ Route::middleware(['auth', 'authorize.languagepack'])->group(function () {
     
     Route::post('languagepack/wordlist/{languagePack}', [WordlistController::class, 'store']);
     Route::get('languagepack/wordlist/{languagePack}', [WordlistController::class, 'edit']);
+    Route::get('languagepack/wordlist/{languagePack}/{word}', [WordlistController::class, 'edit']);
     Route::patch('languagepack/wordlist/{languagePack}', [WordlistController::class, 'update']);
     Route::delete('languagepack/wordlist/{languagePack}', [WordlistController::class, 'delete']);
     Route::get('languagepack/wordlist/{languagePack}/download/{filename}', [WordlistController::class, 'downloadFile']);

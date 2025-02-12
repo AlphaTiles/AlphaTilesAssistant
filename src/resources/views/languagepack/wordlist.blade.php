@@ -1,4 +1,5 @@
 <?php
+use App\Enums\TabEnum;
 use App\Enums\LangInfoEnum;
 use Illuminate\Support\Arr;
 use App\Models\LanguageSetting;
@@ -6,6 +7,7 @@ use App\Models\LanguageSetting;
 $langName = LanguageSetting::where('languagepackid', $languagePack->id)
 	->where('name', LangInfoEnum::LANG_NAME_ENGLISH->value)->first()->value;
 $path = "/storage/languagepacks/" . $languagePack->id . "/res/raw/";	
+$tabEnum = TabEnum::WORD;
 ?>
 
 @extends('layouts.app')
@@ -17,6 +19,8 @@ $path = "/storage/languagepacks/" . $languagePack->id . "/res/raw/";
 <div class="prose">
 
     <h1>Wordlist</h1>
+
+
 	
 	<div>
 		<div x-data="{ showMessage: true }" x-show="showMessage" x-init="setTimeout(() => showMessage = false, 3000)">
@@ -29,6 +33,7 @@ $path = "/storage/languagepacks/" . $languagePack->id . "/res/raw/";
 		<?php 
 		$wordData = old('words') ?? request()['words'] ?? $words;
 		$deleteValues = old('words') ? Arr::pluck(old('words') , 'delete') : Arr::pluck($wordData , 'delete'); 
+		$deleteValues = array_pad($deleteValues, count($words), null);
 		?>
 		@if($words && in_array(1, $deleteValues))		
 		<form method="post" action="{{ url('/languagepack/wordlist/' . $languagePack->id) . '?' . http_build_query(request()->query()) }}" enctype="multipart/form-data">			
@@ -53,6 +58,15 @@ $path = "/storage/languagepacks/" . $languagePack->id . "/res/raw/";
 		</div>	
 		</form>						
 		@endif
+
+	
+	@if(!empty($validationErrors))
+	<x-validation-errors
+		:languagePack="$languagePack"
+		:errors=$validationErrors
+		:tab="$tabEnum"
+	/>	
+	@endif
 
 	@if ($errors->any())
 	<div class="alert alert-error">
