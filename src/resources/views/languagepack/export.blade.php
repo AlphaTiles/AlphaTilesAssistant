@@ -1,6 +1,3 @@
-<?php
-use App\Enums\FieldTypeEnum;
-?>
 @extends('layouts.app')
 
 @section('content')
@@ -13,17 +10,11 @@ use App\Enums\FieldTypeEnum;
 		<h1>Export Language Pack</h1>
 	</div>
 
-	@if (count($errors) > 0)
-	<div class="alert alert-error">
-		<ul class="block">
-			<?php 
-			?>
-			@foreach ($errors as $error)
-				<li class="block">{{ $error['message'] }}: <a href="/languagepack/wordlist/{{ $languagePack->id }}/{{ $error['value'] }}">{{ $error['value'] }}</a></li>
-			@endforeach
-		</ul>
-	</div>
-	@endif
+	<x-validation-errors
+		:languagePack="$languagePack"
+		:errors="$errors"
+		:tab=null
+	/>	
 	
 	<form method="post" action="/languagepack/export/{{ $languagePack->id }}">
 		@csrf

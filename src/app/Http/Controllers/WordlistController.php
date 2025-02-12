@@ -11,6 +11,7 @@ use App\Rules\AudioFileRequired;
 use App\Rules\ImageFileRequired;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use App\Services\ValidationService;
 use Illuminate\Support\Facades\Log;
 use App\Services\WordFileUploadService;
 use Illuminate\Support\Facades\Storage;
@@ -42,11 +43,18 @@ class WordlistController extends Controller
         })
         ->paginate(config('pagination.default'));
 
+        $validationErrors = null;
+        if(empty($word)) {
+            $validationService = (new ValidationService($languagePack));
+            $validationErrors = $validationService->handle();    
+        }
+
         return view('languagepack.wordlist', [
             'completedSteps' => ['lang_info', 'tiles', 'wordlist'],
             'languagePack' => $languagePack,
             'words' => $words,
-            'pagination' => $words->links()
+            'pagination' => $words->links(),
+            'validationErrors' => $validationErrors
         ]);
     }
 

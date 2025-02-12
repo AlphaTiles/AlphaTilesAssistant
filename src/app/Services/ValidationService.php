@@ -23,7 +23,9 @@ class ValidationService
     {
         $errors = $this->checkWordFilesMissing();
 
-        return $errors;
+        $groupedErrors = collect($errors)->groupBy('type')->sortBy('tab');
+
+        return $groupedErrors->toArray();
     }
 
     private function checkWordFilesMissing(): array
@@ -39,18 +41,19 @@ class ValidationService
         $i = 0;
         foreach ($wordsWithoutFile as $word) {
             if (empty($word->audiofile_id)) {
-                $errors[$i]['message'] = "An audio file is required";
                 $errors[$i]['value'] = $word->value;
                 $errors[$i]['type'] = ErrorTypeEnum::MISSING_WORD_AUDIO_FILE;
+                $errors[$i]['tab'] = ErrorTypeEnum::MISSING_WORD_AUDIO_FILE->tab()->name();
                 $i++;
             }
             if (empty($word->imagefile_id)) {
-                $errors[$i]['message'] = "An image file is required";
                 $errors[$i]['value'] = $word->value;
                 $errors[$i]['type'] = ErrorTypeEnum::MISSING_WORD_IMAGE_FILE;
+                $errors[$i]['tab'] = ErrorTypeEnum::MISSING_WORD_AUDIO_FILE->tab()->name();
                 $i++;
             }
         }
+
 
         return $errors;
     }
