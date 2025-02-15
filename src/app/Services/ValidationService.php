@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\Tile;
 use App\Models\Word;
-use App\Enums\ErrorType;
+use App\Enums\TabEnum;
 use App\Enums\ErrorTypeEnum;
 use App\Models\LanguagePack;
+use Illuminate\Database\Eloquent\Model;
 
 class ValidationService
 {
@@ -19,9 +21,17 @@ class ValidationService
     /**
      * returns an array of errors
      */
-    public function handle(): array
+    public function handle(TabEnum $tab = null): array
     {
-        $errors = $this->checkWordFilesMissing();
+        $errors = [];
+
+        if(empty($tab) || $tab === TabEnum::WORD) {
+            $errors = $this->checkWordFilesMissing();
+        }
+
+        if(empty($tab) || $tab === TabEnum::TILE) {
+            $errors = $this->checkDuplicates($errors, new Tile(), ErrorTypeEnum::DUPLICATE_TILE);
+        }
 
         $groupedErrors = collect($errors)->groupBy('type')->sortBy('tab');
 
@@ -54,6 +64,27 @@ class ValidationService
             }
         }
 
+        return $errors;
+    }
+
+    public function checkDuplicates(array $errors, Model $model, ErrorTypeEnum $errorTypeEnum) {
+        $duplicates = $model::where('languagepackid', $this->languagePack->id)
+            ->selectRaw("value COLLATE utf8mb4_bin as normalized_value") // Ensures diacritics are ignored
+            ->groupBy('normalized_value')
+            ->havingRaw('COUNT(*) > 1')
+            ->pluck('normalized_value')
+            ->toArray();
+
+        $i = count($errors);
+
+        if (!empty($duplicates)) {
+            foreach($duplicates as $duplicate) {
+                $errors[$i]['value'] = $duplicate;
+                $errors[$i]['type'] = $errorTypeEnum;
+                $errors[$i]['tab'] = $errorTypeEnum->tab()->name();    
+                $i++;
+            }
+        }
 
         return $errors;
     }

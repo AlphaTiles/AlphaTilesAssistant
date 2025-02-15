@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Word;
 use App\Enums\FileTypeEnum;
+use App\Enums\TabEnum;
 use App\Models\LanguagePack;
 use Illuminate\Http\Request;
 use App\Rules\CustomRequired;
@@ -46,7 +47,7 @@ class WordlistController extends Controller
         $validationErrors = null;
         if(empty($word)) {
             $validationService = (new ValidationService($languagePack));
-            $validationErrors = $validationService->handle();    
+            $validationErrors = $validationService->handle(TabEnum::WORD);    
         }
 
         return view('languagepack.wordlist', [

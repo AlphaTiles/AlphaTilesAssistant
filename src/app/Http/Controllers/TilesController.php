@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\TabEnum;
 use App\Models\File;
 use App\Models\Tile;
 use App\Models\LanguagePack;
@@ -10,6 +11,7 @@ use App\Rules\CustomRequired;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Services\FileUploadService;
+use App\Services\ValidationService;
 use Illuminate\Support\Facades\Log;
 use App\Services\Mp3FileUploadService;
 use App\Services\TileFileUploadService;
@@ -45,16 +47,43 @@ class TilesController extends BaseItemController
         
         $tiles = Tile::where('languagepackid', $languagePack->id)->paginate(config('pagination.default'));
 
+        $validationErrors = null;
+        if(empty($word)) {
+            $validationService = (new ValidationService($languagePack));
+            $validationErrors = $validationService->handle(TabEnum::TILE);    
+        }
+
         return view('languagepack.tiles', [
             'completedSteps' => ['lang_info', 'tiles'],
             'languagePack' => $languagePack,
             'items' => $tiles,
-            'pagination' => $tiles->links()
+            'pagination' => $tiles->links(),
+            'validationErrors' => $validationErrors
         ]);
     }
 
     public function store(LanguagePack $languagePack, Request $request)
     {
+        $request->validate([
+            'add_items' => [
+                'required',
+                function ($attribute, $value, $fail) use ($languagePack) {
+                    $tiles = explode("\r\n", $value);
+                    $duplicates = Tile::where('languagepackid', $languagePack->id)
+                        ->whereIn('value', $tiles)
+                        ->pluck('value')
+                        ->toArray();
+                    
+                    // Filter the duplicates array to only include exact matches (case and accent sensitive)
+                    $duplicates = array_intersect($duplicates, $tiles);
+                    
+                    
+                    if (!empty($duplicates)) {
+                        $fail('The following tiles already exist: ' . implode(', ', $duplicates));
+                    }
+                },
+            ],
+        ]);
         $data = $request->all();
         $tiles = explode("\r\n", $data['add_items']);
 
