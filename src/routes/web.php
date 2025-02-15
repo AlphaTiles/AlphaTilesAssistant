@@ -40,9 +40,10 @@ Route::middleware(['auth', 'authorize.languagepack'])->group(function () {
     Route::get('languagepack/edit/{languagePack}', [LanguageInfoController::class, 'edit']);
 
     Route::get('languagepack/tiles/{languagePack}', [TilesController::class, 'edit']);
+    Route::get('languagepack/tiles/{languagePack}/{tile}', [TilesController::class, 'edit']);
     Route::post('languagepack/tiles/{languagePack}', [TilesController::class, 'store']);
-    Route::patch('languagepack/tiles/{languagePack}', [TilesController::class, 'update']);
-    Route::delete('languagepack/tiles/{languagePack}', [TilesController::class, 'delete']);
+    Route::patch('languagepack/tiles/{languagePack}', [TilesController::class, 'update'])->name('update-tiles');
+    Route::delete('languagepack/tiles/{languagePack}', [TilesController::class, 'delete'])->name('delete-tiles');
     
     Route::get('languagepack/items/{languagePack}/download/{filename}', [ItemsController::class, 'downloadFile']);
     

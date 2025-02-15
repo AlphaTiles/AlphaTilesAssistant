@@ -41,11 +41,15 @@ class TilesController extends BaseItemController
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function edit(LanguagePack $languagePack)
+    public function edit(LanguagePack $languagePack, string $tile = null)
     {        
         session()->forget('success');
         
-        $tiles = Tile::where('languagepackid', $languagePack->id)->paginate(config('pagination.default'));
+        $tiles = Tile::where('languagepackid', $languagePack->id)
+        ->when(!empty($tile), function ($query) use ($tile) {
+            return $query->where('value', $tile);
+        })
+        ->paginate(config('pagination.default'));
 
         $validationErrors = null;
         if(empty($word)) {

@@ -28,7 +28,7 @@ $tabEnum = TabEnum::TILE;
 		$deleteValues = array_pad($deleteValues, count($items), null);
 		?>
 		@if($items && in_array(1, $deleteValues))
-		<form method="post" action="{{ request()->fullUrl() }}" enctype="multipart/form-data">			
+		<form method="post" action="{{ route('delete-tiles', $languagePack->id) }} . '?' . http_build_query(request()->query()) }}" enctype="multipart/form-data">			
 		@csrf
 		@method('DELETE')
 		<div class="alert mb-3">  				
@@ -73,7 +73,7 @@ $tabEnum = TabEnum::TILE;
 	</div>
 	@endif
 
-	<form method="post" action="{{ request()->fullUrl() }}" enctype="multipart/form-data">			
+	<form method="post" action="{{ route('update-tiles', $languagePack->id) }} . '?' . http_build_query(request()->query())" enctype="multipart/form-data">			
 	@csrf
 	@method('PATCH')
 	@if(count($items) > 0)
