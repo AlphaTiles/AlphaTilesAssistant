@@ -1,6 +1,9 @@
 <?php
+
+use App\Enums\TabEnum;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
+$tabEnum = TabEnum::SYLLABLE;
 ?>
 
 @extends('layouts.app')
@@ -25,6 +28,7 @@ use Illuminate\Support\Facades\Log;
 		<?php 
 		$syllablesData = old('items') ?? request()['items'] ?? $syllables;
 		$deleteValues = old('items') ? Arr::pluck(old('items') , 'delete') : Arr::pluck($syllablesData , 'delete'); 
+		$deleteValues = array_pad($deleteValues, count($syllables), null);
 		?>
 		@if($syllables && in_array(1, $deleteValues))
 		<form method="post" action="/languagepack/syllables/{{ $languagePack->id }}" enctype="multipart/form-data">			
@@ -49,6 +53,14 @@ use Illuminate\Support\Facades\Log;
 		</div>	
 		</form>						
 		@endif
+
+	@if(!empty($validationErrors))
+	<x-validation-errors
+		:languagePack="$languagePack"
+		:errors=$validationErrors
+		:tab="$tabEnum"
+	/>	
+	@endif
 
 	@if ($errors->any())
 	<div class="alert alert-error">
@@ -151,9 +163,9 @@ use Illuminate\Support\Facades\Log;
 	<form method="post" action="/languagepack/syllables/{{ $languagePack->id }}">
 		@csrf
 		<div>
-			<label for="add_syllables">Add syllables (one syllable per line):</label><br>
+			<label for="add_items">Add syllables (one syllable per line):</label><br>
 
-			<textarea name="add_syllables" rows=7 cols=40 class="leading-tight"></textarea>
+			<textarea name="add_items" rows=7 cols=40 class="leading-tight">{{ old('add_items') }}</textarea>
 		</div>
 
 		<div class="mt-3 w-9/12">		

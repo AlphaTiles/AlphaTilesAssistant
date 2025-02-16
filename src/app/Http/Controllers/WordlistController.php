@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Word;
 use App\Enums\FileTypeEnum;
+use App\Enums\TabEnum;
 use App\Models\LanguagePack;
 use Illuminate\Http\Request;
 use App\Rules\CustomRequired;
@@ -18,18 +19,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 
-class WordlistController extends Controller
+class WordlistController extends BaseItemController
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
     /**
      * Edit the language pack setup.
      *
@@ -46,7 +37,7 @@ class WordlistController extends Controller
         $validationErrors = null;
         if(empty($word)) {
             $validationService = (new ValidationService($languagePack));
-            $validationErrors = $validationService->handle();    
+            $validationErrors = $validationService->handle(TabEnum::WORD);    
         }
 
         return view('languagepack.wordlist', [
@@ -60,8 +51,10 @@ class WordlistController extends Controller
 
     public function store(LanguagePack $languagePack, Request $request)
     {
+        $this->validateAddItems($request, $languagePack, new Word(), 'words');
+
         $data = $request->all();
-        $words = explode("\r\n", $data['add_words']);
+        $words = explode("\r\n", $data['add_items']);
 
         $insert = [];
         foreach($words as $key => $word) {

@@ -1,6 +1,8 @@
 <?php
+use App\Enums\TabEnum;
 use App\Enums\ColorEnum;
 use Illuminate\Support\Arr;
+$tabEnum = TabEnum::KEY;
 ?>
 
 @extends('layouts.app')
@@ -24,6 +26,7 @@ use Illuminate\Support\Arr;
 		<?php 
 		$keyData = old('items') ?? request()['items'] ?? $keys;
 		$deleteValues = old('items') ? Arr::pluck(old('items') , 'delete') : Arr::pluck($keyData , 'delete'); 
+		$deleteValues = array_pad($deleteValues, count($keys), null);
 		?>
 		@if($keys && in_array(1, $deleteValues))
 		<form method="post" action="/languagepack/keyboard/{{ $languagePack->id }}" enctype="multipart/form-data">			
@@ -48,6 +51,15 @@ use Illuminate\Support\Arr;
 		</div>	
 		</form>						
 		@endif
+
+	@if(!empty($validationErrors))
+	<x-validation-errors
+		:languagePack="$languagePack"
+		:errors=$validationErrors
+		:tab="$tabEnum"
+	/>	
+	@endif
+
 
 	@if ($errors->any())
 	<div class="alert alert-error">
@@ -136,8 +148,8 @@ use Illuminate\Support\Arr;
 		<form method="post" action="/languagepack/keyboard/{{ $languagePack->id }}">
 			@csrf
 			<div>
-				<label for="add_keys">Add keys (one key per line):</label> <a href="#" onClick="openAlert('Keyboard instructions', 'The order in which the keys are listed in the keyboard tab will be the order in which the keyboard is created in the game.<br><br>If your word includes a dash, you must add it. If your words contain spaces, you must add it as an underscore.')"><i class="fa-solid fa-circle-info"></i></a><br>
-				<textarea name="add_keys" rows=10 cols=15 class="leading-tight">{{ $defaultKeys }}</textarea>
+				<label for="add_items">Add keys (one key per line):</label> <a href="#" onClick="openAlert('Keyboard instructions', 'The order in which the keys are listed in the keyboard tab will be the order in which the keyboard is created in the game.<br><br>If your word includes a dash, you must add it. If your words contain spaces, you must add it as an underscore.')"><i class="fa-solid fa-circle-info"></i></a><br>
+				<textarea name="add_items" rows=10 cols=15 class="leading-tight">{{ old('add_items', $defaultKeys) }}</textarea>
 			</div>
 
 			<div class="mt-3 w-9/12">		

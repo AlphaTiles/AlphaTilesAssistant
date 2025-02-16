@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\TabEnum;
 use App\Models\File;
 use App\Models\Tile;
 use App\Models\LanguagePack;
@@ -10,6 +11,7 @@ use App\Rules\CustomRequired;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Services\FileUploadService;
+use App\Services\ValidationService;
 use Illuminate\Support\Facades\Log;
 use App\Services\Mp3FileUploadService;
 use App\Services\TileFileUploadService;
@@ -39,22 +41,35 @@ class TilesController extends BaseItemController
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function edit(LanguagePack $languagePack)
+    public function edit(LanguagePack $languagePack, string $tile = null)
     {        
         session()->forget('success');
         
-        $tiles = Tile::where('languagepackid', $languagePack->id)->paginate(config('pagination.default'));
+        $tiles = Tile::where('languagepackid', $languagePack->id)
+        ->when(!empty($tile), function ($query) use ($tile) {
+            return $query->where('value', $tile);
+        })
+        ->paginate(config('pagination.default'));
+
+        $validationErrors = null;
+        if(empty($tile)) {
+            $validationService = (new ValidationService($languagePack));
+            $validationErrors = $validationService->handle(TabEnum::TILE);    
+        }
 
         return view('languagepack.tiles', [
             'completedSteps' => ['lang_info', 'tiles'],
             'languagePack' => $languagePack,
             'items' => $tiles,
-            'pagination' => $tiles->links()
+            'pagination' => $tiles->links(),
+            'validationErrors' => $validationErrors
         ]);
     }
 
     public function store(LanguagePack $languagePack, Request $request)
     {
+        $this->validateAddItems($request, $languagePack, new Tile(), 'tiles');
+
         $data = $request->all();
         $tiles = explode("\r\n", $data['add_items']);
 

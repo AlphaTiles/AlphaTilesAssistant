@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\TabEnum;
 use App\Models\Syllable;
 use App\Models\LanguagePack;
 use Illuminate\Http\Request;
 use App\Rules\CustomRequired;
+use Google\Service\Vision\Symbol;
 use Illuminate\Support\Facades\DB;
 use App\Services\FileUploadService;
+use App\Services\ValidationService;
 use App\Services\Mp3FileUploadService;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Redirect;
@@ -35,24 +38,38 @@ class SyllablesController extends BaseItemController
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function edit(LanguagePack $languagePack)
+    public function edit(LanguagePack $languagePack, string $syllable = null)
     {        
-        session()->forget('success');
+        session()->forget('success');        
         
-        $items = $this->model::where('languagepackid', $languagePack->id)->paginate(config('pagination.default'));
+        $items = $this->model::where('languagepackid', $languagePack->id)
+        ->when(!empty($syllable), function ($query) use ($syllable) {
+            return $query->where('value', $syllable);
+        })        
+        ->paginate(config('pagination.default'));
+
+        $validationErrors = null;
+        if(empty($syllable)) {
+            $validationService = (new ValidationService($languagePack));
+            $validationErrors = $validationService->handle(TabEnum::SYLLABLE);    
+        }
+
 
         return view('languagepack.' . $this->route, [
             'completedSteps' => ['lang_info', 'tiles', 'wordlist', 'keyboard', 'syllables'],
             'languagePack' => $languagePack,
             'syllables' => $items,
-            'pagination' => $items->links()
+            'pagination' => $items->links(),
+            'validationErrors' => $validationErrors
         ]);
     }
 
     public function store(LanguagePack $languagePack, Request $request)
     {
+        $this->validateAddItems($request, $languagePack, new Syllable(), 'syllables');
+
         $data = $request->all();
-        $items = explode("\r\n", $data['add_syllables']);
+        $items = explode("\r\n", $data['add_items']);
 
         $insert = [];
         foreach($items as $key => $item) {

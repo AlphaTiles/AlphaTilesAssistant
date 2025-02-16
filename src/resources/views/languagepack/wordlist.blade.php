@@ -203,8 +203,8 @@ $tabEnum = TabEnum::WORD;
 	<form method="post" action="/languagepack/wordlist/{{ $languagePack->id }}">
 		@csrf
 		<div>
-			<label for="add_words">Add Words (one word per line):</label> <a href="#" onClick="openAlert('How many words should be included?', '300 words is recommended, but 100-150 words is a common starting point. A good goal is to include, for every game tile, one word that begins with that game tile (although there are of course some game tiles in some languages that never appear at the beginning of words). If you have more than 300 words, it is worth considering whether multiple apps should be made, perhaps dividing the words into semantic groupings or beginner/advanced groupings, etc.')"><i class="fa-solid fa-circle-info"></i></a><br>
-			<textarea name="add_words" rows=7 cols=45 class="leading-tight"></textarea>
+			<label for="add_items">Add Words (one word per line):</label> <a href="#" onClick="openAlert('How many words should be included?', '300 words is recommended, but 100-150 words is a common starting point. A good goal is to include, for every game tile, one word that begins with that game tile (although there are of course some game tiles in some languages that never appear at the beginning of words). If you have more than 300 words, it is worth considering whether multiple apps should be made, perhaps dividing the words into semantic groupings or beginner/advanced groupings, etc.')"><i class="fa-solid fa-circle-info"></i></a><br>
+			<textarea name="add_items" rows=7 cols=45 class="leading-tight">{{ old('add_items') }}</textarea>
 		</div>
 
 		<div class="mt-3 w-9/12">		
