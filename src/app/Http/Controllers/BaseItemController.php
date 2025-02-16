@@ -53,4 +53,27 @@ class BaseItemController extends Controller
         return redirect("languagepack/{$this->route}/{$languagePack->id}");
     }  
 
+    protected function validateAddItems(Request $request, LanguagePack $languagePack, Model $model, string $itemName) {
+        $request->validate([
+            'add_items' => [
+                'required',
+                function ($attribute, $value, $fail) use ($languagePack, $model, $itemName) {
+                    $items = explode("\r\n", $value);
+                    $duplicates = $model::where('languagepackid', $languagePack->id)
+                        ->whereIn('value', $items)
+                        ->pluck('value')
+                        ->toArray();
+                    
+                    // Filter the duplicates array to only include exact matches (case and accent sensitive)
+                    $duplicates = array_intersect($duplicates, $items);
+                    
+                    
+                    if (!empty($duplicates)) {
+                        $fail("The following {$itemName} already exist: " . implode(', ', $duplicates));
+                    }
+                },
+            ],
+        ]);
+
+    }
 }

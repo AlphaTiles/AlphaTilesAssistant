@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Key;
+use App\Enums\TabEnum;
 use App\Models\LanguagePack;
 use Illuminate\Http\Request;
 use App\Rules\CustomRequired;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
+use App\Services\ValidationService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
@@ -27,11 +29,22 @@ class KeyboardController extends BaseItemController
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function edit(LanguagePack $languagePack)
+    public function edit(LanguagePack $languagePack, string $key = null)
     {        
         session()->forget('success');
 
-        $keys = Key::where('languagepackid', $languagePack->id)->get();        
+        $keys = Key::where('languagepackid', $languagePack->id)
+        ->when(!empty($key), function ($query) use ($key) {
+            return $query->where('value', $key);
+        })        
+        ->get();  
+
+        $validationErrors = null;
+        if(empty($key)) {
+            $validationService = (new ValidationService($languagePack));
+            $validationErrors = $validationService->handle(TabEnum::KEY);    
+        }
+        
 
         $defaultKeys = '';
         if(count($keys) === 0) {
@@ -44,14 +57,17 @@ class KeyboardController extends BaseItemController
             'completedSteps' => ['lang_info', 'tiles', 'wordlist', 'keyboard'],
             'languagePack' => $languagePack,
             'keys' => $keys,
-            'defaultKeys' => $defaultKeys
+            'defaultKeys' => $defaultKeys,
+            'validationErrors' => $validationErrors
         ]);
     }
 
     public function store(LanguagePack $languagePack, Request $request)
     {
+        $this->validateAddItems($request, $languagePack, new Key(), 'keys');
+
         $data = $request->all();
-        $keys = explode("\r\n", $data['add_keys']);
+        $keys = explode("\r\n", $data['add_items']);
 
         foreach($keys as $i => $key) {
             if(!empty($key)) {

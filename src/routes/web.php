@@ -56,6 +56,7 @@ Route::middleware(['auth', 'authorize.languagepack'])->group(function () {
 
     Route::post('languagepack/keyboard/{languagePack}', [KeyboardController::class, 'store']);
     Route::get('languagepack/keyboard/{languagePack}', [KeyboardController::class, 'edit']);
+    Route::get('languagepack/keyboard/{languagePack}/{key}', [KeyboardController::class, 'edit']);
     Route::patch('languagepack/keyboard/{languagePack}', [KeyboardController::class, 'update']);
     Route::delete('languagepack/keyboard/{languagePack}', [KeyboardController::class, 'delete']);
 
@@ -65,6 +66,7 @@ Route::middleware(['auth', 'authorize.languagepack'])->group(function () {
     Route::delete('languagepack/resources/{languagePack}', [ResourcesController::class, 'delete']);    
 
     Route::get('languagepack/syllables/{languagePack}', [SyllablesController::class, 'edit']);
+    Route::get('languagepack/syllables/{languagePack}/{syllable}', [SyllablesController::class, 'edit']);
     Route::post('languagepack/syllables/{languagePack}', [SyllablesController::class, 'store']);
     Route::patch('languagepack/syllables/{languagePack}', [SyllablesController::class, 'update']);
     Route::delete('languagepack/syllables/{languagePack}', [SyllablesController::class, 'delete']);

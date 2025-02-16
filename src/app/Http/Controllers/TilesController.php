@@ -52,7 +52,7 @@ class TilesController extends BaseItemController
         ->paginate(config('pagination.default'));
 
         $validationErrors = null;
-        if(empty($word)) {
+        if(empty($tile)) {
             $validationService = (new ValidationService($languagePack));
             $validationErrors = $validationService->handle(TabEnum::TILE);    
         }
@@ -68,26 +68,8 @@ class TilesController extends BaseItemController
 
     public function store(LanguagePack $languagePack, Request $request)
     {
-        $request->validate([
-            'add_items' => [
-                'required',
-                function ($attribute, $value, $fail) use ($languagePack) {
-                    $tiles = explode("\r\n", $value);
-                    $duplicates = Tile::where('languagepackid', $languagePack->id)
-                        ->whereIn('value', $tiles)
-                        ->pluck('value')
-                        ->toArray();
-                    
-                    // Filter the duplicates array to only include exact matches (case and accent sensitive)
-                    $duplicates = array_intersect($duplicates, $tiles);
-                    
-                    
-                    if (!empty($duplicates)) {
-                        $fail('The following tiles already exist: ' . implode(', ', $duplicates));
-                    }
-                },
-            ],
-        ]);
+        $this->validateAddItems($request, $languagePack, new Tile(), 'tiles');
+
         $data = $request->all();
         $tiles = explode("\r\n", $data['add_items']);
 

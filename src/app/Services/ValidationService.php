@@ -6,7 +6,9 @@ use App\Models\Tile;
 use App\Models\Word;
 use App\Enums\TabEnum;
 use App\Enums\ErrorTypeEnum;
+use App\Models\Key;
 use App\Models\LanguagePack;
+use App\Models\Syllable;
 use Illuminate\Database\Eloquent\Model;
 
 class ValidationService
@@ -27,6 +29,15 @@ class ValidationService
 
         if(empty($tab) || $tab === TabEnum::WORD) {
             $errors = $this->checkWordFilesMissing();
+            $errors = $this->checkDuplicates($errors, new Word(), ErrorTypeEnum::DUPLICATE_WORD);
+        }
+
+        if(empty($tab) || $tab === TabEnum::KEY) {
+            $errors = $this->checkDuplicates($errors, new Key(), ErrorTypeEnum::DUPLICATE_KEY);
+        }
+
+        if(empty($tab) || $tab === TabEnum::SYLLABLE) {
+            $errors = $this->checkDuplicates($errors, new Syllable(), ErrorTypeEnum::DUPLICATE_SYLLABLE);
         }
 
         if(empty($tab) || $tab === TabEnum::TILE) {
