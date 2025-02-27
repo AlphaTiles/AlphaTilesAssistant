@@ -29,7 +29,7 @@ class ValidationService
 
         if(empty($tab) || $tab === TabEnum::WORD) {
             $errors = $this->checkWordFilesMissing();
-            $errors = $this->checkDuplicates($errors, new Word(), ErrorTypeEnum::DUPLICATE_WORD);
+            $errors = $this->checkDuplicates($errors, new Word(), ErrorTypeEnum::DUPLICATE_WORD);            
         }
 
         if(empty($tab) || $tab === TabEnum::KEY) {
@@ -42,6 +42,11 @@ class ValidationService
 
         if(empty($tab) || $tab === TabEnum::TILE) {
             $errors = $this->checkDuplicates($errors, new Tile(), ErrorTypeEnum::DUPLICATE_TILE);
+        }
+
+        if(empty($tab)) {
+            $counTilesService = new CountTilesService($this->languagePack);
+            $tileUsage = $counTilesService->handle();
         }
 
         $groupedErrors = collect($errors)->groupBy('type')->sortBy('tab');
