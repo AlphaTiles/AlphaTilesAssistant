@@ -23,9 +23,13 @@ use App\Enums\ErrorTypeEnum;
         <div class="collapse-content">
             @foreach ($errorGroup as $error)
                 <div>
+                    @if($typeEnum->isLinkable())
                     <a href="/languagepack/{{ $typeEnum->tab()->path() }}/{{ $languagePack->id }}/{{ $error['value'] }}">
                         {{ $error['value'] }}
                     </a>
+                    @else
+                        {{ $error['value'] }}
+                    @endif
                 </div>
             @endforeach
         </div>

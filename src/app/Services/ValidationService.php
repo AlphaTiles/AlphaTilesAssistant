@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class ValidationService
 {
+    const NUM_TIMES_TILES_WANTED_IN_WORDS = 5;
+
     protected LanguagePack $languagePack;
 
     public function __construct(LanguagePack $languagePack)
@@ -45,8 +47,7 @@ class ValidationService
         }
 
         if(empty($tab)) {
-            $counTilesService = new CountTilesService($this->languagePack);
-            $tileUsage = $counTilesService->handle();
+            $errors = $this->checkTileUsage($errors);
         }
 
         $groupedErrors = collect($errors)->groupBy('type')->sortBy('tab');
@@ -98,6 +99,24 @@ class ValidationService
                 $errors[$i]['value'] = $duplicate;
                 $errors[$i]['type'] = $errorTypeEnum;
                 $errors[$i]['tab'] = $errorTypeEnum->tab()->name();    
+                $i++;
+            }
+        }
+
+        return $errors;
+    }
+
+    public function checkTileUsage(array $errors): array
+    {
+        $counTilesService = new CountTilesService($this->languagePack);
+        $tileUsage = $counTilesService->handle();
+
+        $i = count($errors);
+        foreach ($tileUsage as $tile => $count) {
+            if ($count < self::NUM_TIMES_TILES_WANTED_IN_WORDS) {
+                $errors[$i]['value'] = $tile . ' (' . $count . ')';
+                $errors[$i]['type'] = ErrorTypeEnum::TILE_USAGE;
+                $errors[$i]['tab'] = ErrorTypeEnum::TILE_USAGE->tab()->name();
                 $i++;
             }
         }
