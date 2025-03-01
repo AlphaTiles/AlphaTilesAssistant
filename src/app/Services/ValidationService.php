@@ -86,10 +86,10 @@ class ValidationService
 
     public function checkDuplicates(array $errors, Model $model, ErrorTypeEnum $errorTypeEnum) {
         $duplicates = $model::where('languagepackid', $this->languagePack->id)
-            ->selectRaw("value COLLATE utf8mb4_bin as normalized_value") // Ensures diacritics are ignored
-            ->groupBy('normalized_value')
+            ->selectRaw("value, LOWER(value) COLLATE utf8mb4_bin as normalized_value") // Ensures diacritics are ignored
+            ->groupBy('normalized_value', 'value')
             ->havingRaw('COUNT(*) > 1')
-            ->pluck('normalized_value')
+            ->pluck('value')
             ->toArray();
 
         $i = count($errors);
