@@ -8,6 +8,7 @@ use App\Models\Tile;
 use App\Models\Word;
 use App\Enums\LangInfoEnum;
 use App\Models\LanguageSetting;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -16,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class LanguagePack extends Model
 {
     use SoftDeletes;
+    use HasFactory;
     
     protected $fillable = [
         'userid',
