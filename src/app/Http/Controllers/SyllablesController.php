@@ -97,12 +97,8 @@ class SyllablesController extends BaseItemController
             [
                 'items.*' => [
                     'required_unless:items.*.delete,1',
-                    new RequireAtLeastOneDistractor(request()),
                 ],
                 'items.*.languagepackid' => ['required', 'integer'],
-                'items.*.or_1' => ['required_unless:items.*.delete,1'],
-                'items.*.or_2' => ['required_unless:items.*.delete,1'],
-                'items.*.or_3' => ['required_unless:items.*.delete,1'],
                 'items.*.file' => $fileRules,
                 'items.*.color' => ['sometimes'],
             ],

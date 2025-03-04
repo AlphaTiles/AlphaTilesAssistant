@@ -12,6 +12,8 @@ enum ErrorTypeEnum: string
     case DUPLICATE_SYLLABLE            = 'duplicate_syllable';
     case DUPLICATE_TILE                = 'duplicate_tile';
     case DUPLICATE_WORD                = 'duplicate_word';
+    case EMPTY_DISTRACTOR_SYLLABLE      = 'empty_distractor_syllable';
+    case EMPTY_DISTRACTOR_TILE         = 'empty_distractor_tile';
     case TILE_USAGE                    = 'tile_usage';
 
     public function label(): string
@@ -23,6 +25,8 @@ enum ErrorTypeEnum: string
             self::DUPLICATE_SYLLABLE     => 'The following syllables are duplicate',
             self::DUPLICATE_TILE          => 'The following tiles are duplicate',
             self::DUPLICATE_WORD           => 'The following words are duplicate',
+            self::EMPTY_DISTRACTOR_SYLLABLE => 'Distractors cannot be empty',
+            self::EMPTY_DISTRACTOR_TILE         => 'Distractors cannot be empty',
             self::TILE_USAGE               => "It is recommended that each tile be used at least " . ValidationService::NUM_TIMES_TILES_WANTED_IN_WORDS . " times",
         };
     }
@@ -36,6 +40,8 @@ enum ErrorTypeEnum: string
             self::DUPLICATE_SYLLABLE => TabEnum::SYLLABLE,
             self::DUPLICATE_TILE => TabEnum::TILE,
             self::DUPLICATE_WORD => TabEnum::WORD,
+            self::EMPTY_DISTRACTOR_SYLLABLE => TabEnum::SYLLABLE,
+            self::EMPTY_DISTRACTOR_TILE => TabEnum::TILE,
             self::TILE_USAGE => TabEnum::TILE,
         };
     }

@@ -100,14 +100,10 @@ class TilesController extends BaseItemController
             [
                 'items.*' => [
                     'required_unless:items.*.delete,1',
-                    new RequireAtLeastOneDistractor(request()),
                     new CustomRequired(request(), 'type')
                 ],
                 'items.*.languagepackid' => ['required', 'integer'],
                 'items.*.type' => ['required_unless:items.*.delete,1'],
-                'items.*.or_1' => ['required_unless:items.*.delete,1'],
-                'items.*.or_2' => ['required_unless:items.*.delete,1'],
-                'items.*.or_3' => ['required_unless:items.*.delete,1'],
                 'items.*.type2' => ['sometimes'],    
                 'items.*.type3' => ['sometimes'],    
                 'items.*.file' => $fileRules,
