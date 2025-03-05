@@ -130,14 +130,7 @@ class WordlistController extends BaseItemController
         
         session()->flash('success', 'Records updated successfully');
 
-        $wordCollection = Word::where('languagepackid', $languagePack->id)->paginate(config('pagination.default'));
-
-        return view('languagepack.wordlist', [
-            'completedSteps' => ['lang_info', 'tiles', 'wordlist'],
-            'languagePack' => $languagePack,
-            'words' => $wordCollection,
-            'pagination' => $wordCollection->links()
-        ]);
+        return redirect(url('/languagepack/wordlist/' . $languagePack->id) . '?' . http_build_query(request()->query()));
     }
     
     public function delete(LanguagePack $languagePack, Request $request) 

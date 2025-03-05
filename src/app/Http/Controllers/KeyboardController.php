@@ -103,13 +103,11 @@ class KeyboardController extends BaseItemController
             [
                 'items.*' => [
                     'required_unless:items.*.delete,1',
-                    new CustomRequired(request(), 'color')
                 ],
                 'items.*.languagepackid' => ['required', 'integer'],
                 'items.*.value' => [
                     'required_unless:items.*.delete,1',
                 ],
-                'items.*.color' => ['required_unless:items.*.delete,1'],
             ],
             [                
                 'items.*.value' => '',

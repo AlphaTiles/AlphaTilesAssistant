@@ -5,16 +5,20 @@ use Tests\TestCase;
 use App\Models\File;
 use App\Models\Tile;
 use App\Models\Word;
+use App\Models\Syllable;
 use Illuminate\Support\Arr;
 use App\Enums\ErrorTypeEnum;
 use App\Models\LanguagePack;
 use App\Services\ValidationService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 
 class ValidationServiceTest extends TestCase
 {
     private LanguagePack $languagePack;
     private ValidationService $validationService;
+
+    use RefreshDatabase;
 
     protected function setUp(): void
     {
@@ -184,4 +188,107 @@ class ValidationServiceTest extends TestCase
         $this->assertEquals(ErrorTypeEnum::MISSING_WORD_IMAGE_FILE, $firstImageError['type']);
         $this->assertEquals(ErrorTypeEnum::MISSING_WORD_IMAGE_FILE->tab()->name(), $firstImageError['tab']);
     }
+
+    public function test_check_tile_distractors()
+    {
+        $testLanguagePack = LanguagePack::factory()->create();
+        $validationService = new ValidationService($testLanguagePack);
+
+        // Create tile with no distractors
+        Tile::factory()->create([
+            'value' => 'ch',
+            'languagepackid' => $testLanguagePack->id,
+            'or_1' => null,
+            'or_2' => null,
+            'or_3' => null
+        ]);
+
+        // Create tile with partial distractors
+        Tile::factory()->create([
+            'value' => 'sch',
+            'languagepackid' => $testLanguagePack->id,
+            'or_1' => 'sh',
+            'or_2' => null,
+            'or_3' => null
+        ]);
+
+        // Create tile with all distractors (should not trigger error)
+        Tile::factory()->create([
+            'value' => 'a',
+            'languagepackid' => $testLanguagePack->id,
+            'or_1' => 'e',
+            'or_2' => 'i',
+            'or_3' => 'o'
+        ]);
+
+        $result = $validationService->handle();
+
+        $tileErrors = $result[ErrorTypeEnum::EMPTY_DISTRACTOR_TILE->value];
+
+        // Should have 2 tiles with distractor errors
+        $this->assertCount(2, $tileErrors);
+        
+        // Verify the tiles with missing distractors
+        $errorTiles = collect($tileErrors)->pluck('value')->toArray();
+        $this->assertContains('ch', $errorTiles);
+        $this->assertContains('sch', $errorTiles);
+        $this->assertNotContains('a', $errorTiles);
+
+        // Verify error structure
+        $firstError = $tileErrors[0];
+        $this->assertEquals(ErrorTypeEnum::EMPTY_DISTRACTOR_TILE, $firstError['type']);
+        $this->assertEquals(ErrorTypeEnum::EMPTY_DISTRACTOR_TILE->tab()->name(), $firstError['tab']);
+    }
+
+    public function test_check_syllable_distractors()
+    {
+        // Create a separate language pack for this test
+        $testLanguagePack = LanguagePack::factory()->create();
+        $validationService = new ValidationService($testLanguagePack);
+
+        // Create syllable with no distractors
+        Syllable::factory()->create([
+            'value' => 'ba',
+            'languagepackid' => $testLanguagePack->id,
+            'or_1' => null,
+            'or_2' => null,
+            'or_3' => null
+        ]);
+
+        // Create syllable with partial distractors
+        Syllable::factory()->create([
+            'value' => 'be',
+            'languagepackid' => $testLanguagePack->id,
+            'or_1' => 'bi',
+            'or_2' => null,
+            'or_3' => null
+        ]);
+
+        // Create syllable with all distractors (should not trigger error)
+        Syllable::factory()->create([
+            'value' => 'bo',
+            'languagepackid' => $testLanguagePack->id,
+            'or_1' => 'bu',
+            'or_2' => 'ba',
+            'or_3' => 'bi'
+        ]);
+
+        $result = $validationService->handle();
+
+        $syllableErrors = $result[ErrorTypeEnum::EMPTY_DISTRACTOR_SYLLABLE->value];
+
+        // Should have 2 syllables with distractor errors
+        $this->assertCount(2, $syllableErrors);
+        
+        // Verify the syllables with missing distractors
+        $errorSyllables = collect($syllableErrors)->pluck('value')->toArray();
+        $this->assertContains('ba', $errorSyllables);
+        $this->assertContains('be', $errorSyllables);
+        $this->assertNotContains('bo', $errorSyllables);
+
+        // Verify error structure
+        $firstError = $syllableErrors[0];
+        $this->assertEquals(ErrorTypeEnum::EMPTY_DISTRACTOR_SYLLABLE, $firstError['type']);
+        $this->assertEquals(ErrorTypeEnum::EMPTY_DISTRACTOR_SYLLABLE->tab()->name(), $firstError['tab']);
+    }    
 }

@@ -36,14 +36,18 @@ class ValidationService
 
         if(empty($tab) || $tab === TabEnum::KEY) {
             $errors = $this->checkDuplicates($errors, new Key(), ErrorTypeEnum::DUPLICATE_KEY);
+            $errors = $this->checkColor($errors, new Key(), ErrorTypeEnum::COLOR_KEY);
         }
 
         if(empty($tab) || $tab === TabEnum::SYLLABLE) {
             $errors = $this->checkDuplicates($errors, new Syllable(), ErrorTypeEnum::DUPLICATE_SYLLABLE);
+            $errors = $this->checkDistractors($errors, new Syllable(), ErrorTypeEnum::EMPTY_DISTRACTOR_SYLLABLE);
         }
 
         if(empty($tab) || $tab === TabEnum::TILE) {
             $errors = $this->checkDuplicates($errors, new Tile(), ErrorTypeEnum::DUPLICATE_TILE);
+            $errors = $this->checkDistractors($errors, new Tile(), ErrorTypeEnum::EMPTY_DISTRACTOR_TILE);
+            $errors = $this->checkTypes($errors, new Tile(), ErrorTypeEnum::EMPTY_TYPE_TILE);
         }
 
         if(empty($tab)) {
@@ -82,6 +86,67 @@ class ValidationService
         }
 
         return $errors;
+    }
+
+    public function checkColor(array $errors, Model $model, ErrorTypeEnum $errorTypeEnum): array{
+        $itemsWithMissingType = $model::where('languagepackid', $this->languagePack->id)
+            ->whereNull('color')
+            ->get();
+            
+        $i = count($errors);
+
+        if (!empty($itemsWithMissingType)) {
+            foreach($itemsWithMissingType as $item) {
+                $errors[$i]['value'] = $item->value;
+                $errors[$i]['type'] = $errorTypeEnum;
+                $errors[$i]['tab'] = $errorTypeEnum->tab()->name();    
+                $i++;
+            }
+        }
+
+        return $errors;            
+    }    
+
+    public function checkDistractors(array $errors, Model $model, ErrorTypeEnum $errorTypeEnum): array{
+        $itemsWithMissingDistractors = $model::where('languagepackid', $this->languagePack->id)
+            ->where(function ($query) {
+            $query->whereNull('or_1')
+                ->orWhereNull('or_2')
+                ->orWhereNull('or_3');
+            })
+            ->get();
+            
+        $i = count($errors);
+
+        if (!empty($itemsWithMissingDistractors)) {
+            foreach($itemsWithMissingDistractors as $item) {
+                $errors[$i]['value'] = $item->value;
+                $errors[$i]['type'] = $errorTypeEnum;
+                $errors[$i]['tab'] = $errorTypeEnum->tab()->name();    
+                $i++;
+            }
+        }
+
+        return $errors;            
+    }
+
+    public function checkTypes(array $errors, Model $model, ErrorTypeEnum $errorTypeEnum): array{
+        $itemsWithMissingType = $model::where('languagepackid', $this->languagePack->id)
+            ->whereNull('type')
+            ->get();
+            
+        $i = count($errors);
+
+        if (!empty($itemsWithMissingType)) {
+            foreach($itemsWithMissingType as $item) {
+                $errors[$i]['value'] = $item->value;
+                $errors[$i]['type'] = $errorTypeEnum;
+                $errors[$i]['tab'] = $errorTypeEnum->tab()->name();    
+                $i++;
+            }
+        }
+
+        return $errors;            
     }
 
     public function checkDuplicates(array $errors, Model $model, ErrorTypeEnum $errorTypeEnum) {
