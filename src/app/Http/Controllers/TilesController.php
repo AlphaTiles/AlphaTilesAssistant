@@ -42,9 +42,7 @@ class TilesController extends BaseItemController
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function edit(LanguagePack $languagePack, string $tile = null)
-    {        
-        session()->forget('success');
-        
+    {                
         $tiles = Tile::where('languagepackid', $languagePack->id)
         ->when(!empty($tile), function ($query) use ($tile) {
             return $query->where('value', $tile);
@@ -100,10 +98,8 @@ class TilesController extends BaseItemController
             [
                 'items.*' => [
                     'required_unless:items.*.delete,1',
-                    new CustomRequired(request(), 'type')
                 ],
                 'items.*.languagepackid' => ['required', 'integer'],
-                'items.*.type' => ['required_unless:items.*.delete,1'],
                 'items.*.type2' => ['sometimes'],    
                 'items.*.type3' => ['sometimes'],    
                 'items.*.file' => $fileRules,
@@ -175,14 +171,6 @@ class TilesController extends BaseItemController
         
         session()->flash('success', 'Records updated successfully');
 
-        $itemsCollection = Tile::where('languagepackid', $languagePack->id)->with(['file', 'file2', 'file3'])->paginate(config('pagination.default'));
-
-        return view('languagepack.tiles', [
-            'completedSteps' => ['lang_info', 'tiles'],
-            'languagePack' => $languagePack,
-            'items' => $itemsCollection,
-            'pagination' => $itemsCollection->links()
-        ]);
-
+        return redirect(url('/languagepack/tiles/' . $languagePack->id) . '?' . http_build_query(request()->query()));
     }        
 }

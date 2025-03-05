@@ -6,16 +6,11 @@ use App\Enums\TabEnum;
 use App\Models\Syllable;
 use App\Models\LanguagePack;
 use Illuminate\Http\Request;
-use App\Rules\CustomRequired;
-use Google\Service\Vision\Symbol;
 use Illuminate\Support\Facades\DB;
 use App\Services\FileUploadService;
 use App\Services\ValidationService;
-use App\Services\Mp3FileUploadService;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
-use App\Rules\RequireAtLeastOneDistractor;
 
 class SyllablesController extends BaseItemController
 {
