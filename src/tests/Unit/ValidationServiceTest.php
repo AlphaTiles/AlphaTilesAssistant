@@ -1,6 +1,7 @@
 <?php
 namespace Tests\Unit;
 
+use App\Models\Key;
 use Tests\TestCase;
 use App\Models\File;
 use App\Models\Tile;
@@ -27,6 +28,15 @@ class ValidationServiceTest extends TestCase
         // Create language pack
         $this->languagePack = LanguagePack::factory()->create();
         
+        // Create keys
+        $keys = ['a', 'b', 'c'];
+        foreach ($keys as $key) {
+            Key::factory()->create([
+                'value' => $key,
+                'languagepackid' => $this->languagePack->id
+            ]);
+        }
+
         // Create tiles
         $tiles = ['a', 'b', 'c', 'ch', 'h', 'sch'];
         foreach ($tiles as $tile) {
@@ -46,6 +56,34 @@ class ValidationServiceTest extends TestCase
         }
 
         $this->validationService = new ValidationService($this->languagePack);
+    }
+
+    public function test_check_key_usage()
+    {
+        $result = $this->validationService->handle();
+
+        $this->assertArrayHasKey(ErrorTypeEnum::KEY_USAGE->value, $result);
+        
+        $keyErrors = collect($result[ErrorTypeEnum::KEY_USAGE->value]);
+        
+        // Keys that should have errors (used less than 5 times)
+        $expectedUnderusedKeys= ['a', 'b', 'c'];
+        
+        foreach ($expectedUnderusedKeys as $key) {
+            $this->assertTrue(
+                $keyErrors->contains(function ($error) use ($key) {
+                    return str_starts_with($error['value'], $key);
+                }),
+                "Should contain error for underused key '$key'"
+            );
+        }
+
+        $values = $keyErrors->pluck('value')->toArray();
+        $this->assertEquals([
+            "a (1)",
+            "b (1)",
+            "c (3)",
+        ], $values);
     }
 
     public function test_check_tile_usage()

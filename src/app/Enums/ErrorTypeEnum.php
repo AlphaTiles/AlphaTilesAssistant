@@ -16,6 +16,7 @@ enum ErrorTypeEnum: string
     case EMPTY_DISTRACTOR_SYLLABLE      = 'empty_distractor_syllable';
     case EMPTY_DISTRACTOR_TILE         = 'empty_distractor_tile';
     case EMPTY_TYPE_TILE              = 'empty_type_tile';
+    case KEY_USAGE                     = 'key_usage';
     case TILE_USAGE                    = 'tile_usage';
 
     public function label(): string
@@ -31,6 +32,7 @@ enum ErrorTypeEnum: string
             self::EMPTY_DISTRACTOR_SYLLABLE => 'Distractors cannot be empty',
             self::EMPTY_DISTRACTOR_TILE         => 'Distractors cannot be empty',
             self::EMPTY_TYPE_TILE         => 'Type cannot be empty',
+            self::KEY_USAGE                => "It is recommended that each key be used at least " . ValidationService::NUM_TIMES_KEYS_WANTED_IN_WORDS . " times",
             self::TILE_USAGE               => "It is recommended that each tile be used at least " . ValidationService::NUM_TIMES_TILES_WANTED_IN_WORDS . " times",
         };
     }
@@ -48,6 +50,7 @@ enum ErrorTypeEnum: string
             self::EMPTY_DISTRACTOR_SYLLABLE => TabEnum::SYLLABLE,
             self::EMPTY_DISTRACTOR_TILE => TabEnum::TILE,
             self::EMPTY_TYPE_TILE => TabEnum::TILE,
+            self::KEY_USAGE => TabEnum::KEY,
             self::TILE_USAGE => TabEnum::TILE,
         };
     }
@@ -55,6 +58,7 @@ enum ErrorTypeEnum: string
     public function isLinkable(): bool
     {
         return match($this) {
+            self::KEY_USAGE => false,
             self::TILE_USAGE => false,
             default => true,
         };
