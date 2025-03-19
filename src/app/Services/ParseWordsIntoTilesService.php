@@ -14,7 +14,6 @@ class ParseWordsIntoTilesService
     // Define valid multi-type tiles (this probably should be dynamic)
     const MULTITYPE_TILES = ["C", "PC", "V", "X", "T", "-", "SAD", "LV", "AV", "BV", "FV", "D", "AD"]; 
 
-
     public function __construct(LanguagePack $languagePack)
     {
         $this->languagePack = $languagePack;
@@ -46,19 +45,42 @@ class ParseWordsIntoTilesService
         // Process words and count tile occurrences
         foreach ($wordList as $word) {
             Log::error("Word: " . $word->value);
-            $tilesInWord = $this->parseWordIntoTiles($word->value, $scriptType, $tileHashMap, $placeholderCharacter);
-        
-            foreach ($tilesInWord as $tileInWord) {
-                Log::error($tileInWord);
-                if ($tileInWord === null) {
-                    $preliminaryTilesInWord = $this->parseWordIntoTilesPreliminary($word->value, $tileHashMap, $placeholderCharacter, self::MULTITYPE_TILES);
-                    $preliminaryTileStringsInWord = array_filter(array_map(fn($t) => $t->value ?? null, $preliminaryTilesInWord));
-        
-                    Log::error("The word '{$word->value}' could not be parsed. The tiles parsed (simple parsing) are: " . implode(", ", $preliminaryTileStringsInWord));
-                    $parseErrors[$word->value][] = $preliminaryTileStringsInWord;  // Store multiple errors if needed
-                    break; // Stop checking once we detect an issue
+            
+            // First try the preliminary parsing to get all possible tiles
+            $wordValue = str_replace('.', '', $word->value);
+            $preliminaryTilesInWord = $this->parseWordIntoTilesPreliminary($wordValue, $tileHashMap, $placeholderCharacter, self::MULTITYPE_TILES);
+            $preliminaryLength = mb_strlen($wordValue);
+            $coveredLength = 0;
+            
+            foreach ($preliminaryTilesInWord as $tile) {
+                if ($tile !== null) {
+                    $coveredLength += mb_strlen($tile->value);
                 }
             }
+            
+            // Try full parsing only if preliminary parsing covered the entire word
+            if ($coveredLength === $preliminaryLength) {
+                $tilesInWord = $this->parseWordIntoTiles($word->value, $scriptType, $tileHashMap, $placeholderCharacter);
+                
+                // Check if full parsing succeeded
+                $hasNullTile = false;
+                foreach ($tilesInWord as $tileInWord) {
+                    if ($tileInWord === null) {
+                        $hasNullTile = true;
+                        break;
+                    }
+                }
+                
+                if (!$hasNullTile && !empty($tilesInWord)) {
+                    // Parsing succeeded, continue to next word
+                    continue;
+                }
+            }
+            
+            // If we get here, either preliminary or full parsing failed
+            $preliminaryTileStringsInWord = array_filter(array_map(fn($t) => $t->value ?? null, $preliminaryTilesInWord));
+            Log::error("Failed to parse word '{$word->value}'. Preliminary tiles found: " . implode(", ", $preliminaryTileStringsInWord));
+            $parseErrors[$word->value] = $preliminaryTileStringsInWord;
         }        
         
         return $parseErrors;

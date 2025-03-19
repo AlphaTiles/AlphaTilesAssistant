@@ -35,7 +35,7 @@ enum ErrorTypeEnum: string
             self::EMPTY_TYPE_TILE         => 'Type cannot be empty',
             self::KEY_USAGE                => "It is recommended that each key be used at least " . ValidationService::NUM_TIMES_KEYS_WANTED_IN_WORDS . " times",
             self::TILE_USAGE               => "It is recommended that each tile be used at least " . ValidationService::NUM_TIMES_TILES_WANTED_IN_WORDS . " times",
-            self::PARSE_WORD_INTO_TILES   => "The word could not be parsed. The tiles parsed (simple parsing) are: %s",
+            self::PARSE_WORD_INTO_TILES   => "The word could not be parsed",
         };
     }
 
@@ -63,6 +63,7 @@ enum ErrorTypeEnum: string
         return match($this) {
             self::KEY_USAGE => false,
             self::TILE_USAGE => false,
+            self::PARSE_WORD_INTO_TILES => false,
             default => true,
         };
     }
