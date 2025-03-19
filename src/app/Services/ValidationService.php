@@ -32,7 +32,8 @@ class ValidationService
 
         if(empty($tab) || $tab === TabEnum::WORD) {
             $errors = $this->checkWordFilesMissing();
-            $errors = $this->checkDuplicates($errors, new Word(), ErrorTypeEnum::DUPLICATE_WORD);            
+            $errors = $this->checkDuplicates($errors, new Word(), ErrorTypeEnum::DUPLICATE_WORD);     
+            $errors = $this->checkParsingWordsIntoTiles($errors);       
         }
 
         if(empty($tab) || $tab === TabEnum::KEY) {
@@ -187,6 +188,22 @@ class ValidationService
                 $i++;
             }
         }
+
+        return $errors;
+    }
+
+    public function checkParsingWordsIntoTiles(array $errors): array
+    {
+        $parseWordsIntoTilesService = new ParseWordsIntoTilesService($this->languagePack);
+        $parseErrors = $parseWordsIntoTilesService->handle($errors);
+
+        $i = count($errors);
+        foreach ($parseErrors as $word => $parsedTiles) {
+            $errors[$i]['value'] = sprintf("%s - the tiles parsed (simple parsing) are: %s", $word, implode(", ", $parsedTiles));
+            $errors[$i]['type'] = ErrorTypeEnum::PARSE_WORD_INTO_TILES;
+            $errors[$i]['tab'] = ErrorTypeEnum::PARSE_WORD_INTO_TILES->tab()->name();
+            $i++;
+        }        
 
         return $errors;
     }
