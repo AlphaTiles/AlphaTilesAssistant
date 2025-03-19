@@ -117,6 +117,25 @@ class ValidationServiceTest extends TestCase
         ], $values);
     }
 
+    public function test_parse_words_into_tiles()
+    {
+        $result = $this->validationService->handle();
+
+        $this->assertArrayHasKey(ErrorTypeEnum::PARSE_WORD_INTO_TILES->value, $result);
+        
+        $parseErrors = collect($result[ErrorTypeEnum::PARSE_WORD_INTO_TILES->value]);
+        
+        $values = $parseErrors->pluck('value')->toArray();
+        $this->assertEquals([
+            "Katze - the tiles parsed (simple parsing) are: a",
+            "Hund - the tiles parsed (simple parsing) are: h",
+            "Frosch - the tiles parsed (simple parsing) are: sch",
+            "Kuh - the tiles parsed (simple parsing) are: h",
+            "Buch - the tiles parsed (simple parsing) are: b, ch",
+            "Milch - the tiles parsed (simple parsing) are: ch"
+        ], $values);
+    }    
+
     public function test_check_duplicates()
     {
         // Create duplicate words
