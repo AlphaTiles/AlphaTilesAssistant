@@ -87,7 +87,7 @@ class ParseWordsIntoTilesService
                   
     }
 
-    function parseWordIntoTiles($wordListWord, $scriptType, $tileHashMap, $placeholderCharacter)
+    public function parseWordIntoTiles($wordListWord, $scriptType, $tileHashMap, $placeholderCharacter)
     {
         $parsedWordArrayPreliminary = $this->parseWordIntoTilesPreliminary($wordListWord, $tileHashMap, $placeholderCharacter, self::MULTITYPE_TILES);
     
@@ -274,7 +274,7 @@ class ParseWordsIntoTilesService
         return $parsedWordTileArray;
     }
     
-    function parseWordIntoTilesPreliminary(string $wordListWord, $tileHashMap, $placeholderCharacter, $MULTITYPE_TILES)
+    public function parseWordIntoTilesPreliminary(string $wordListWord, $tileHashMap, $placeholderCharacter, $MULTITYPE_TILES)
     {
         $wordPreliminaryTileArray = [];
         $wordPreliminaryTileArrayFinal = [];
