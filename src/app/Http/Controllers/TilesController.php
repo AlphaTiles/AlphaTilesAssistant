@@ -2,23 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\TabEnum;
-use App\Models\File;
 use App\Models\Tile;
+use App\Enums\TabEnum;
+use Illuminate\Support\Arr;
 use App\Models\LanguagePack;
 use Illuminate\Http\Request;
-use App\Rules\CustomRequired;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Services\FileUploadService;
 use App\Services\ValidationService;
-use Illuminate\Support\Facades\Log;
-use App\Services\Mp3FileUploadService;
-use App\Services\TileFileUploadService;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
-use App\Rules\RequireAtLeastOneDistractor;
 
 class TilesController extends BaseItemController
 {
@@ -169,6 +162,18 @@ class TilesController extends BaseItemController
             return Redirect::back()->withErrors($validator)->withInput();
         }
         
+        $items = $request->all()['items'];
+        if(Arr::pluck($items, 'delete')) {
+            $itemsCollection = Tile::where('languagepackid', $languagePack->id)->with(['file', 'file2', 'file3'])->paginate(config('pagination.default'));
+
+            return view('languagepack.tiles', [
+                'completedSteps' => ['lang_info', 'tiles'],
+                'languagePack' => $languagePack,
+                'items' => $itemsCollection,
+                'pagination' => $itemsCollection->links()
+            ]);
+        }
+
         session()->flash('success', 'Records updated successfully');
 
         return redirect(url('/languagepack/tiles/' . $languagePack->id) . '?' . http_build_query(request()->query()));

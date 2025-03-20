@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Word;
-use App\Enums\FileTypeEnum;
 use App\Enums\TabEnum;
+use App\Enums\FileTypeEnum;
+use Illuminate\Support\Arr;
 use App\Models\LanguagePack;
 use Illuminate\Http\Request;
 use App\Rules\CustomRequired;
@@ -128,6 +129,18 @@ class WordlistController extends BaseItemController
             return Redirect::back()->withErrors($errorCollection)->withInput();
         }
         
+        $items = $request->all()['words'];
+        if(Arr::pluck($items, 'delete')) {
+            $itemsCollection = Word::where('languagepackid', $languagePack->id)->paginate(config('pagination.default'));
+
+            return view('languagepack.wordlist', [
+                'completedSteps' => ['lang_info', 'tiles', 'wordlist'],
+                'languagePack' => $languagePack,
+                'words' => $itemsCollection,
+                'pagination' => $itemsCollection->links()
+            ]);            
+        }
+
         session()->flash('success', 'Records updated successfully');
 
         return redirect(url('/languagepack/wordlist/' . $languagePack->id) . '?' . http_build_query(request()->query()));
@@ -154,7 +167,7 @@ class WordlistController extends BaseItemController
             Word::where('id', $wordId)->delete();
         }
 
-        return Redirect::back();
+        return redirect(url('/languagepack/wordlist/' . $languagePack->id) . '?' . http_build_query(request()->query()));
     }
     
     public function downloadFile(LanguagePack $languagePack, $filename)

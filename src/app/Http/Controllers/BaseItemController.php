@@ -50,7 +50,7 @@ class BaseItemController extends Controller
             $this->model::find($id)->delete();
         }
 
-        return redirect("languagepack/{$this->route}/{$languagePack->id}");
+        return redirect(url("/languagepack/{$this->route}/" . $languagePack->id) . '?' . http_build_query(request()->query()));
     }  
 
     protected function validateAddItems(Request $request, LanguagePack $languagePack, Model $model, string $itemName) {
