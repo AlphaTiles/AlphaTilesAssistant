@@ -159,10 +159,9 @@ class GoogleService
         $this->driveService->files->delete($folderId);
     }       
 
-    function handleExport(LanguagePack $languagePack): void
-    {
-        $mainFolderId = $this->createFolder('alphatilesassistant');
-        $folderId = $this->createFolder($languagePack->name, $mainFolderId);
+    function handleExport(LanguagePack $languagePack, string $driveRootFolderId): void
+    {        
+        $folderId = $this->createFolder($languagePack->name, $driveRootFolderId);
         $exportSheetService = new ExportSheetService($languagePack, $this->token, $folderId);
         $exportSheetService->handle($folderId);
     }

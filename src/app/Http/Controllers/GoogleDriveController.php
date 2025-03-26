@@ -31,9 +31,12 @@ class GoogleDriveController extends Controller
         }
 
         $token = Session::get("socialite_token");
-        ExportDriveFolderJob::dispatch($token, $languagePack);
+        $googleService = new GoogleService($token);  
+        $driveRootFolderId = $googleService->createFolder('alphatilesassistant');
+        ExportDriveFolderJob::dispatch($token, $languagePack, $driveRootFolderId);        
 
         return view('drive-export', [
+            'driveRootFolderId' => $driveRootFolderId,
             'languagepack' => $languagePack,
         ]);
     }

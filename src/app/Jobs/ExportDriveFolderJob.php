@@ -22,16 +22,18 @@ class ExportDriveFolderJob implements ShouldQueue
     public string $token;
     public LanguagePack $languagePack;
     public GoogleService $googleService;
+    public string $driveRootFolderId;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(string $token, $languagePack)
+    public function __construct(string $token, $languagePack, string $driveRootFolderId)
     {
         $this->token = $token;
         $this->languagePack = $languagePack;
+        $this->driveRootFolderId = $driveRootFolderId;
     }
 
     /**
@@ -42,7 +44,7 @@ class ExportDriveFolderJob implements ShouldQueue
     public function handle()
     {        
         Log::error('Export Job started for language pack id: ' . $this->languagePack->id);
-        $this->googleService = new GoogleService($this->token);        
-        $this->googleService->handleExport($this->languagePack);
+        $this->googleService = new GoogleService($this->token);                
+        $this->googleService->handleExport($this->languagePack, $this->driveRootFolderId);
     }
 }
