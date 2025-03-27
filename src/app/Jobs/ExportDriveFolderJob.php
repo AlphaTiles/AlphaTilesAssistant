@@ -2,12 +2,15 @@
 
 namespace App\Jobs;
 
+use App\Enums\ExportStatus;
 use App\Enums\ImportStatus;
 use App\Models\LanguagePack;
 use Illuminate\Bus\Queueable;
-use Illuminate\Support\Facades\Log;
 use App\Services\GoogleService;
+use Illuminate\Support\Facades\Log;
 use App\Services\ImportSheetService;
+use App\Services\LogToDatabaseService;
+use Google\Service\Vault\ExportStats;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -43,6 +46,9 @@ class ExportDriveFolderJob implements ShouldQueue
      */
     public function handle()
     {        
+        $logService = new LogToDatabaseService($this->languagePack->id, 'export');
+        $logService->handle('Export Job started', ExportStatus::IN_PROGRESS->value);
+
         Log::error('Export Job started for language pack id: ' . $this->languagePack->id);
         $this->googleService = new GoogleService($this->token);                
         $this->googleService->handleExport($this->languagePack, $this->driveRootFolderId);

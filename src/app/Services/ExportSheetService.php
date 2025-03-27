@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\ExportStatus;
 use Exception;
 use Google\Client;
 use App\Models\Key;
@@ -26,6 +27,7 @@ use Google\Service\Sheets\BatchUpdateSpreadsheetRequest;
 
 class ExportSheetService
 {    
+    protected LogToDatabaseService $logService;
     protected GoogleService $googleService;
     protected Drive $driveService;
     protected Sheets $googleSheet;
@@ -33,7 +35,7 @@ class ExportSheetService
     protected Client $client;
     protected string $spreadSheetId;
     protected string $exportFolderId;
-    protected bool $debug;
+    protected bool $debug;    
 
     public function __construct(LanguagePack $languagePack, string $googleToken, string $exportFolderId)
     {
@@ -42,6 +44,7 @@ class ExportSheetService
         $this->client->setAccessToken($googleToken);
         $this->languagePack = $languagePack;    
         $this->googleService = new GoogleService($googleToken); 
+        $this->logService = new LogToDatabaseService($languagePack->id, 'export');
         $this->driveService = new Drive($this->client);     
         $this->googleSheet = new Sheets($this->client);    
         $this->exportFolderId = $exportFolderId;
@@ -173,6 +176,8 @@ class ExportSheetService
 
     private function wordlistSheet(string $spreadsheetId): void
     {
+        $sheetName = 'wordlist';
+
         $imageFolderName = 'images_words';
         $oldFolderId = $this->googleService->folderExists($imageFolderName, $this->exportFolderId);
         if($oldFolderId) {
@@ -186,8 +191,7 @@ class ExportSheetService
             $this->googleService->deleteFolder($oldFolderId);             
         }        
         $audioFolderId = $this->googleService->createFolder($wordFolderName, $this->exportFolderId);        
-        Log::error('audio folder: ' . $audioFolderId);
-        $sheetName = 'wordlist';
+        Log::error('audio folder: ' . $audioFolderId);        
         $this->createSheetTab($spreadsheetId, $sheetName, 3);
         $sheetAndRange = "{$sheetName}!A1:F2000"; 
 
@@ -466,6 +470,8 @@ class ExportSheetService
 
     private function createSheetTab(string $spreadsheetId, string $sheetName, int $index): void
     {
+        $this->logService->handle("Creating {$sheetName} sheet", ExportStatus::IN_PROGRESS->value);
+
         if($this->sheetExists($spreadsheetId, $sheetName)) {
             return;
         }
@@ -495,11 +501,12 @@ class ExportSheetService
                 'valueInputOption' => 'RAW'
             ];
             $this->googleSheet->spreadsheets_values->update($spreadsheetId, $sheetAndRange, $body, $params);            
+            return;
         }
         catch(Exception $e) {
             Log::error($e->getMessage());
-        }    
-        return;
+            $this->logService->handle($e->getMessage(), ExportStatus::FAILED->value);
+        }            
     }
 
     function sheetExists(string $spreadsheetId, string $sheetName) {
@@ -514,6 +521,8 @@ class ExportSheetService
 
     private function createSpreadsheet(string $folderId): string
     {
+        $this->logService->handle('Creating spreadsheet', ExportStatus::IN_PROGRESS->value);
+
         $fileName = $this->generateFilename();
         $fileId = $this->googleService->fileExists($fileName, $folderId, 'application/vnd.google-apps.spreadsheet');
         if($fileId) {
@@ -531,7 +540,7 @@ class ExportSheetService
         $file = $driveService->files->create($fileMetadata, [
             'fields' => 'id'
         ]);
-
+        
         return $file->id;
     }
 
