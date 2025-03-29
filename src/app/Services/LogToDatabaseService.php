@@ -22,7 +22,7 @@ class LogToDatabaseService
         $previousLog = null;
         $newMessage = $message;
 
-        Log::error('Status: ' . $status->value);
+        Log::error($message);
 
         if ($status != ExportStatus::STARTED) {
             $previousLog = DatabaseLog::where('languagepackid', $this->languagepackId)

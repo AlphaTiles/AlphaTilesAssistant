@@ -239,7 +239,6 @@ class ExportSheetService
             $i++;
         }
 
-
         $this->addValuesToSheet($spreadsheetId, $sheetAndRange, $values);
         Log::info('export of words completed');
     }
@@ -494,6 +493,13 @@ class ExportSheetService
 
     private function addValuesToSheet(string $spreadsheetId, string $sheetAndRange, array $values): void
     {
+        // Replace null values with empty strings in $values
+        array_walk_recursive($values, function (&$value) {
+            if (is_null($value)) {
+            $value = '';
+            }
+        });
+
         try{
             $body = new ValueRange([
                 'values' => $values
