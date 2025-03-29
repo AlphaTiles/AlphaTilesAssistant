@@ -17,18 +17,25 @@ class LogToDatabaseService
         $this->type = $type;
     }
 
-    public function handle(string $message, string $status): void
+    public function handle(string $message, ExportStatus $status): void
     {
-        $previousLog = DatabaseLog::where('languagepackid', $this->languagepackId)
+        $previousLog = null;
+        $newMessage = $message;
+
+        Log::error('Status: ' . $status->value);
+
+        if ($status != ExportStatus::STARTED) {
+            $previousLog = DatabaseLog::where('languagepackid', $this->languagepackId)
             ->where('type', $this->type)
             ->latest()
-            ->first();
+            ->first();            
+        }
 
-        $newMessage = $message;
-        if ($previousLog) {
+        $statusValue = $status->value;
+        if (!empty($previousLog)) {
             $newMessage = $previousLog->message . "\n" . $message;
-            if ($previousLog->status === ExportStatus::FAILED->value) {
-                $status = $previousLog->status;
+            if ($previousLog->status === ExportStatus::FAILED) {
+                $statusValue = $previousLog->status;
             }
         }
 
@@ -37,7 +44,7 @@ class LogToDatabaseService
             'type' => $this->type,
         ],[
             'message' => $newMessage,
-            'status' => $status,
+            'status' => $statusValue,
         ]);    
     }
 }

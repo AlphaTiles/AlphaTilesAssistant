@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\GoogleDriveController;
+use App\Models\DatabaseLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,6 +17,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 Route::post('drive/dispatchimport', [GoogleDriveController::class, 'dispatchimport']);
+
+Route::get('/export-logs', function (Request $request) {
+    $logData = DatabaseLog::where('languagepackid', $request->query('languagepackid'))
+        ->where('type', 'export')
+        ->first();
+    
+    return response()->json(['messages' => $logData->message, 'status' => $logData->status]);
+});
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

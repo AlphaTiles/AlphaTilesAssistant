@@ -46,11 +46,8 @@ class ExportDriveFolderJob implements ShouldQueue
      */
     public function handle()
     {        
-        $logService = new LogToDatabaseService($this->languagePack->id, 'export');
-        $logService->handle('Export Job started', ExportStatus::IN_PROGRESS->value);
-
         Log::error('Export Job started for language pack id: ' . $this->languagePack->id);
-        $this->googleService = new GoogleService($this->token);                
+        $this->googleService = new GoogleService($this->languagePack, $this->token, 'export');                
         $this->googleService->handleExport($this->languagePack, $this->driveRootFolderId);
     }
 }

@@ -33,7 +33,7 @@ class ImportSheetService
         $client = new Client();
         $client->setAccessToken($googleToken);
         $this->languagePack = $languagePack;    
-        $this->googleService = new GoogleService($googleToken);      
+        $this->googleService = new GoogleService($this->languagePack, $googleToken);      
         $this->googleSheet = new Sheets($client);    
         $this->folderId = $folderId;
     }

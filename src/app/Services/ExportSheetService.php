@@ -43,7 +43,7 @@ class ExportSheetService
         $this->client = new Client();
         $this->client->setAccessToken($googleToken);
         $this->languagePack = $languagePack;    
-        $this->googleService = new GoogleService($googleToken); 
+        $this->googleService = new GoogleService($languagePack, $googleToken, 'export'); 
         $this->logService = new LogToDatabaseService($languagePack->id, 'export');
         $this->driveService = new Drive($this->client);     
         $this->googleSheet = new Sheets($this->client);    
@@ -65,6 +65,7 @@ class ExportSheetService
         $this->namesSheet($spreadsheetId);
         $this->gamesSheet($spreadsheetId);
         $this->colorsSheet($spreadsheetId);
+        $this->logService->handle('Export Job completed', ExportStatus::SUCCESS);
     }
 
     private function notesSheet(string $spreadsheetId): void
@@ -470,7 +471,7 @@ class ExportSheetService
 
     private function createSheetTab(string $spreadsheetId, string $sheetName, int $index): void
     {
-        $this->logService->handle("Creating {$sheetName} sheet", ExportStatus::IN_PROGRESS->value);
+        $this->logService->handle("Creating {$sheetName} sheet", ExportStatus::IN_PROGRESS);
 
         if($this->sheetExists($spreadsheetId, $sheetName)) {
             return;
@@ -505,7 +506,7 @@ class ExportSheetService
         }
         catch(Exception $e) {
             Log::error($e->getMessage());
-            $this->logService->handle($e->getMessage(), ExportStatus::FAILED->value);
+            $this->logService->handle($e->getMessage(), ExportStatus::FAILED);
         }            
     }
 
@@ -521,7 +522,7 @@ class ExportSheetService
 
     private function createSpreadsheet(string $folderId): string
     {
-        $this->logService->handle('Creating spreadsheet', ExportStatus::IN_PROGRESS->value);
+        $this->logService->handle('Creating spreadsheet', ExportStatus::IN_PROGRESS);
 
         $fileName = $this->generateFilename();
         $fileId = $this->googleService->fileExists($fileName, $folderId, 'application/vnd.google-apps.spreadsheet');
@@ -563,6 +564,8 @@ class ExportSheetService
         if(!$file) {
             return;
         }
+
+        $this->logService->handle("Exporting {$fileType} file: {$fileName}", ExportStatus::IN_PROGRESS);
 
         $relativeFilePath = str_replace('/storage/public', '', $file->file_path);
         $relativeFilePath = str_replace('/storage', '', $relativeFilePath);

@@ -42,9 +42,9 @@ class ImportDriveFolderJob implements ShouldQueue
      * @return void
      */
     public function handle()
-    {        
-        $this->googleService = new GoogleService($this->token);        
+    {                
         $languagePack = $this->createLanguagePack();
+        $this->googleService = new GoogleService($languagePack, $this->token);        
         $files = $this->googleService->listFiles($this->folderId);
         $spreadsheetId = null;
         $sheetType = 'google';
