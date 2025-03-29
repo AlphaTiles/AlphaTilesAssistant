@@ -44,8 +44,6 @@ class ParseWordsIntoTilesService
         
         // Process words and count tile occurrences
         foreach ($wordList as $word) {
-            Log::error("Word: " . $word->value);
-            
             // First try the preliminary parsing to get all possible tiles
             $wordValue = str_replace('.', '', $word->value);
             $preliminaryTilesInWord = $this->parseWordIntoTilesPreliminary($wordValue, $tileHashMap, $placeholderCharacter, self::MULTITYPE_TILES);
@@ -79,7 +77,6 @@ class ParseWordsIntoTilesService
             
             // If we get here, either preliminary or full parsing failed
             $preliminaryTileStringsInWord = array_filter(array_map(fn($t) => $t->value ?? null, $preliminaryTilesInWord));
-            Log::error("Failed to parse word '{$word->value}'. Preliminary tiles found: " . implode(", ", $preliminaryTileStringsInWord));
             $parseErrors[$word->value] = $preliminaryTileStringsInWord;
         }        
         

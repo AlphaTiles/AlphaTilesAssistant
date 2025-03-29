@@ -2,28 +2,31 @@
 
 namespace App\Services;
 
-use App\Models\LanguagePack;
 use Exception;
 use Google\Client;
 use Google\Service\Drive;
+use App\Enums\ExportStatus;
+use App\Models\LanguagePack;
 use Google\Service\Drive\DriveFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class GoogleService
 {
+    protected LogToDatabaseService $logService;
     protected Client $client;
     protected DriveFile $driveFile;
     protected Drive $driveService;
     protected string $token;
 
-    public function __construct(string $token)
+    public function __construct(LanguagePack $languagePack, string $token, $logType = 'unknown')
     {
         $this->client = new Client();
         $this->token = $token;
         $this->client->setAccessToken($token);
         $this->driveService = new Drive($this->client);
         $this->driveFile = new DriveFile($this->client);
+        $this->logService = new LogToDatabaseService($languagePack->id, $logType);
     }
 
     public function getFolder($folderId)
@@ -135,6 +138,7 @@ class GoogleService
 
     function createFolder(string $folderName, $parentId = null): string
     {
+        $this->logService->handle("Creating folder $folderName", ExportStatus::IN_PROGRESS);
         $folderId = $this->folderExists($folderName, $parentId);
         if($folderId) {
             return $folderId;
@@ -159,10 +163,9 @@ class GoogleService
         $this->driveService->files->delete($folderId);
     }       
 
-    function handleExport(LanguagePack $languagePack): void
-    {
-        $mainFolderId = $this->createFolder('alphatilesassistant');
-        $folderId = $this->createFolder($languagePack->name, $mainFolderId);
+    function handleExport(LanguagePack $languagePack, string $driveRootFolderId): void
+    {        
+        $folderId = $this->createFolder($languagePack->name, $driveRootFolderId);
         $exportSheetService = new ExportSheetService($languagePack, $this->token, $folderId);
         $exportSheetService->handle($folderId);
     }

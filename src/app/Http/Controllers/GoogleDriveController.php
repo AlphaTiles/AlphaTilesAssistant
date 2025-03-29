@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use Google\Service\Drive;
+use App\Enums\ExportStatus;
 use App\Models\LanguagePack;
 use Illuminate\Http\Request;
 use App\Services\GoogleService;
@@ -11,6 +12,7 @@ use App\Jobs\ExportDriveFolderJob;
 use App\Jobs\ImportDriveFolderJob;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use App\Services\LogToDatabaseService;
 use Illuminate\Support\Facades\Session;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -30,10 +32,18 @@ class GoogleDriveController extends Controller
                 ->redirect();        
         }
 
+        Log::error("starting export");
+        $logService = new LogToDatabaseService($languagePack->id, 'export');
+        $logService->handle('Export Job started', ExportStatus::STARTED);
+
         $token = Session::get("socialite_token");
-        ExportDriveFolderJob::dispatch($token, $languagePack);
+        $googleService = new GoogleService($languagePack, $token, 'export');  
+        $driveRootFolderId = $googleService->createFolder('alphatilesassistant');
+
+        ExportDriveFolderJob::dispatch($token, $languagePack, $driveRootFolderId);        
 
         return view('drive-export', [
+            'driveRootFolderId' => $driveRootFolderId,
             'languagepack' => $languagePack,
         ]);
     }
