@@ -21,7 +21,7 @@ $hideAddLinkClass = $nr === 3 && empty($tile->type2) ? 'hidden' : '';
         $typeValue = old('items{{ $nr }}.' . $key . '.type') ?? $tile->{$typeField};
         $selected = $typeValue === $typeEnum->value ? 'selected' : ''; 
         ?>								
-        <option value="{{ $typeEnum->value }}" {{ $selected }}>{{ $typeEnum->label() }}</option>
+        <option value="{{ $typeEnum->value }}" {{ $selected }}>{{ $typeEnum->value }}: {{ $typeEnum->label() }}</option>
     @endforeach		
     </select>						
 </div>
