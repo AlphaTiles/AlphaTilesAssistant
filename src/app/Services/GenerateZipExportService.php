@@ -319,14 +319,18 @@ class GenerateZipExportService
             $file = basename($word->audioFile->file_path);
             $resourceFile = "app/public/languagepacks/{$this->languagePack->id}/res/raw/{$file}";
             $outputFolder = "{$zipFileName}/res/raw/{$file}";
-            $zip->addFile(storage_path($resourceFile), $outputFolder);
+            if (file_exists(storage_path($resourceFile))) {
+                $zip->addFile(storage_path($resourceFile), $outputFolder);
+            }
         }
 
         if ($word->imageFile) {
             $file = basename($word->imageFile->file_path);
             $resourceFile = "app/public/languagepacks/{$this->languagePack->id}/res/raw/{$file}";
             $outputFolder = "{$zipFileName}/res/drawable-xxxhdpi/{$file}";
-            $zip->addFile(storage_path($resourceFile), $outputFolder);
+            if (file_exists(storage_path($resourceFile))) {
+                $zip->addFile(storage_path($resourceFile), $outputFolder);
+            }
         }
     }
 

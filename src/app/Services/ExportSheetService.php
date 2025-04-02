@@ -218,15 +218,16 @@ class ExportSheetService
         $i = 1;        
         foreach($words as $word) {
             $fileName = '';
+            $fileNameSheet = '';
             if(isset($word->audioFile->file_path)) {
                 $storagePath = "/storage/languagepacks/{$this->languagePack->id}/res/raw/";
                 $fileName = str_replace($storagePath, '', $word->audioFile->file_path);
-                $fileName = str_replace('.mp3', '',$fileName);
+                $fileNameSheet = str_replace('.mp3', '',$fileName);
             }
             if(isset($word->imageFile->file_path)) {
                 $storagePath = "/storage/languagepacks/{$this->languagePack->id}/res/raw/";
                 $fileName = str_replace($storagePath, '', $word->imageFile->file_path);
-                $fileName = str_replace('.png', '',$fileName);
+                $fileNameSheet = str_replace('.png', '',$fileName);
             }
             $this->saveFileToDrive($word->audioFile, $audioFolderId, 'word audio', $fileName);
             $this->saveFileToDrive($word->imageFile, $imageFolderId, 'image audio', $fileName);
@@ -235,7 +236,7 @@ class ExportSheetService
             $stage = $word->stage ?? '-';
 
             $values[$i] = [
-                $fileName,
+                $fileNameSheet,
                 $word->value,
                 '0',
                 $mixedTypes,
