@@ -93,7 +93,8 @@ class ExportSheetService
         $langItems = app(LangInfoRepository::class)->getSettings(false, $this->languagePack);
         $i = 1;
         foreach($langItems as $item) {
-            $values[$i] = [$item['export_key'], $item['value']];
+            $value = !empty($item['value']) ? $item['value'] : 'none';
+            $values[$i] = [$item['export_key'], $value];
             $i++;
         }
 
