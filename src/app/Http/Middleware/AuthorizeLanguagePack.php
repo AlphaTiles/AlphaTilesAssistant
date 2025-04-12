@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use App\Models\Collaborator;
 
 class AuthorizeLanguagePack
 {
@@ -20,9 +21,23 @@ class AuthorizeLanguagePack
         
         if ($languagePack && !session('masterpw')) {
             $user = $request->user();
-            if ($user->can('view', $languagePack) ||
-                $user->can('update', $languagePack) ||
-                $user->can('delete', $languagePack)) {
+            
+            // Check if user is the owner
+            if ($languagePack->user_id === $user->id) {
+                return $next($request);
+            }
+
+            // Check if user is a collaborator
+            $isCollaborator = Collaborator::where('languagepack_id', $languagePack->id)
+                ->where('user_id', $user->id)
+                ->exists();
+
+            if ($isCollaborator) {
+                // For collaborators, only allow view and update actions
+                $route = $request->route()->getName();
+                if (str_contains($route, 'delete')) {
+                    abort(403, 'Collaborators cannot delete language packs');
+                }
                 return $next($request);
             }
 
