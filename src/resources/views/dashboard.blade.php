@@ -1,5 +1,6 @@
 <?php
 use App\Enums\ImportStatus;
+use Illuminate\Support\Facades\Auth;
 ?>
 @extends('layouts.app')
 
@@ -20,12 +21,14 @@ use App\Enums\ImportStatus;
                     <table class="table table-compact w-full">
                         <colgroup>
                             <col span="1" style="width: 5%;">
+                            <col span="1" style="width: 5%;">
                             <col span="1" style="width: 70%;">
                             <col span="1" style="width: 15%;">
                         </colgroup>                        
                         <thead>
                         <tr>
                             <th>Edit</th> 
+                            <th>Users</th>
                             <th>Name</th> 
                             <th>Date Created</th> 
                         </tr>
@@ -38,6 +41,17 @@ use App\Enums\ImportStatus;
                                     <i class="fa-regular fa-pen-to-square"></i>
                                 </a>
                             </td> 
+                            <td>
+                                @if($languagepack->user_id == Auth::id())
+                                    <a href="/languagepack/users/{{ $languagepack->id }}">
+                                        <i class="fa-solid fa-people-group"></i>
+                                    </a>
+                                @else
+                                    <a href="/languagepack/remove/{{ $languagepack->id }}/{{ Auth::id() }}">
+                                        <i class="fa-solid fa-user-minus"></i>
+                                    </a>
+                                @endif
+                            </td>                             
                             <td>
                                 <a href="/languagepack/edit/{{ $languagepack->id }}">
                                     {{ $languagepack->name }}

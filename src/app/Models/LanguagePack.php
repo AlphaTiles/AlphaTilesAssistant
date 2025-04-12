@@ -15,12 +15,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class LanguagePack extends Model
-{
+{    
     use SoftDeletes;
     use HasFactory;
-    
+
     protected $fillable = [
-        'userid',
+        'user_id',
         'name',
         'import_status'
     ];
@@ -31,6 +31,11 @@ class LanguagePack extends Model
             'import_status' => ImportStatus::class, 
         ];
     }    
+
+    public function collaborators(): HasMany
+    {
+        return $this->hasMany(Collaborator::class, 'languagepack_id');
+    }
 
     public function hasSetting(LangInfoEnum $langInfo): bool
     {
@@ -46,7 +51,7 @@ class LanguagePack extends Model
 
     public function owner(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'userid');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function langInfo(): HasMany

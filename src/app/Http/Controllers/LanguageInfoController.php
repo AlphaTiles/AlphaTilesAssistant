@@ -82,7 +82,7 @@ class LanguageInfoController extends Controller
         $settings = $data['settings'];
 
         $languagePack = [
-            'userid' => Auth::user()->id,
+            'user_id' => Auth::user()->id,
             'name' => $settings['lang_name_english']
         ];
 
