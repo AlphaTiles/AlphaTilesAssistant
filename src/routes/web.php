@@ -38,6 +38,7 @@ Route::middleware(['auth', 'authorize.languagepack'])->group(function () {
     Route::post('languagepack/edit/{id}', [LanguageInfoController::class, 'store']);       
     Route::delete('languagepack/delete/{languagePack}', [LanguageInfoController::class, 'destroy']);
     Route::get('languagepack/edit/{languagePack}', [LanguageInfoController::class, 'edit']);
+    Route::get('languagepack/remove/{languagePack}/{user}', [LanguageInfoController::class, 'removeCollaborator']);    
 
     Route::get('languagepack/tiles/{languagePack}', [TilesController::class, 'edit']);
     Route::get('languagepack/tiles/{languagePack}/{tile}', [TilesController::class, 'edit']);
@@ -75,7 +76,8 @@ Route::middleware(['auth', 'authorize.languagepack'])->group(function () {
     Route::get('languagepack/game_settings/{languagePack}', [GameSettingsController::class, 'edit']);
 
     Route::get('languagepack/export/{languagePack}', [ExportController::class, 'show']);    
-    Route::post('languagepack/export/{languagePack}', [ExportController::class, 'store']);    
+    Route::post('languagepack/export/{languagePack}', [ExportController::class, 'store']);  
+    
 
     Route::get('drive/import', [GoogleDriveController::class, 'import'])->name('drive.import');    
     Route::get('drive/export/{languagePack}', [GoogleDriveController::class, 'export'])->name('drive.export');    

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Key;
 use App\Models\Tile;
+use App\Models\User;
 use App\Models\Word;
 use App\Enums\LangInfoEnum;
 use App\Models\LanguagePack;
@@ -12,7 +14,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Repositories\LangInfoRepository;
 use App\Http\Requests\StoreLangPackRequest;
-use App\Models\Key;
 
 class LanguageInfoController extends Controller
 {
@@ -118,5 +119,17 @@ class LanguageInfoController extends Controller
             
             LanguageSetting::insert($settings);
         }
+    }
+
+    public function removeCollaborator(LanguagePack $languagePack, User $user) 
+    {
+        $collaborator = $languagePack->collaborators()->where('user_id', $user->id)->first();
+
+        if ($collaborator) {
+            $collaborator->delete();
+            return redirect('/dashboard')->with('success', 'Languagepack removed successfully from account.');
+        }
+
+        return redirect()->back()->with('error', 'Collaborator not found.');
     }
 }

@@ -7,6 +7,14 @@ use Illuminate\Support\Facades\Auth;
 @section('content')
 <div class="container">
 
+    <div x-data="{ showMessage: true }" x-show="showMessage" x-init="setTimeout(() => showMessage = false, 3000)">
+		@if (session()->has('success'))
+		<div class="p-3 text-green-700 bg-green-300 rounded">
+			{{ session()->get('success') }}
+		</div>
+		@endif
+	</div>	
+
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
@@ -47,7 +55,7 @@ use Illuminate\Support\Facades\Auth;
                                         <i class="fa-solid fa-people-group"></i>
                                     </a>
                                 @else
-                                    <a href="/languagepack/remove/{{ $languagepack->id }}/{{ Auth::id() }}">
+                                    <a href="#" onClick="confirmRemoveCollaboration({{ json_encode($languagepack->id) }});">
                                         <i class="fa-solid fa-user-minus"></i>
                                     </a>
                                 @endif
@@ -75,3 +83,27 @@ use Illuminate\Support\Facades\Auth;
     </div>
 </div>
 @endsection
+
+
+@section('scripts')
+<script>
+
+function confirmRemoveCollaboration(languagepackId) {
+	Swal.fire({
+				title: 'Confirm removal',
+				html: 'Please confirm that you want to be removed as collaborator from this project.',
+				showCancelButton: true,
+				cancelButtonText: 'Cancel',
+				cancelButtonColor: 'grey',
+				confirmButtonColor: 'red',
+				confirmButtonText: 'Leave project',
+				allowOutsideClick: false,
+			})
+			.then((result) => {
+				if (result.isConfirmed) {
+                    window.location.href = "/languagepack/remove/" + languagepackId + "/{{ Auth::id() }}";
+				}
+			});
+		}
+</script>
+@endsection        
