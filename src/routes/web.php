@@ -14,6 +14,7 @@ use App\Http\Controllers\SyllablesController;
 use App\Http\Controllers\GoogleDriveController;
 use App\Http\Controllers\GameSettingsController;
 use App\Http\Controllers\LanguageInfoController;
+use App\Http\Controllers\LanguagePackController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,13 +32,23 @@ Route::get('/', function () {
 })->middleware('guest');
 
 Route::middleware(['auth', 'authorize.languagepack'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('home');    
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');    
     
+    Route::get('/languagepack/users/{languagepack}', [LanguagePackController::class, 'users'])
+        ->name('languagepack.users');
+        Route::post('/languagepack/{languagepack}/users', [LanguagePackController::class, 'addUser'])
+            ->name('languagepack.addUser');
+
+    Route::delete('/languagepack/{languagepack}/users/{user}', [LanguagePackController::class, 'removeUser'])
+        ->name('languagepack.removeUser');
+
+
     Route::get('languagepack/create', [LanguageInfoController::class, 'create']);
     Route::post('languagepack/edit', [LanguageInfoController::class, 'store']);
     Route::post('languagepack/edit/{id}', [LanguageInfoController::class, 'store']);       
     Route::delete('languagepack/delete/{languagePack}', [LanguageInfoController::class, 'destroy']);
     Route::get('languagepack/edit/{languagePack}', [LanguageInfoController::class, 'edit']);
+    Route::get('languagepack/remove/{languagePack}/{user}', [LanguageInfoController::class, 'removeCollaborator']);    
 
     Route::get('languagepack/tiles/{languagePack}', [TilesController::class, 'edit']);
     Route::get('languagepack/tiles/{languagePack}/{tile}', [TilesController::class, 'edit']);
@@ -75,8 +86,8 @@ Route::middleware(['auth', 'authorize.languagepack'])->group(function () {
     Route::get('languagepack/game_settings/{languagePack}', [GameSettingsController::class, 'edit']);
 
     Route::get('languagepack/export/{languagePack}', [ExportController::class, 'show']);    
-    Route::post('languagepack/export/{languagePack}', [ExportController::class, 'store']);    
-
+    Route::post('languagepack/export/{languagePack}', [ExportController::class, 'store']);  
+    
     Route::get('drive/import', [GoogleDriveController::class, 'import'])->name('drive.import');    
     Route::get('drive/export/{languagePack}', [GoogleDriveController::class, 'export'])->name('drive.export');    
 });

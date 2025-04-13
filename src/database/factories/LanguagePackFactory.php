@@ -14,7 +14,7 @@ class LanguagePackFactory extends Factory
     public function definition()
     {
         return [
-            'userid' => User::factory(),
+            'user_id' => User::factory(),
             'name' => $this->faker->words(2, true),
             'import_status' => ImportStatus::SUCCESS,
         ];

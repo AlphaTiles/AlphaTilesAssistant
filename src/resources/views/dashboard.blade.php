@@ -1,10 +1,19 @@
 <?php
 use App\Enums\ImportStatus;
+use Illuminate\Support\Facades\Auth;
 ?>
 @extends('layouts.app')
 
 @section('content')
 <div class="container">
+
+    <div x-data="{ showMessage: true }" x-show="showMessage" x-init="setTimeout(() => showMessage = false, 3000)">
+		@if (session()->has('success'))
+		<div class="p-3 text-green-700 bg-green-300 rounded">
+			{{ session()->get('success') }}
+		</div>
+		@endif
+	</div>	
 
     <div class="row justify-content-center">
         <div class="col-md-8">
@@ -20,12 +29,14 @@ use App\Enums\ImportStatus;
                     <table class="table table-compact w-full">
                         <colgroup>
                             <col span="1" style="width: 5%;">
+                            <col span="1" style="width: 5%;">
                             <col span="1" style="width: 70%;">
                             <col span="1" style="width: 15%;">
                         </colgroup>                        
                         <thead>
                         <tr>
                             <th>Edit</th> 
+                            <th>Users</th>
                             <th>Name</th> 
                             <th>Date Created</th> 
                         </tr>
@@ -38,6 +49,17 @@ use App\Enums\ImportStatus;
                                     <i class="fa-regular fa-pen-to-square"></i>
                                 </a>
                             </td> 
+                            <td>
+                                @if($languagepack->user_id == Auth::id())
+                                    <a href="/languagepack/users/{{ $languagepack->id }}">
+                                        <i class="fa-solid fa-people-group"></i>
+                                    </a>
+                                @else
+                                    <a href="#" onClick="confirmRemoveCollaboration({{ json_encode($languagepack->id) }});">
+                                        <i class="fa-solid fa-user-minus"></i>
+                                    </a>
+                                @endif
+                            </td>                             
                             <td>
                                 <a href="/languagepack/edit/{{ $languagepack->id }}">
                                     {{ $languagepack->name }}
@@ -61,3 +83,27 @@ use App\Enums\ImportStatus;
     </div>
 </div>
 @endsection
+
+
+@section('scripts')
+<script>
+
+function confirmRemoveCollaboration(languagepackId) {
+	Swal.fire({
+				title: 'Confirm removal',
+				html: 'Please confirm that you want to be removed as collaborator from this project.',
+				showCancelButton: true,
+				cancelButtonText: 'Cancel',
+				cancelButtonColor: 'grey',
+				confirmButtonColor: 'red',
+				confirmButtonText: 'Leave project',
+				allowOutsideClick: false,
+			})
+			.then((result) => {
+				if (result.isConfirmed) {
+                    window.location.href = "/languagepack/remove/" + languagepackId + "/{{ Auth::id() }}";
+				}
+			});
+		}
+</script>
+@endsection        

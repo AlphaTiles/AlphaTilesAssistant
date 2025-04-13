@@ -75,7 +75,7 @@ class ImportDriveFolderJob implements ShouldQueue
     {
         $folder = $this->googleService->getFolder($this->folderId);
         $folderName = $folder->getName();
-        $existingLanguagePack = LanguagePack::where('userid', $this->userId)
+        $existingLanguagePack = LanguagePack::where('user_id', $this->userId)
             ->where('name', $folderName)->first();
 
         if ($existingLanguagePack) {
@@ -84,7 +84,7 @@ class ImportDriveFolderJob implements ShouldQueue
         }
 
         return LanguagePack::create([
-            'userid' => $this->userId,
+            'user_id' => $this->userId,
             'name' => $folderName,
             'import_status' => ImportStatus::IMPORTING
         ]);
@@ -92,7 +92,7 @@ class ImportDriveFolderJob implements ShouldQueue
 
     private function generateUniqueItemName($itemName)
     {
-        $count = LanguagePack::where('userid', $this->userId)
+        $count = LanguagePack::where('user_id', $this->userId)
             ->where('name', 'like', "$itemName%")->count();
         return $itemName . ' ' . ($count + 1);
     }    

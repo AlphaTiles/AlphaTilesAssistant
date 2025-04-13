@@ -22,12 +22,12 @@ class LanguagePackPolicy
 
     public function view(User $user, LanguagePack $languagePack)
     {
-        return $user->id === $languagePack->userid;
+        return $user->id === $languagePack->user_id;
     }    
 
     public function update(User $user, LanguagePack $languagePack)
     {
-        return $user->id === $languagePack->userid;
+        return $user->id === $languagePack->user_id;
     }    
 
     public function delete(User $user, LanguagePack $languagePack)

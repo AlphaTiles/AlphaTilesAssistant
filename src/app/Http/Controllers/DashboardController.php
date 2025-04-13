@@ -28,7 +28,10 @@ class DashboardController extends Controller
         $userid = Auth::user()->id;
 
         return view('dashboard', [
-            'languagepacks' => LanguagePack::where('userid', $userid)
+            'languagepacks' => LanguagePack::where('user_id', $userid)
+                ->orWhereHas('collaborators', function ($query) use ($userid) {
+                    $query->where('user_id', $userid);
+                })
                 ->orderByDesc('created_at')->get()
         ]);
     }

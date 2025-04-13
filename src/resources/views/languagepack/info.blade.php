@@ -34,9 +34,15 @@ if(isset($languagePack->langInfo) &&  $languagePack->langInfo->count() > 0) {
 		
 	@endif
 
+	@if($languagePack)
 	<div class="mt-5">
-		<input type="button" value="Delete" onClick="confirmDelete();" class="ml-1 inline-block no-underline btn-sm btn-error font-normal cursor-pointer" />
+		@if($languagePack->user_id == Auth::id())
+			<input type="button" value="Delete" onClick="confirmDelete();" class="ml-1 inline-block no-underline btn-sm btn-error font-normal cursor-pointer" />
+		@else
+			<input type="button" value="Leave Project" onClick="confirmRemoveCollaboration();" class="ml-1 inline-block no-underline btn-sm btn-error font-normal cursor-pointer /">
+		@endif
 	</div>
+	@endif
 	
 	<div class="mt-4">
 		<a href="/dashboard">Back to Dashboard</a>
@@ -52,11 +58,14 @@ if(isset($languagePack->langInfo) &&  $languagePack->langInfo->count() > 0) {
 				title: 'Confirm Deletion',
 				html: 'Please confirm that you want to delete this language pack and any words, files, etc. that you added to it.',
 				showCancelButton: true,
+				cancelButtonText: 'Cancel',
+				cancelButtonColor: 'grey',
 				confirmButtonColor: 'red',
 				confirmButtonText: 'Delete',
+				allowOutsideClick: false,
 			})
-			.then((willDelete) => {
-				if (willDelete) {
+			.then((result) => {				
+				if (result.isConfirmed) {
 					// User clicked the confirm button, send DELETE request
 					fetch("/languagepack/delete/{{ $languagePackId }}", {
 						method: 'DELETE',
@@ -90,5 +99,23 @@ if(isset($languagePack->langInfo) &&  $languagePack->langInfo->count() > 0) {
 				}
         });
 	}
+
+	function confirmRemoveCollaboration() {
+	Swal.fire({
+				title: 'Confirm removal',
+				html: 'Please confirm that you want to be removed as collaborator from this project.',
+				showCancelButton: true,
+				cancelButtonText: 'Cancel',
+				cancelButtonColor: 'grey',
+				confirmButtonColor: 'red',
+				confirmButtonText: 'Leave project',
+				allowOutsideClick: false,
+			})
+			.then((result) => {
+				if (result.isConfirmed) {
+					window.location.href = "/languagepack/remove/{{ $languagePackId }}/{{ Auth::id() }}";
+				}
+			});
+		}
 </script>
 @endsection
