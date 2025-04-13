@@ -34,6 +34,7 @@ if(isset($languagePack->langInfo) &&  $languagePack->langInfo->count() > 0) {
 		
 	@endif
 
+	@if($languagePack)
 	<div class="mt-5">
 		@if($languagePack->user_id == Auth::id())
 			<input type="button" value="Delete" onClick="confirmDelete();" class="ml-1 inline-block no-underline btn-sm btn-error font-normal cursor-pointer" />
@@ -41,6 +42,7 @@ if(isset($languagePack->langInfo) &&  $languagePack->langInfo->count() > 0) {
 			<input type="button" value="Leave Project" onClick="confirmRemoveCollaboration();" class="ml-1 inline-block no-underline btn-sm btn-error font-normal cursor-pointer /">
 		@endif
 	</div>
+	@endif
 	
 	<div class="mt-4">
 		<a href="/dashboard">Back to Dashboard</a>
