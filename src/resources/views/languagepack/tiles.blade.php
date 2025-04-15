@@ -106,7 +106,7 @@ $tabEnum = TabEnum::TILE;
 					<input type="hidden" name="items[{{ $key }}][languagepackid]" value="{{ $tile->languagepackid }}">
 						<input type="hidden" name="items[{{ $key }}][id]" value="{{ $tile->id }}" />
 						<input type="hidden" name="items[{{ $key }}][value]" value="{{ $tile->value }}" />
-						{{ $tile->value }}
+						<a href="#" onClick="showTileInfo({{ $languagePack->id }}, '{{ $tile->value }}');">{{ $tile->value }}</a>
 					</td> 
 					<td>								
 						<input type="text" size=2 name="items[{{ $key }}][upper]" value="{{ $tile->upper }}" />
@@ -252,5 +252,30 @@ function addType(key, nr) {
 
 	event.preventDefault();
 }
+
+function showTileInfo(languagePackId, tile) {
+
+	fetch(`/api/tiles/words/${languagePackId}/${tile}`)
+		.then(response => response.json())
+		.then(words => {
+			const wordList = words.map(word => `<li>${word}</li>`).join('');			
+			Swal.fire({
+				title: 'Words in which tile is used',
+				html: `<ul>${wordList}</ul>`,
+				confirmButtonColor: 'blue',
+				confirmButtonText: 'Close'
+			});
+		})
+		.catch(error => {
+			console.error('Error fetching words:', error);
+			Swal.fire({
+				title: 'Error',
+				text: 'Could not fetch words for the selected tile.',
+				confirmButtonColor: 'blue',
+				confirmButtonText: 'Close'
+			});
+		});
+}
+
 </script>
 @endsection

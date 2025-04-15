@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 class CountTilesService
 {
     protected LanguagePack $languagePack;
-protected ParseWordsIntoTilesService $parseWordsIntoTilesService;
+    protected ParseWordsIntoTilesService $parseWordsIntoTilesService;
 
     public function __construct(LanguagePack $languagePack)
     {
