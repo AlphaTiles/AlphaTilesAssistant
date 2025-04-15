@@ -12,6 +12,7 @@ use App\Services\FileUploadService;
 use App\Services\ValidationService;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
+use App\Services\ParseWordsIntoTilesService;
 
 class TilesController extends BaseItemController
 {
@@ -178,4 +179,13 @@ class TilesController extends BaseItemController
 
         return redirect(url('/languagepack/tiles/' . $languagePack->id) . '?' . http_build_query(request()->query()));
     }        
+
+    public function words(string $languagePack)
+    {
+        dd($languagePack);
+        $parseWordsIntoTilesService = new ParseWordsIntoTilesService($languagePack);
+        $words = $parseWordsIntoTilesService->handle([]);
+
+        return $words;
+    }
 }

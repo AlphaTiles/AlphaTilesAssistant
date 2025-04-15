@@ -307,7 +307,7 @@ class ParseWordsIntoTilesService
     
             // Select the best-matching tile
             $tileString = "";
-            switch ($charBlockLength) {
+            switch ($charBlockLength) {                
                 case 1:
                     $tileString = $tileHashMap[$next1Chars] ?? $tileHashMap[$placeholderCharacter . $next1Chars] ?? 
                                   $tileHashMap[$next1Chars . $placeholderCharacter] ?? $tileHashMap[$placeholderCharacter . $next1Chars . $placeholderCharacter] ?? "";
