@@ -51,3 +51,8 @@ div:where(.swal2-container) div:where(.swal2-popup) {
     width: auto !important;
     max-width: 80% !important;
 }
+
+.swal2-confirm{
+ background-color:blue;
+ color: white;
+ }
