@@ -19,7 +19,7 @@ use App\Http\Controllers\GoogleDriveController;
 */
 Route::post('drive/dispatchimport', [GoogleDriveController::class, 'dispatchimport']);
 
-Route::get('tiles/words/{languagePack}/{tileValue}', [ApiTilesController::class, 'words']);
+Route::get('tiles/words/{languagePack}/{tileId}', [ApiTilesController::class, 'words']);
 
 Route::get('/export-logs', function (Request $request) {
     $logData = DatabaseLog::where('languagepackid', $request->query('languagepackid'))

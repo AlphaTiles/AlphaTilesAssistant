@@ -38,7 +38,7 @@ class ValidationServiceTest extends TestCase
         }
 
         // Create tiles
-        $tiles = ['a', 'b', 'c', 'ch', 'h', 'sch'];
+        $tiles = ['a', 'á', 'b', 'c', 'ch', 'h', 'sch'];
         foreach ($tiles as $tile) {
             Tile::factory()->create([
                 'value' => $tile,
@@ -47,7 +47,7 @@ class ValidationServiceTest extends TestCase
         }
         
         // Create words
-        $words = ['Katze', 'Hund', 'Frosch', 'Kuh', 'Buch', 'Milch'];
+        $words = ['Katze', 'Rát', 'Hund', 'Frosch', 'Kuh', 'Buch', 'Milch'];
         foreach ($words as $word) {
             Word::factory()->create([
                 'value' => $word,
@@ -109,6 +109,7 @@ class ValidationServiceTest extends TestCase
         $values = $tileErrors->pluck('value')->toArray();
         $this->assertEquals([
             "a (1)",
+            "á (1)",
             "b (1)",
             "c (0)",
             "ch (2)",
@@ -126,8 +127,9 @@ class ValidationServiceTest extends TestCase
         $parseErrors = collect($result[ErrorTypeEnum::PARSE_WORD_INTO_TILES->value]);
         
         $values = $parseErrors->pluck('value')->toArray();
-        $this->assertEquals([
+        $this->assertEquals([            
             "Katze - the tiles parsed (simple parsing) are: a",
+            "Rát - the tiles parsed (simple parsing) are: á",
             "Hund - the tiles parsed (simple parsing) are: h",
             "Frosch - the tiles parsed (simple parsing) are: sch",
             "Kuh - the tiles parsed (simple parsing) are: h",
