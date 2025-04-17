@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Tile;
 use App\Models\Word;
 use App\Enums\LangInfoEnum;
+use Illuminate\Support\Arr;
 use App\Models\LanguagePack;
 use App\Services\ParseWordsIntoTilesService;
 
@@ -15,12 +16,18 @@ class ApiTilesController extends Controller
         $parseWordsIntoTilesService = new ParseWordsIntoTilesService($languagePack);      
 
         $tile = Tile::find($tileId);
-        $tileHashMap[$tile->value] = $tile;
+        
         $normalizer = \Normalizer::FORM_C;
         if (preg_match('/\p{M}/u', $tile->value)) { 
             $normalizer = \Normalizer::FORM_D;
         }            
        $tileValue = \Normalizer::normalize($tile->value, $normalizer);
+
+        $tileList = Tile::where('languagepackid', $languagePack->id)->get();
+        $tileHashMap = [];
+        foreach ($tileList as $tile) {
+            $tileHashMap[$tile->value] = $tile;
+        }
 
         $wordList = Word::where('languagepackid', $languagePack->id)->get();
         $scriptType = $languagePack->langInfo
@@ -38,7 +45,7 @@ class ApiTilesController extends Controller
 
             $tilesInWord = $parseWordsIntoTilesService->parseWordIntoTiles($wordValue, $scriptType, $tileHashMap, $placeholderCharacter);            
                         
-            if(!empty($tilesInWord) && strtolower($tilesInWord[0]->value) === strtolower($tileValue)) {                
+            if(!empty($tilesInWord) && in_array($tileValue, Arr::pluck($tilesInWord, 'value'))) {                
                 $wordsWithTile[] = $word->value;
             }
         }
