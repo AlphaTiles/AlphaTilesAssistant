@@ -39,6 +39,7 @@
 
         <div class="my-5 border-t-2 text-center">
             <ul id="footer">
+                <li><a href="https://give.sil.org/give/483433#!/donation/checkout" target="_blank">Donate</a></li>
             </ul>                                
         </div>
     </div>
