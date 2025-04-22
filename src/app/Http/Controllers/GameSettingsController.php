@@ -61,11 +61,13 @@ class GameSettingsController extends Controller
         if(isset($request->settings)) {
             $key = 0;
             foreach($request->settings as $key => $setting) {
-                $settings[$key]['languagepackid'] = $languagePack->id;
-                $settings[$key]['name'] = $key;
-                $settings[$key]['value'] = $setting;
-                $key++;
-            }    
+                if(!empty($setting)) {
+                    $settings[$key]['languagepackid'] = $languagePack->id;
+                    $settings[$key]['name'] = $key;
+                    $settings[$key]['value'] = $setting;
+                    $key++;
+                }
+            }
             
             GameSetting::insert($settings);
         }

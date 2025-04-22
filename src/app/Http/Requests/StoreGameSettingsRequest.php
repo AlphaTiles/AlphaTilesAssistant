@@ -23,6 +23,7 @@ class StoreGameSettingsRequest extends FormRequest
             'settings' => [
                 'array',
             ],
+            'settings.share_link' => 'sometimes',
             'btnNext' => 'sometimes',
         ] + $requiredSettings;        
     }
