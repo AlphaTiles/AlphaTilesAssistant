@@ -56,3 +56,11 @@ div:where(.swal2-container) div:where(.swal2-popup) {
  background-color:blue;
  color: white;
  }
+
+tr:nth-child(even) {
+    background-color: #f5f5f5;
+}
+
+.table :where(tbody th, tbody td) {
+    background-color: unset;
+}
