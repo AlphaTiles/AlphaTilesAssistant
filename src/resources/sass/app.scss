@@ -64,3 +64,7 @@ tr:nth-child(even) {
 .table :where(tbody th, tbody td) {
     background-color: unset;
 }
+
+#footer a {
+    color: darkgray;
+}
