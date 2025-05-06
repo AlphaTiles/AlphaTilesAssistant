@@ -23,13 +23,13 @@
     "file": "assets/fa-brands-400.20c4a58b.ttf",
     "src": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.ttf"
   },
-  "node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.ttf": {
-    "file": "assets/fa-solid-900.67a65763.ttf",
-    "src": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.ttf"
-  },
   "node_modules/@fortawesome/fontawesome-free/webfonts/fa-v4compatibility.ttf": {
     "file": "assets/fa-v4compatibility.0515a423.ttf",
     "src": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-v4compatibility.ttf"
+  },
+  "node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.ttf": {
+    "file": "assets/fa-solid-900.67a65763.ttf",
+    "src": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.ttf"
   },
   "resources/js/app.js": {
     "file": "assets/app.e5198d1b.js",
@@ -37,7 +37,7 @@
     "isEntry": true
   },
   "resources/sass/app.scss": {
-    "file": "assets/app.029a089c.css",
+    "file": "assets/app.34f8f21d.css",
     "src": "resources/sass/app.scss",
     "isEntry": true
   }
