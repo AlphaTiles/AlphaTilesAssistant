@@ -52,10 +52,16 @@ div:where(.swal2-container) div:where(.swal2-popup) {
     max-width: 80% !important;
 }
 
+// Override SweetAlert2 styles
 .swal2-confirm{
- background-color:blue;
- color: white;
- }
+    background-color:blue;
+    color: white;
+}
+
+.swal2-cancel {
+    background-color: #6c757d !important; // Grey color
+    display: inline-block !important;
+}
 
 tr:nth-child(even) {
     background-color: #f5f5f5;

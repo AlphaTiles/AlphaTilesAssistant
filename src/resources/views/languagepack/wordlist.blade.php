@@ -200,11 +200,11 @@ $tabEnum = TabEnum::WORD;
 	</form>
 
 
-	<form method="post" action="/languagepack/wordlist/{{ $languagePack->id }}">
+	<form id="formAddItems" method="post" action="/languagepack/wordlist/{{ $languagePack->id }}">
 		@csrf
 		<div>
 			<label for="add_items">Add Words (one word per line):</label> <a href="#" onClick="openAlert('How many words should be included?', '300 words is recommended, but 100-150 words is a common starting point. A good goal is to include, for every game tile, one word that begins with that game tile (although there are of course some game tiles in some languages that never appear at the beginning of words). If you have more than 300 words, it is worth considering whether multiple apps should be made, perhaps dividing the words into semantic groupings or beginner/advanced groupings, etc.')"><i class="fa-solid fa-circle-info"></i></a><br>
-			<textarea name="add_items" rows=7 cols=45 class="leading-tight">{{ old('add_items') }}</textarea>
+			<textarea name="add_items" id="txtAddItems" rows=7 cols=45 class="leading-tight">{{ old('add_items') }}</textarea>
 		</div>
 
 		<div class="mt-3 w-9/12">		
@@ -228,5 +228,29 @@ $tabEnum = TabEnum::WORD;
 
 @section('scripts')
 <script>	
+document.getElementById('formAddItems').addEventListener('submit', function(event) {
+	const text = document.getElementById('txtAddItems').value;
+	const lines = text.split('\n');
+	const pattern = /[\t,;]/;
+
+	// Check each line for multiple columns
+	const hasMultipleColumns = lines.some(line => pattern.test(line));
+
+	if (hasMultipleColumns) {
+		event.preventDefault(); // Pause form submission
+		Swal.fire({
+			title: 'Are you sure?',
+			html: "Make sure you only include a single column of data that has the words as written in the language of the game.",
+			showCancelButton: true,
+			confirmButtonText: 'Yes, proceed!',
+			cancelButtonText: 'Cancel',
+			allowOutsideClick: false,
+		}).then((result) => {
+			if (result.isConfirmed) {
+				event.target.submit(); // Submit the form if confirmed
+			}
+		});
+	}
+});
 </script>
 @endsection
