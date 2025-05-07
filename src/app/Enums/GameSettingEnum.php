@@ -7,7 +7,6 @@ use Google\Service\CloudHealthcare\Field;
 enum GameSettingEnum: string
 {
     case SCAN_SETTING        = 'scan_setting';
-    case SHOW_FILTER_OPTIONS = 'show_filter_options';
     case HAS_TILE_AUDIO      = 'has_tile_audio';
     case AFTER_12_TRACKERS = 'after_12_trackers';
     case SYLLABLE_AUDIO = 'syllable_audio';
@@ -29,7 +28,6 @@ enum GameSettingEnum: string
     {
         return match ($this) {
             self::SCAN_SETTING      => '1',
-            self::SHOW_FILTER_OPTIONS => false,
             self::HAS_TILE_AUDIO    => false,    
             self::AFTER_12_TRACKERS => '3',       
             self::SYLLABLE_AUDIO => false, 
@@ -53,7 +51,6 @@ enum GameSettingEnum: string
     {
         return match ($this) {
             self::SCAN_SETTING       => 'Game 001 Scan Setting',
-            self::SHOW_FILTER_OPTIONS => 'Show filter options for Game 001',
             self::HAS_TILE_AUDIO    =>  'Has tile audio',
             self::AFTER_12_TRACKERS => 'After 12 checked trackers',
             self::SYLLABLE_AUDIO => 'Has syllable audio',            
@@ -77,7 +74,6 @@ enum GameSettingEnum: string
     {
         return match($this) {
             self::SCAN_SETTING => '/images/help/scan_settings.png',
-            self::SHOW_FILTER_OPTIONS => '/images/help/filter_options.png',
             self::AFTER_12_TRACKERS => '/images/help/after_12_trackers.png',
             self::NUMBER_AVATARS => '/images/help/number_avatars.png',
             self::DIFFERENTIATE_TYPES => '/images/help/differentiate_types.png',
@@ -104,22 +100,21 @@ enum GameSettingEnum: string
     {
         return match ($this) {
             self::SCAN_SETTING       => '1. Game 001 Scan Setting',
-            self::SHOW_FILTER_OPTIONS => '2. Show filter options for Game 001',
-            self::HAS_TILE_AUDIO     => '3. Has tile audio',
-            self::AFTER_12_TRACKERS => '4. After 12 checked trackers',
-            self::SYLLABLE_AUDIO => '5. Has syllable audio',
-            self::NUMBER_AVATARS => '6. Number of avatars',
-            self::DIFFERENTIATE_TYPES => '7. Differentiates types of multitype symbols',
-            self::STAGE_CORRESPONDENCE => '8. Stage correspondence ratio',
-            self::FIRST_LETTER_CORRESPONDENCE => '9. First letter stage correspondence',
-            self::WORD_LENGTH => '10. Stage 1-2 max word length',
-            self::DAYS_EXPIRATION => '11. Days until expiration',
-            self::CHILE_KEYBOARD_WIDTH => '12. Chile keyboard width',
-            self::CHILE_GUESS_COUNT => '13. Chile base guess count',
-            self::CHILE_MIN_WORD_LENGTH => '14. Chile minimum word length',
-            self::CHILE_MAX_WORD_LENGTH => '15. Chile maximum word length',
-            self::BOLD_NON_INITIAL_TILES => '16. In Game 001 (Romania) bold non-initial tiles when in focus? (boldNonInitialFocusTiles)',
-            self::BOLD_INITIAL_TILES => '17. In Game 001 (Romania) bold initial tiles when in focus? (boldInitialFocusTiles)',
+            self::HAS_TILE_AUDIO     => '2. Has tile audio',
+            self::AFTER_12_TRACKERS => '3. After 12 checked trackers',
+            self::SYLLABLE_AUDIO => '4. Has syllable audio',
+            self::NUMBER_AVATARS => '5. Number of avatars',
+            self::DIFFERENTIATE_TYPES => '6. Differentiates types of multitype symbols',
+            self::STAGE_CORRESPONDENCE => '7. Stage correspondence ratio',
+            self::FIRST_LETTER_CORRESPONDENCE => '8. First letter stage correspondence',
+            self::WORD_LENGTH => '9. Stage 1-2 max word length',
+            self::DAYS_EXPIRATION => '10. Days until expiration',
+            self::CHILE_KEYBOARD_WIDTH => '11. Chile keyboard width',
+            self::CHILE_GUESS_COUNT => '12. Chile base guess count',
+            self::CHILE_MIN_WORD_LENGTH => '13. Chile minimum word length',
+            self::CHILE_MAX_WORD_LENGTH => '14. Chile maximum word length',
+            self::BOLD_NON_INITIAL_TILES => '15. In Game 001 (Romania) bold non-initial tiles when in focus? (boldNonInitialFocusTiles)',
+            self::BOLD_INITIAL_TILES => '16. In Game 001 (Romania) bold initial tiles when in focus? (boldInitialFocusTiles)',
             self::SHARE_LINK => 'aa_share.txt',
         };
     }
@@ -128,7 +123,6 @@ enum GameSettingEnum: string
     {
         return match($this) {
             self::SCAN_SETTING  => FieldTypeEnum::DROPDOWN,
-            self::SHOW_FILTER_OPTIONS => FieldTypeEnum::CHECKBOX,
             self::HAS_TILE_AUDIO => FieldTypeEnum::CHECKBOX,
             self::AFTER_12_TRACKERS => FieldTypeEnum::DROPDOWN,
             self::SYLLABLE_AUDIO => FieldTypeEnum::CHECKBOX,
