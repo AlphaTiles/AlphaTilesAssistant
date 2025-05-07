@@ -148,7 +148,7 @@ $tabEnum = TabEnum::KEY;
 		<form method="post" action="/languagepack/keyboard/{{ $languagePack->id }}">
 			@csrf
 			<div>
-				<label for="add_items">Add keys (one key per line):</label> <a href="#" onClick="openAlert('Keyboard instructions', 'The order in which the keys are listed in the keyboard tab will be the order in which the keyboard is created in the game.<br><br>If your word includes a dash, you must add it. If your words contain spaces, you must add it as an underscore.')"><i class="fa-solid fa-circle-info"></i></a><br>
+				<label for="add_items">Add keys (one key per line):</label> <a href="#" onClick="openAlert('Keyboard instructions', 'The order in which the keys are listed in the keyboard tab will be the order in which the keyboard is created in the game.<br><br>Remember to include space, dash or any other characters that form words in the language. The keyboard-based games in Alpha Tiles are meant to mimic typing on an Android keyboard, so there is no need to include digraphs, but only each individual character that is used to form words in the language.')"><i class="fa-solid fa-circle-info"></i></a><br>
 				<textarea name="add_items" rows=10 cols=15 class="leading-tight">{{ old('add_items', $defaultKeys) }}</textarea>
 			</div>
 
