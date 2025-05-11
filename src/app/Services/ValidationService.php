@@ -6,9 +6,12 @@ use App\Models\Tile;
 use App\Models\Word;
 use App\Enums\TabEnum;
 use App\Enums\ErrorTypeEnum;
+use App\Enums\GameSettingEnum;
+use App\Models\GameSetting;
 use App\Models\Key;
 use App\Models\LanguagePack;
 use App\Models\Syllable;
+use Google\Service\Vision\Symbol;
 use Illuminate\Database\Eloquent\Model;
 
 class ValidationService
@@ -44,12 +47,14 @@ class ValidationService
         if(empty($tab) || $tab === TabEnum::SYLLABLE) {
             $errors = $this->checkDuplicates($errors, new Syllable(), ErrorTypeEnum::DUPLICATE_SYLLABLE);
             $errors = $this->checkDistractors($errors, new Syllable(), ErrorTypeEnum::EMPTY_DISTRACTOR_SYLLABLE);
+            $errors = $this->checkAudioFilesMissing($errors, new Syllable(), ErrorTypeEnum::MISSING_TILE_AUDIO_FILE);            
         }
 
         if(empty($tab) || $tab === TabEnum::TILE) {
             $errors = $this->checkDuplicates($errors, new Tile(), ErrorTypeEnum::DUPLICATE_TILE);
             $errors = $this->checkDistractors($errors, new Tile(), ErrorTypeEnum::EMPTY_DISTRACTOR_TILE);
             $errors = $this->checkTypes($errors, new Tile(), ErrorTypeEnum::EMPTY_TYPE_TILE);
+            $errors = $this->checkAudioFilesMissing($errors, new Tile(), ErrorTypeEnum::MISSING_TILE_AUDIO_FILE);
         }
 
         if(empty($tab)) {
@@ -90,6 +95,55 @@ class ValidationService
 
         return $errors;
     }
+
+    private function checkAudioFilesMissing(array $errors, Model $model, ErrorTypeEnum $errorEnum): array
+    {
+        if($model instanceof Tile) {
+            $audioFileRequired = GameSetting::where('languagepackid', $this->languagePack->id)
+            ->where('name', GameSettingEnum::HAS_TILE_AUDIO->value)
+            ->first();
+            
+            if(empty($audioFileRequired)) {
+                return $errors;
+            }
+        }        
+
+        if($model instanceof Syllable) {
+            $audioFileRequired = GameSetting::where('languagepackid', $this->languagePack->id)
+            ->where('name', GameSettingEnum::SYLLABLE_AUDIO->value)
+            ->first();
+            
+            if(empty($audioFileRequired)) {
+                return $errors;
+            }
+        }             
+
+        $itemsWithoutFile = $model::where('languagepackid', $this->languagePack->id)
+        ->where(function ($query) use ($model) {
+            $query->whereNull('file_id');
+            if (in_array('file2_id', $model->getFillable())) {
+                $query->orWhereNull('file2_id');
+            }
+            if (in_array('file3_id', $model->getFillable())) {
+                $query->orWhereNull('file3_id');
+            }
+        })
+        ->get();
+
+        $i = 0;
+        foreach ($itemsWithoutFile as $item) {
+            if (empty($item->file_id) || 
+                (!empty($item->type2) && empty($item->file2_id)) || 
+                (!empty($item->type3) && empty($item->file3_id))) {
+                    $errors[$i]['value'] = $item->value;
+                    $errors[$i]['type'] = $errorEnum;
+                    $errors[$i]['tab'] = $errorEnum->tab()->name();
+                    $i++;
+            }
+        }
+
+        return $errors;
+    }    
 
     public function checkColor(array $errors, Model $model, ErrorTypeEnum $errorTypeEnum): array{
         $itemsWithMissingType = $model::where('languagepackid', $this->languagePack->id)
