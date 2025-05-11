@@ -8,6 +8,8 @@ enum ErrorTypeEnum: string
 {
     case MISSING_WORD_AUDIO_FILE       = 'missing_word_audio_file';
     case MISSING_WORD_IMAGE_FILE       = 'missing_word_image_file';
+    case MISSING_SYLLABLE_AUDIO_FILE       = 'missing_syllable_audio_file';
+    case MISSING_TILE_AUDIO_FILE       = 'missing_tile_audio_file';
     case COLOR_KEY                    = 'color_key';
     case DUPLICATE_KEY                 = 'duplicate_key';
     case DUPLICATE_SYLLABLE            = 'duplicate_syllable';
@@ -25,6 +27,8 @@ enum ErrorTypeEnum: string
         return match($this) {
             self::MISSING_WORD_AUDIO_FILE => 'An audio file is required',
             self::MISSING_WORD_IMAGE_FILE => 'An image file is required',
+            self::MISSING_SYLLABLE_AUDIO_FILE => 'An audio file is required',
+            self::MISSING_TILE_AUDIO_FILE => 'An audio file is required',
             self::COLOR_KEY                 => 'The following keys are not color coded',
             self::DUPLICATE_KEY          => 'The following keys are duplicate',
             self::DUPLICATE_SYLLABLE     => 'The following syllables are duplicate',
@@ -44,6 +48,8 @@ enum ErrorTypeEnum: string
         return match($this) {
             self::MISSING_WORD_AUDIO_FILE => TabEnum::WORD,
             self::MISSING_WORD_IMAGE_FILE => TabEnum::WORD,
+            self::MISSING_SYLLABLE_AUDIO_FILE => TabEnum::SYLLABLE,
+            self::MISSING_TILE_AUDIO_FILE => TabEnum::TILE,
             self::COLOR_KEY => TabEnum::KEY,
             self::DUPLICATE_KEY => TabEnum::KEY,
             self::DUPLICATE_SYLLABLE => TabEnum::SYLLABLE,
