@@ -44,7 +44,8 @@ class SocialController extends Controller
                     "or <a href=\"https://accounts.google.com/AccountChooser\">login with another account</a>.";
                 }
             } catch (Exception $e) {
-                dd($e);
+                Log::error('Google login error: ' . $e->getMessage());
+                return redirect()->route('login')->withErrors(['google' => 'Failed to login with Google. Please try again.']);
             }
     }
 }
