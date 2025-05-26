@@ -10,7 +10,7 @@ use App\Services\ParseWordsIntoTilesService;
 
 class ApiWordController extends Controller
 {
-    public function tiles(LanguagePack $languagePack, int $wordId): string
+    public function tiles(LanguagePack $languagePack, string $wordId): string
     {  
         $parseWordsIntoTilesService = new ParseWordsIntoTilesService($languagePack);      
         $word = Word::find($wordId);

@@ -114,6 +114,9 @@ $tabEnum = TabEnum::WORD;
 						<input type="hidden" name="words[{{ $key }}][id]" value="{{ $word->id }}" />						
 						<?php $errorClass = isset($errorKeys) && in_array('words.' . $key, $errorKeys) ? 'inputError' : ''; ?>			
 						<input type="text" name="words[{{ $key }}][value]" value="{{ old('words.' . $key . '.value') ?? $word->value }}" class="{{ $errorClass }}" />
+						<a href="#" onClick="showWordInfo({{ $word->languagepackid }}, {{$key }}, {{ $word->id }});">
+							<i class="fa-solid fa-th"></i>
+						</a>
 					</td> 
 					<td>								
 						<input type="text" name="words[{{ $key }}][mixed_types]" value="{{ old('words.' . $key . '.mixed_types') ?? $word->mixed_types }}" />
@@ -228,6 +231,49 @@ $tabEnum = TabEnum::WORD;
 
 @section('scripts')
 <script>	
+function showWordInfo(languagePackId, inputNr, wordId) {
+    // Find the input element associated with this word
+    const wordInput = document.querySelector(`input[name="words[${inputNr}][value]"]`);
+    
+    // Check if the input value has changed from its original value
+    if (wordInput && wordInput.defaultValue !== wordInput.value) {
+        Swal.fire({
+            title: 'Unsaved Changes',
+            text: 'You need to save the changes first before you can view the tiles.',
+            confirmButtonColor: 'blue',
+            confirmButtonText: 'Close',
+            showConfirmButton: true,
+            showCancelButton: false
+        });
+        return;
+    }
+
+    // Existing fetch logic for showing tiles
+    fetch(`/api/words/tiles/${languagePackId}/${wordId}`)
+        .then(response => response.text())
+        .then(tiles => {
+            Swal.fire({
+                title: 'Word gets parsed into these tiles',
+                html: tiles,
+                confirmButtonColor: 'blue',
+                confirmButtonText: 'Close',
+                showConfirmButton: true,
+                showCancelButton: false
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching tiles:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'Could not fetch tiles for the selected word.',
+                confirmButtonColor: 'blue',
+                confirmButtonText: 'Close',
+                showConfirmButton: true,
+                showCancelButton: false
+            });
+        });
+}
+
 document.getElementById('formAddItems').addEventListener('submit', function(event) {
 	const text = document.getElementById('txtAddItems').value;
 	const lines = text.split('\n');
