@@ -277,5 +277,5 @@ function showTileInfo(languagePackId, tileId) {
 }
 
 </script>
-@vite('resources/js/shared-scripts.js')
+<script src="{{ asset('js/shared-scripts.js') }}"></script>
 @endsection
