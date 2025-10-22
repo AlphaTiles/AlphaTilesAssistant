@@ -275,5 +275,5 @@ function showWordInfo(languagePackId, inputNr, wordId) {
 }
 
 </script>
-@vite('resources/js/shared-scripts.js')
+<script src="{{ asset('js/shared-scripts.js') }}"></script>
 @endsection
