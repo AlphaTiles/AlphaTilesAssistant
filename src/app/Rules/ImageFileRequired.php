@@ -51,13 +51,27 @@ class ImageFileRequired implements Rule
                 return false;
             }    
 
-            if(!$this->isValidDimensions()) {
+            if(!$this->isValidImage()) {
                 return false;
+            }
+
+
+            if(!$this->isValidDimensions()) {
+                // record a non-blocking warning so upload proceeds
+                try {
+                    $wordKey = explode('.', $this->attribute)[1] ?? '';
+                    $word = $this->words[$wordKey]['value'] ?? 'the item';
+                    session()->push('image_warnings', "The dimensions of the image file for {$word} should be {$this->validImageDimensionInKb}x{$this->validImageDimensionInKb}px.");
+                } catch (\Exception $e) {
+                    Log::warning('Could not add image dimension warning to session: ' . $e->getMessage());
+                }
+
+                // do NOT return false — allow upload to continue
             }
             
             return true;
         }
-
+        
         //not required
         return true;
     }
@@ -80,7 +94,7 @@ class ImageFileRequired implements Rule
             } elseif($fileSizeInKB === 0 || $fileSizeInKB > 256) {
                 $errorMessage = "The file size must be no bigger than 256kb.";
             }
-            elseif(!$this->isValidDimensions($this->value)) {
+            elseif(!$this->isValidDimensions()) {
                 $errorMessage = "The dimensions of the image file have to be {$this->validImageDimensionInKb}x{$this->validImageDimensionInKb}px.";
             }    
         }
@@ -90,13 +104,29 @@ class ImageFileRequired implements Rule
         ];                        
     }
 
-    protected function isValidDimensions(): bool
+     protected function isValidImage(): bool
     {
         if($this->file->getClientOriginalExtension() !== 'png') {
             return false;
         }
 
-        if(getimagesize($this->file)[0] !== $this->validImageDimensionInKb && getimagesize($this->file)[1] !== $this->validImageDimensionInKb) {
+        $size = @getimagesize($this->file);
+        if(!$size || !isset($size[0], $size[1])) {
+            return false;
+        }
+
+        return true;
+    }
+
+    protected function isValidDimensions(): bool
+    {
+        $size = @getimagesize($this->file);
+        if(!$size || !isset($size[0], $size[1])) {
+            return false;
+        }
+
+        // invalid if either width or height doesn't match expected
+        if($size[0] !== $this->validImageDimensionInKb || $size[1] !== $this->validImageDimensionInKb) {
             return false;
         }
 

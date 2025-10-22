@@ -202,11 +202,11 @@ $tabEnum = TabEnum::TILE;
 		</div>
 	</form>
 
-	<form method="post" action="/languagepack/tiles/{{ $languagePack->id }}">
+	<form id="formAddItems" method="post" action="/languagepack/tiles/{{ $languagePack->id }}" data-add-items-message="Make sure you only include a single column of data that has the tiles.">
 		@csrf
 		<div>
 			<label for="add_items">Add items (one tile per line):</label><br>
-			<textarea name="add_items" rows=7 cols=40 class="leading-tight">{{ old('add_items') }}</textarea>
+			<textarea id="txtAddItems" name="add_items" rows=7 cols=40 class="leading-tight">{{ old('add_items') }}</textarea>
 		</div>
 
 		<div class="mt-3 w-9/12">		
@@ -277,4 +277,5 @@ function showTileInfo(languagePackId, tileId) {
 }
 
 </script>
+@vite('resources/js/shared-scripts.js')
 @endsection

@@ -59,6 +59,8 @@ enum LangInfoEnum: string
     public function helpText(): ?string
     {
         return match($this) {
+            self::VARIANT_INFO => 'List variant or dialect information, if required. If not required, leave ‘1’ as the default.',
+            self::MEDIA_CREDITS => 'If using Flaticon images and the SIL Global logo is retained, no acknowledgement is required, but it is recommended to state ‘Flaticon images used under a premium license held by SIL Global.’',
             default => null
         };
     }
