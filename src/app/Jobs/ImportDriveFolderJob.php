@@ -43,8 +43,16 @@ class ImportDriveFolderJob implements ShouldQueue
      */
     public function handle()
     {                
+        // Ensure googleService exists before createLanguagePack() uses it.
+        // Construct with null for the languagePack initially; we'll reassign once created.
+        // this is because we need to get the folder id first to create the language pack
+        $this->googleService = new GoogleService(null, $this->token);
+
         $languagePack = $this->createLanguagePack();
-        $this->googleService = new GoogleService($languagePack, $this->token);        
+
+        // Reinitialize googleService with the actual language pack
+        $this->googleService = new GoogleService($languagePack, $this->token);
+
         $files = $this->googleService->listFiles($this->folderId);
         $spreadsheetId = null;
         $sheetType = 'google';

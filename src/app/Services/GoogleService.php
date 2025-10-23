@@ -19,14 +19,16 @@ class GoogleService
     protected Drive $driveService;
     protected string $token;
 
-    public function __construct(LanguagePack $languagePack, string $token, $logType = 'unknown')
+    public function __construct(?LanguagePack $languagePack, string $token, $logType = 'unknown')
     {
         $this->client = new Client();
         $this->token = $token;
         $this->client->setAccessToken($token);
         $this->driveService = new Drive($this->client);
         $this->driveFile = new DriveFile($this->client);
-        $this->logService = new LogToDatabaseService($languagePack->id, $logType);
+        if(isset($languagePack)) {
+            $this->logService = new LogToDatabaseService($languagePack->id, $logType);
+        }
     }
 
     public function getFolder($folderId)
