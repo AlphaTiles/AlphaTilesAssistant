@@ -57,8 +57,9 @@ class ImportSheetService
             $this->languagePack->import_status = ImportStatus::SUCCESS->value;
             Log::error("import complete");
         } catch(Exception $ex) {
-            Log::error('exception thrown');
+            Log::error('import exception thrown');
             Log::error($ex->getMessage());
+            Log::error($ex->getTraceAsString());            
             $this->languagePack->import_status = ImportStatus::FAILED->value;    
         } finally {
             $this->languagePack->save();
@@ -122,27 +123,50 @@ class ImportSheetService
                 $tile['or_2'] = $row[2];
                 $tile['or_3'] = $row[3];
                 $tile['type'] = $row[4];
-                $tile['upper'] = $row[6];
-                $tile['type2'] = trim($row[7]) === 'none' ? null : $row[7];
-                $tile['type3'] = trim($row[9]) === 'none' ? null : $row[9];
-                $tile['stage'] = $row[14] === '-' ? null : $row[14];
-                $tile['stage2'] = $row[15] === '-' ? null : $row[15];
-                $tile['stage3'] = $row[16] === '-' ? null : $row[16];
+                $tile['upper'] = $row[6] ?? '';
+                $type2 = null;
+                if(isset($row[7])) {    
+                    $type2 = trim($row[7]) === 'none' ? null : $row[7];
+                }
+                $tile['type2'] = $type2;
+                $type3 = null;
+                if(isset($row[9])) {    
+                    $type3 = trim($row[9]) === 'none' ? null : $row[9];                
+                }
+                $tile['type3'] = $type3;
+                $stage = null;
+                if(isset($row[14])) {    
+                    $stage = $row[14] === '-' ? null : $row[14];
+                }
+                $tile['stage'] = $stage;
+                $stage2 = null;
+                if(isset($row[15])) {    
+                    $stage2 = $row[15] === '-' ? null : $row[15];
+                }
+                $tile['stage2'] = $stage2;
+                $stage3 = null;
+                if(isset($row[16])) {    
+                    $stage3 = $row[16] === '-' ? null : $row[16];
+                }   
+                $tile['stage3'] = $stage3;
 
                 $myTile = Tile::create($tile);
 
-                $this->uploadTileFile(1, $myTile, $row[5]);
-                $this->uploadTileFile(2, $myTile, $row[8]);
-                $this->uploadTileFile(3, $myTile, $row[10]);
-
+                $this->uploadTileFile(1, $myTile, $row[5] ?? null);
+                $this->uploadTileFile(2, $myTile, $row[8] ?? null);
+                $this->uploadTileFile(3, $myTile, $row[10] ?? null);
             }
 
             
         }            
     }
 
-    private function uploadTileFile(int $fileNr, Tile $myTile, string $fileName): void
+    private function uploadTileFile(int $fileNr, Tile $myTile, ?string $fileName): void
     {
+        if(empty($fileName)) {
+            return;
+        }
+
         if(strtolower($fileName) === 'x') {
             return;
         }
@@ -181,7 +205,7 @@ class ImportSheetService
             if(!empty($row[0])) {
                 $word['languagepackid'] = $this->languagePack->id;
                 $word['value'] = $row[1];                
-                $word['mixed_types'] = $row[3];                
+                $word['mixed_types'] = $row[3] ?? '';                
 
                 $myWord = Word::create($word);
                 $this->uploadWordFile($myWord, $row[0], FileTypeEnum::AUDIO);
