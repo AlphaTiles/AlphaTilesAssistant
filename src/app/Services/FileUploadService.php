@@ -22,7 +22,7 @@ class FileUploadService
         );                        
         if($fileValdidation->passes()){
             $newFileName = "{$itemType}_" .  str_pad($item['id'], 3, '0', STR_PAD_LEFT) . '_' . $fileNr . '.' . $extension;
-            $languagePackPath = "languagepacks/{$item['languagepackid']}/res/raw/";
+            $languagePackPath = "languagepacks/{$item['languagepackid']}/res/raw";
             $filePath = $item[$fileField]->storeAs($languagePackPath, $newFileName, 'public');
             $fileModel->name = $item[$fileField]->getClientOriginalName();
             $fileModel->file_path = '/storage/' . $filePath;

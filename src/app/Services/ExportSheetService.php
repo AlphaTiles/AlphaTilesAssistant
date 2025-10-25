@@ -341,7 +341,7 @@ class ExportSheetService
         if($oldFolderId) {
             $this->googleService->deleteFolder($oldFolderId);             
         }        
-        $this->googleService->createFolder($folderName, $this->exportFolderId);        
+        $imageFolderId = $this->googleService->createFolder($folderName, $this->exportFolderId);        
 
         $values = [
             ['Name', 'Link', 'Image'],
@@ -351,10 +351,17 @@ class ExportSheetService
             ->orderBy('name')
             ->get();
         $i = 1;        
+        $storagePath = "/storage/languagepacks/{$this->languagePack->id}/res/raw/";
+
         foreach($items as $item) {
+            $fileImageName = str_replace($storagePath, '', $item->file->file_path);
+            $fileNameSheet = str_replace('.png', '',$fileImageName);
+            $this->saveFileToDrive($item->file, $imageFolderId, 'image', $fileImageName);
+
             $values[$i] = [
                 $item->name,
                 $item->link,
+                $fileNameSheet
             ];
             $i++;
         }        
