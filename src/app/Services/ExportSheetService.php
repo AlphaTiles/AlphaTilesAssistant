@@ -218,20 +218,21 @@ class ExportSheetService
             ->get();
         $i = 1;        
         foreach($words as $word) {
-            $fileName = '';
+            $fileAudioName = '';
+            $fileImageName = '';
             $fileNameSheet = '';
             if(isset($word->audioFile->file_path)) {
                 $storagePath = "/storage/languagepacks/{$this->languagePack->id}/res/raw/";
-                $fileName = str_replace($storagePath, '', $word->audioFile->file_path);
-                $fileNameSheet = str_replace('.mp3', '',$fileName);
+                $fileAudioName = str_replace($storagePath, '', $word->audioFile->file_path);
+                $fileNameSheet = str_replace('.mp3', '',$fileAudioName);
             }
             if(isset($word->imageFile->file_path)) {
                 $storagePath = "/storage/languagepacks/{$this->languagePack->id}/res/raw/";
-                $fileName = str_replace($storagePath, '', $word->imageFile->file_path);
-                $fileNameSheet = str_replace('.png', '',$fileName);
+                $fileImageName = str_replace($storagePath, '', $word->imageFile->file_path);
+                $fileNameSheet = str_replace('.png', '',$fileImageName);
             }
-            $this->saveFileToDrive($word->audioFile, $audioFolderId, 'word audio', $fileName);
-            $this->saveFileToDrive($word->imageFile, $imageFolderId, 'image audio', $fileName);
+            $this->saveFileToDrive($word->audioFile, $audioFolderId, 'word audio', $fileAudioName);
+            $this->saveFileToDrive($word->imageFile, $imageFolderId, 'image', $fileImageName);
 
             $mixedTypes = !empty($word->mixed_types) ? $word->mixed_types : '-';  
             $stage = $word->stage ?? '-';
