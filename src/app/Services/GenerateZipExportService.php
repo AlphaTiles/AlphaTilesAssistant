@@ -306,10 +306,16 @@ class GenerateZipExportService
         $fileRelation = $nr > 1 ? "file{$nr}" : 'file';
 
         if ($item->{$fileRelation}) {
-            $file = basename($item->{$fileRelation}->file_path);
-            $resourceFile = "app/public/languagepacks/{$this->languagePack->id}/res/raw/{$file}";
-            $outputFolder = "{$zipFileName}/res/raw/{$file}";
-            $zip->addFile(storage_path($resourceFile), $outputFolder);
+            $file = $item->{$fileRelation}->file_path;
+            $extension = pathinfo($file, PATHINFO_EXTENSION);
+            $fileName = basename($file);
+            $resourceFile = "app/public/languagepacks/{$this->languagePack->id}/res/raw/{$fileName}";
+            $outputFolder = 'raw';
+            if ($extension === 'png') {
+                $outputFolder = 'drawable-xxxhdpi';
+            }
+            $outputFolderPath = "{$zipFileName}/res/{$outputFolder}/{$fileName}";
+            $zip->addFile(storage_path($resourceFile), $outputFolderPath);
         }
     }
 

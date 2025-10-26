@@ -218,20 +218,21 @@ class ExportSheetService
             ->get();
         $i = 1;        
         foreach($words as $word) {
-            $fileName = '';
+            $fileAudioName = '';
+            $fileImageName = '';
             $fileNameSheet = '';
             if(isset($word->audioFile->file_path)) {
                 $storagePath = "/storage/languagepacks/{$this->languagePack->id}/res/raw/";
-                $fileName = str_replace($storagePath, '', $word->audioFile->file_path);
-                $fileNameSheet = str_replace('.mp3', '',$fileName);
+                $fileAudioName = str_replace($storagePath, '', $word->audioFile->file_path);
+                $fileNameSheet = str_replace('.mp3', '',$fileAudioName);
             }
             if(isset($word->imageFile->file_path)) {
                 $storagePath = "/storage/languagepacks/{$this->languagePack->id}/res/raw/";
-                $fileName = str_replace($storagePath, '', $word->imageFile->file_path);
-                $fileNameSheet = str_replace('.png', '',$fileName);
+                $fileImageName = str_replace($storagePath, '', $word->imageFile->file_path);
+                $fileNameSheet = str_replace('.png', '',$fileImageName);
             }
-            $this->saveFileToDrive($word->audioFile, $audioFolderId, 'word audio', $fileName);
-            $this->saveFileToDrive($word->imageFile, $imageFolderId, 'image audio', $fileName);
+            $this->saveFileToDrive($word->audioFile, $audioFolderId, 'word audio', $fileAudioName);
+            $this->saveFileToDrive($word->imageFile, $imageFolderId, 'image', $fileImageName);
 
             $mixedTypes = !empty($word->mixed_types) ? $word->mixed_types : '-';  
             $stage = $word->stage ?? '-';
@@ -340,7 +341,7 @@ class ExportSheetService
         if($oldFolderId) {
             $this->googleService->deleteFolder($oldFolderId);             
         }        
-        $this->googleService->createFolder($folderName, $this->exportFolderId);        
+        $imageFolderId = $this->googleService->createFolder($folderName, $this->exportFolderId);        
 
         $values = [
             ['Name', 'Link', 'Image'],
@@ -350,10 +351,17 @@ class ExportSheetService
             ->orderBy('name')
             ->get();
         $i = 1;        
+        $storagePath = "/storage/languagepacks/{$this->languagePack->id}/res/raw/";
+
         foreach($items as $item) {
+            $fileImageName = str_replace($storagePath, '', $item->file->file_path);
+            $fileNameSheet = str_replace('.png', '',$fileImageName);
+            $this->saveFileToDrive($item->file, $imageFolderId, 'image', $fileImageName);
+
             $values[$i] = [
                 $item->name,
                 $item->link,
+                $fileNameSheet
             ];
             $i++;
         }        
@@ -437,7 +445,7 @@ class ExportSheetService
         $this->googleService->createFolder($folderName, $this->exportFolderId);        
 
         $this->createSheetTab($spreadsheetId, $sheetName, 10);
-        $sheetAndRange = "{$sheetName}!A1:H200"; 
+        $sheetAndRange = "{$sheetName}!A1:I37"; 
 
         $filePath = resource_path('settings/aa_games.txt');
         $fileContents = file_get_contents($filePath);
