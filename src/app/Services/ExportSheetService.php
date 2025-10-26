@@ -445,7 +445,7 @@ class ExportSheetService
         $this->googleService->createFolder($folderName, $this->exportFolderId);        
 
         $this->createSheetTab($spreadsheetId, $sheetName, 10);
-        $sheetAndRange = "{$sheetName}!A1:H200"; 
+        $sheetAndRange = "{$sheetName}!A1:I37"; 
 
         $filePath = resource_path('settings/aa_games.txt');
         $fileContents = file_get_contents($filePath);

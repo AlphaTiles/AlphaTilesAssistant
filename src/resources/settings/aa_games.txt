@@ -1,114 +1,37 @@
-Door	Country	ChallengeLevel	Color	InstructionAudio	AudioDuration	SyllOrTile	StagesIncluded
-1	Romania	1	5	zzz_romania	16572	T	-
-2	Thailand	155	0	zzz_thailand_image	2571	T	-
-3	Thailand	255	0	zzz_thailand_image	2571	T	-
-4	Thailand	355	0	zzz_thailand_image	2571	T	-
-5	Thailand	165	1	zzz_thailand_image	2571	T	-
-6	Thailand	265	1	zzz_thailand_image	2571	T	-
-7	Thailand	365	1	zzz_thailand_image	2571	T	-
-8	Sudan	1	5	zzz_sudan	5453	S	-
-9	Thailand	177	2	zzz_thailand_sound	2129	S	-
-10	Thailand	277	2	zzz_thailand_sound	2129	S	-
-11	Sudan	1	5	zzz_sudan	5453	T	-
-12	Thailand	111	3	zzz_thailand_sound	2129	T	-
-13	Thailand	211	3	zzz_thailand_sound	2129	T	-
-14	Thailand	122	4	zzz_thailand_sound	2129	T	-
-15	Thailand	222	4	zzz_thailand_sound	2129	T	-
-16	Thailand	112	7	zzz_thailand_sound	2129	T	-
-17	Thailand	121	7	zzz_thailand_sound	2129	T	-
-18	Thailand	212	7	zzz_thailand_sound	2129	T	-
-19	Thailand	221	7	zzz_thailand_sound	2129	T	-
-20	Thailand	185	8	zzz_thailand_sound	2129	S	-
-21	Thailand	285	8	zzz_thailand_sound	2129	S	-
-22	Thailand	175	8	zzz_thailand_sound	2129	S	-
-23	Thailand	275	8	zzz_thailand_sound	2129	S	-
-24	Thailand	135	9	zzz_thailand_image	2571	T	-
-25	Thailand	235	9	zzz_thailand_image	2571	T	-
-26	Thailand	115	9	zzz_thailand_image	2571	T	-
-27	Thailand	215	9	zzz_thailand_image	2571	T	-
-28	Thailand	125	10	zzz_thailand_image	2571	T	-
-29	Thailand	225	10	zzz_thailand_image	2571	T	-
-30	Thailand	187	11	zzz_thailand_sound	2129	S	-
-31	Thailand	287	11	zzz_thailand_sound	2129	S	-
-32	Thailand	131	12	zzz_thailand_sound	2129	T	-
-33	Thailand	231	12	zzz_thailand_sound	2129	T	-
-34	Thailand	132	12	zzz_thailand_sound	2129	T	-
-35	Thailand	232	12	zzz_thailand_sound	2129	T	-
-36	Thailand	174	0	zzz_thailand_sound	2129	S	-
-37	Thailand	184	0	zzz_thailand_sound	2129	S	-
-38	Thailand	145	1	zzz_thailand_image	2571	T	-
-39	Thailand	245	1	zzz_thailand_image	2571	T	-
-40	Thailand	345	1	zzz_thailand_image	2571	T	-
-41	Thailand	151	2	zzz_thailand_sound	2129	T	-
-42	Thailand	251	2	zzz_thailand_sound	2129	T	-
-43	Thailand	152	2	zzz_thailand_sound	2129	T	-
-44	Thailand	252	2	zzz_thailand_sound	2129	T	-
-45	Thailand	161	3	zzz_thailand_sound	2129	T	-
-46	Thailand	261	3	zzz_thailand_sound	2129	T	-
-47	Thailand	162	3	zzz_thailand_sound	2129	T	-
-48	Thailand	262	3	zzz_thailand_sound	2129	T	-
-49	Thailand	141	4	zzz_thailand_sound	2129	T	-
-50	Thailand	241	4	zzz_thailand_sound	2129	T	-
-51	Thailand	142	4	zzz_thailand_sound	2129	T	-
-52	Thailand	242	4	zzz_thailand_sound	2129	T	-
-53	Thailand	114	7	zzz_thailand_word	2224	T	-
-54	Thailand	214	7	zzz_thailand_word	2224	T	-
-55	Thailand	124	7	zzz_thailand_word	2224	T	-
-56	Thailand	224	7	zzz_thailand_word	2224	T	-
-57	Thailand	134	8	zzz_thailand_word	2224	T	-
-58	Thailand	234	8	zzz_thailand_word	2224	T	-
-59	Thailand	154	9	zzz_thailand_word	2224	T	-
-60	Thailand	254	9	zzz_thailand_word	2224	T	-
-61	Thailand	354	9	zzz_thailand_word	2224	T	-
-62	Thailand	144	10	zzz_thailand_word	2224	T	-
-63	Thailand	244	10	zzz_thailand_word	2224	T	-
-64	Thailand	344	10	zzz_thailand_word	2224	T	-
-65	Thailand	164	12	zzz_thailand_word	2224	T	-
-66	Thailand	264	12	zzz_thailand_word	2224	T	-
-67	Thailand	364	12	zzz_thailand_word	2224	T	-
-68	Georgia	1	11	zzz_georgia	5985	S	-
-69	Georgia	1	4	zzz_georgia	5985	T	-
-70	Brazil	1	9	zzz_brazil_consonant	2619	S	-
-71	Brazil	1	2	zzz_brazil_consonant	2619	T	-
-72	Brazil	4	2	zzz_brazil_consonant	2619	T	-
-73	Georgia	2	11	zzz_georgia	5985	S	-
-74	Georgia	2	4	zzz_georgia	5985	T	-
-75	Brazil	2	9	zzz_brazil_consonant	2619	S	-
-76	Brazil	2	2	zzz_brazil_vowel	2812	T	-
-77	Brazil	5	2	zzz_brazil_consonant	2619	T	-
-78	Peru	1	3	zzz_peru	3186	T	-
-79	Ecuador	1	0	zzz_ecuador	2249	T	-
-80	Italy	1	1	X	naWhileMPOnly	T	-
-81	Brazil	3	2	zzz_brazil_vowel	2812	T	-
-82	Brazil	6	2	zzz_brazil_consonant	2619	T	-
-83	Mexico	1	0	zzz_mexico	7877	T	-
-84	Georgia	3	4	zzz_georgia	5985	T	-
-85	Peru	2	3	zzz_peru	3186	T	-
-86	Georgia	3	11	zzz_georgia	5985	S	-
-87	Georgia	4	4	zzz_georgia	5985	T	-
-88	Mexico	3	0	zzz_mexico	7877	T	-
-89	Georgia	4	11	zzz_georgia	5985	S	-
-90	Georgia	5	4	zzz_georgia	5985	T	-
-91	Peru	3	3	zzz_peru	3186	T	-
-92	Colombia	1	7	zzz_colombia_1	4509	S	-
-93	Mexico	2	0	zzz_mexico	7877	T	-
-94	Georgia	5	11	zzz_georgia	5985	S	-
-95	Georgia	6	11	zzz_georgia	5985	S	-
-96	Georgia	6	4	zzz_georgia	5985	T	-
-97	Colombia	2	7	zzz_colombia_2_3	3540	S	-
-98	Mexico	4	0	zzz_mexico	7877	T	-
-99	UnitedStates	1	10	zzz_united_states	6359	T	-
-100	Colombia	1	1	zzz_colombia_1	4509	T	-
-101	Myanmar	1	8	zzz_myanmar	22900	T	-
-102	UnitedStates	1	10	zzz_united_states	6359	S	-
-103	Colombia	3	7	zzz_colombia_2_3	3540	S	-
-104	Japan	1	12	X	naWhileMPOnly	S	-
-105	Colombia	2	1	zzz_colombia_2_3	3540	T	-
-106	UnitedStates	2	10	zzz_united_states	6359	T	-
-107	Mexico	5	0	zzz_mexico	7877	T	-
-108	Myanmar	2	8	zzz_myanmar	22900	T	-
-109	UnitedStates	3	10	zzz_united_states	6359	T	-
-110	Japan	1	12	X	naWhileMPOnly	S	-
-111	Myanmar	3	8	zzz_myanmar	22900	T	-
-112	China	1	9	X	naWhileMPOnly	T	-
-113	Colombia	3	1	zzz_colombia_2_3	3540	T	-
+Door	Country	ChallengeLevel	Color	InstructionAudio	AudioDuration	SyllOrTile	StagesIncluded	Friendly Name
+1	Romania	1	5	X	naWhileMPOnly	T	-	Learn the Tiles
+2	Malaysia	1	5	X	naWhileMPOnly	T	-	Word List
+3	Iraq	1	5	X	naWhileMPOnly	T	-	Interactive Tile Chart
+4	Georgia	1	4	X	naWhileMPOnly	T	-	Identify the Initial Tile: Level 1
+5	Brazil	1	2	X	naWhileMPOnly	T	-	Identify the Missing Vowel: Level 1
+6	Brazil	4	2	X	naWhileMPOnly	T	-	Identify the Missing Consonant: Level 1
+7	Georgia	2	4	X	naWhileMPOnly	T	-	Identify the Initial Tile: Level 2
+8	Brazil	2	2	X	naWhileMPOnly	T	-	Identify the Missing Vowel: Level 2
+9	Brazil	5	2	X	naWhileMPOnly	T	-	Identify the Missing Consonant: Level 2
+10	Peru	1	3	X	naWhileMPOnly	T	-	Choose the Correctly Spelled Word: Level 1
+11	Ecuador	1	0	X	naWhileMPOnly	T	-	Choose the Matching Word: Level 1
+12	Italy	1	1	X	naWhileMPOnly	T	-	Lotería (Bingo): Level 1
+13	Brazil	3	2	X	naWhileMPOnly	T	-	Identify the Missing Vowel: Level 3
+14	Brazil	6	2	X	naWhileMPOnly	T	-	Identify the Missing Consonant: Level 3
+15	Mexico	1	0	X	naWhileMPOnly	T	-	Memory: Level 1
+16	Georgia	3	4	X	naWhileMPOnly	T	-	Identify the Initial Tile: Level 3
+17	Peru	2	3	X	naWhileMPOnly	T	-	Choose the Correctly Spelled Word: Level 2
+18	Georgia	4	4	X	naWhileMPOnly	T	-	Identify the Initial Tile: Level 1
+19	Mexico	3	0	X	naWhileMPOnly	T	-	Memory: Level 3
+20	Georgia	5	4	X	naWhileMPOnly	T	-	Identify the Initial Tile: Level 2
+21	Peru	3	3	X	naWhileMPOnly	T	-	Choose the Correctly Spelled Word: Level 3
+22	Mexico	2	0	X	naWhileMPOnly	T	-	Memory: Level 2
+23	Georgia	6	4	X	naWhileMPOnly	T	-	Identify the Initial Tile: Level 3
+24	Mexico	4	0	X	naWhileMPOnly	T	-	Memory: Level 4
+25	UnitedStates	1	10	X	naWhileMPOnly	T	-	Build the Word from Tile Pairs: Level 1
+26	Colombia	1	1	X	naWhileMPOnly	T	-	Spell the Word: Level 1
+27	Myanmar	1	8	X	naWhileMPOnly	T	-	Word Search: Level 1
+28	Colombia	2	1	X	naWhileMPOnly	T	-	Spell the Word: Level 2
+29	UnitedStates	2	10	X	naWhileMPOnly	T	-	Build the Word from Tile Pairs: Level 2
+30	Mexico	5	0	X	naWhileMPOnly	T	-	Memory: Level 5
+31	Myanmar	2	8	X	naWhileMPOnly	T	-	Word Search: Level 2
+32	UnitedStates	3	10	X	naWhileMPOnly	T	-	Build the Word from Tile Pairs: Level 3
+33	Myanmar	3	8	X	naWhileMPOnly	T	-	Word Search: Level 3
+34	China	1	9	X	naWhileMPOnly	T	-	Game of Fifteen (15): Level 1
+35	Chile	1	6	X	naWhileMPOnly	T	-	Guess the Word: Level 1
+36	Colombia	3	1	X	naWhileMPOnly	T	-	Spell the Word: Level 3
