@@ -77,6 +77,10 @@ $tabEnum = TabEnum::TILE;
 	@csrf
 	@method('PATCH')
 	@if(count($items) > 0)
+		<p>
+			<input type="radio" name="orderBy" value="value" {{ $orderby == 'value' ? 'checked' : '' }} onChange="this.form.submit();"> Order by Tile
+			<input type="radio" name="orderBy" value="id" {{ $orderby == 'id' ? 'checked' : '' }} onChange="this.form.submit();"> Added Order
+		</p>
 		<div>
 			<table class="table table-compact w-full">
 				<colgroup>

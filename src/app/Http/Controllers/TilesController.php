@@ -3,13 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tile;
+use Carbon\Language;
 use App\Enums\TabEnum;
 use Illuminate\Support\Arr;
 use App\Models\LanguagePack;
 use Illuminate\Http\Request;
+use App\Models\LanguagepackConfig;
 use Illuminate\Support\Facades\DB;
 use App\Services\FileUploadService;
 use App\Services\ValidationService;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use App\Services\ParseWordsIntoTilesService;
@@ -36,11 +39,13 @@ class TilesController extends BaseItemController
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function edit(LanguagePack $languagePack, string $tile = null)
-    {                
+    {           
+        $orderBy = $this->getOrderBy($languagePack, 'tile_orderby');     
         $tiles = Tile::where('languagepackid', $languagePack->id)
         ->when(!empty($tile), function ($query) use ($tile) {
             return $query->where('value', $tile);
         })
+        ->orderBy($orderBy)
         ->paginate(config('pagination.default'));
 
         $validationErrors = null;
@@ -54,7 +59,8 @@ class TilesController extends BaseItemController
             'languagePack' => $languagePack,
             'items' => $tiles,
             'pagination' => $tiles->links(),
-            'validationErrors' => $validationErrors
+            'validationErrors' => $validationErrors,
+            'orderby' => $orderBy,
         ]);
     }
 
@@ -83,7 +89,18 @@ class TilesController extends BaseItemController
 
     public function update(LanguagePack $languagePack, Request $request)
     {
-        $items = $request->all()['items'];        
+        LanguagepackConfig::updateOrCreate(
+            [
+                'languagepackid' => $languagePack->id,
+                'name' => 'tile_orderby'
+            ],
+            [
+                'value' => $request->orderBy
+            ]
+        );
+        
+        $items = $request->all()['items'];   
+        $orderBy = $this->getOrderBy($languagePack, 'tile_orderby');          
                
         $fileRules = 'mimes:mp3|max:1024';
         $customErrorMessage = "The file upload failed. Please verify that the files are of type mp3 and the file size is not bigger than 1 MB.";
@@ -165,12 +182,17 @@ class TilesController extends BaseItemController
         
         $items = $request->all()['items'];
         if(Arr::pluck($items, 'delete')) {
-            $itemsCollection = Tile::where('languagepackid', $languagePack->id)->with(['file', 'file2', 'file3'])->paginate(config('pagination.default'));
+            $itemsCollection = Tile::orderBy($orderBy)
+                ->where('languagepackid', $languagePack->id)
+                ->with(['file', 'file2', 'file3'])
+                ->paginate(config('pagination.default'));
+
 
             return view('languagepack.tiles', [
                 'completedSteps' => ['lang_info', 'tiles'],
                 'languagePack' => $languagePack,
                 'items' => $itemsCollection,
+                'orderby' => $orderBy,
                 'pagination' => $itemsCollection->links()
             ]);
         }

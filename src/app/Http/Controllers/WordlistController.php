@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use App\Rules\CustomRequired;
 use App\Rules\AudioFileRequired;
 use App\Rules\ImageFileRequired;
+use App\Models\LanguagepackConfig;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Services\ValidationService;
@@ -29,7 +30,9 @@ class WordlistController extends BaseItemController
      */
     public function edit(LanguagePack $languagePack, string $word = null)
     {        
+        $orderBy = $this->getOrderBy($languagePack, 'word_orderby');     
         $words = Word::where('languagepackid', $languagePack->id)
+        ->orderBy($orderBy)
         ->when(!empty($word), function ($query) use ($word) {
             return $query->where('value', $word);
         })
@@ -45,6 +48,7 @@ class WordlistController extends BaseItemController
             'completedSteps' => ['lang_info', 'tiles', 'wordlist'],
             'languagePack' => $languagePack,
             'words' => $words,
+            'orderby' => $orderBy,
             'pagination' => $words->links(),
             'validationErrors' => $validationErrors
         ]);
@@ -75,7 +79,18 @@ class WordlistController extends BaseItemController
 
     public function update(LanguagePack $languagePack, Request $request)
     {
+        LanguagepackConfig::updateOrCreate(
+            [
+                'languagepackid' => $languagePack->id,
+                'name' => 'word_orderby'
+            ],
+            [
+                'value' => $request->orderBy
+            ]
+        );
+
         $words = $request->all()['words'];
+        $orderBy = $this->getOrderBy($languagePack, 'word_orderby');          
           
         $validator = Validator::make(
             $request->all(), 
@@ -131,13 +146,16 @@ class WordlistController extends BaseItemController
         
         $items = $request->all()['words'];
         if(Arr::pluck($items, 'delete')) {
-            $itemsCollection = Word::where('languagepackid', $languagePack->id)->paginate(config('pagination.default'));
+            $itemsCollection = Word::orderBy($orderBy)
+                ->where('languagepackid', $languagePack->id)
+                ->paginate(config('pagination.default'));
 
             return view('languagepack.wordlist', [
                 'completedSteps' => ['lang_info', 'tiles', 'wordlist'],
                 'languagePack' => $languagePack,
                 'words' => $itemsCollection,
-                'pagination' => $itemsCollection->links()
+                'pagination' => $itemsCollection->links(),
+                'orderby' => $orderBy,
             ]);            
         }
 
