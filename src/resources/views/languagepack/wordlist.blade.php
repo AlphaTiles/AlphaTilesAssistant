@@ -19,8 +19,6 @@ $tabEnum = TabEnum::WORD;
 <div class="prose">
 
     <h1>Wordlist</h1>
-
-
 	
 	<div>
 		<div x-data="{ showMessage: true }" x-show="showMessage" x-init="setTimeout(() => showMessage = false, 3000)">
@@ -86,6 +84,12 @@ $tabEnum = TabEnum::WORD;
 	@csrf
 	@method('PATCH')
 	@if(count($words) > 0)
+
+		<p>
+			<input type="radio" name="orderBy" value="value" {{ $orderby == 'value' ? 'checked' : '' }} onChange="this.form.submit();"> Order by Word
+			<input type="radio" name="orderBy" value="id" {{ $orderby == 'id' ? 'checked' : '' }} onChange="this.form.submit();"> Added Order
+		</p>
+
 		<div>
 			<table class="table table-compact w-full">
 				<colgroup>

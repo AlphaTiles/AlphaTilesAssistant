@@ -5,8 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\File;
 use App\Models\LanguagePack;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use App\Models\LanguagepackConfig;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class BaseItemController extends Controller
 {
@@ -75,5 +76,13 @@ class BaseItemController extends Controller
             ],
         ]);
 
+    }
+
+    public function getOrderBy(LanguagePack $languagePack, string $key)
+    {
+        $orderBy = LanguagepackConfig::where('languagepackid', $languagePack->id)
+            ->where('name', $key)->first();
+
+        return $orderBy ? $orderBy->value : 'value';
     }
 }
