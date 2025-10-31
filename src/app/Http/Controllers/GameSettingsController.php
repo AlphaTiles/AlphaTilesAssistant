@@ -59,51 +59,89 @@ class GameSettingsController extends Controller
     
     private function saveSettings(LanguagePack $languagePack, StoreGameSettingsRequest $request): void
     {
-        if(isset($request->settings)) {
-            $key = 0;
-            foreach($request->settings as $key => $setting) {
-                $removeGoogleServicesFileFlag = $key == 'google_services_json_remove';
+        if (empty($request->settings)) {
+            return;
+        }
 
-                if ($removeGoogleServicesFileFlag) {
-                    // try to resolve a File model first (numeric id or matching name/path)
-                    $fileRecord = null;                    
-                    $googleSerivcesFile = GameSetting::where('languagepackid', $languagePack->id)
-                        ->where('name', GameSettingEnum::GOOGLE_SERVICES_JSON->value)
-                        ->firstOrFail();
-                    $fileRecord = File::find((int) $googleSerivcesFile->value);
+        foreach ($request->settings as $key => $value) {
+            if ($this->isGoogleServicesFileRemoval($key)) {
+                $this->removeGoogleServicesFile($languagePack);
+                continue;
+            }
 
-                    if ($fileRecord) {
-                        // delete the file from storage
-                        $relative = ltrim(str_replace('/storage/', '', $fileRecord->file_path), '/');
-                        Storage::disk('public')->delete($relative);
-                        // delete the file record
-                        $fileRecord->delete();
-                        $googleSerivcesFile->delete();
-                    }
-                    // do not re-insert this setting
-                    continue;
-                }
+            if ($this->isGoogleServicesFileUpload($key)) {
+                $value = $this->handleGoogleServicesFileUpload($languagePack, $value);
+            }
 
-                if($key === GameSettingEnum::GOOGLE_SERVICES_JSON->value) {
-                    // Ensure we pass an array to the service (it may be a string from the request)
-                    $itemForUpload = is_array($setting) ? $setting : [
+            if (isset($value)) {
+                GameSetting::updateOrCreate(
+                    [
                         'languagepackid' => $languagePack->id,
-                        'file' => $setting
-                    ];
-
-                    $fileModel = $this->upload($itemForUpload, 'google_services.json');
-                    $setting = $fileModel ? $fileModel->id : null;
-                }
-
-                if(isset($setting)) {
-                    GameSetting::updateOrCreate(
-                        ['languagepackid' => $languagePack->id, 'name' => $key],
-                        ['value' => $setting]
-                    );
-                }
-            }            
+                        'name' => $key,
+                    ],
+                    [
+                        'value' => $value,
+                    ]
+                );
+            }
         }
     }
+
+    /**
+     * Determine if this key indicates Google Services JSON removal.
+     */
+    private function isGoogleServicesFileRemoval(string $key): bool
+    {
+        return $key === 'google_services_json_remove';
+    }
+
+    /**
+     * Determine if this key indicates a Google Services JSON upload.
+     */
+    private function isGoogleServicesFileUpload(string $key): bool
+    {
+        return $key === GameSettingEnum::GOOGLE_SERVICES_JSON->value;
+    }
+
+    /**
+     * Handle deletion of the Google Services file and its database record.
+     */
+    private function removeGoogleServicesFile(LanguagePack $languagePack): void
+    {
+        $googleServicesSetting = GameSetting::where('languagepackid', $languagePack->id)
+            ->where('name', GameSettingEnum::GOOGLE_SERVICES_JSON->value)
+            ->first();
+
+        if (!$googleServicesSetting) {
+            return;
+        }
+
+        $file = File::find((int) $googleServicesSetting->value);
+        if ($file) {
+            $relativePath = ltrim(str_replace('/storage/', '', $file->file_path), '/');
+            Storage::disk('public')->delete($relativePath);
+            $file->delete();
+        }
+
+        $googleServicesSetting->delete();
+    }
+
+    /**
+     * Handle upload and storage of a Google Services file.
+     */
+    private function handleGoogleServicesFileUpload(LanguagePack $languagePack, mixed $value): ?int
+    {
+        $uploadData = is_array($value)
+            ? $value
+            : [
+                'languagepackid' => $languagePack->id,
+                'file' => $value,
+            ];
+
+        $fileModel = $this->upload($uploadData, 'google_services.json');
+
+        return $fileModel?->id;
+    }    
 
     public function upload(array $item, $fileName): ?File
     {
