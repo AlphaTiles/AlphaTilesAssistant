@@ -73,6 +73,11 @@ class GenerateZipExportService
         $settingsFile = $this->generateShareFile($settingsFileName, $zip, $zipFileName);
         $zip->addFile($settingsFile, "{$zipFileName}/res/raw/{$settingsFileName}");
 
+        // add google-services.json file to /res/raw if it exists 
+        $publicGoogleServices = storage_path("app/public/languagepacks/{$this->languagePack->id}/res/raw/google-services.json");
+        if (file_exists($publicGoogleServices)) {
+            $zip->addFile($publicGoogleServices, "{$zipFileName}/res/raw/google-services.json");
+        }
 
         $fontPath = resource_path('font');
         $this->addFolderToZip($fontPath, $zip, "/{$zipFileName}/res/font/");

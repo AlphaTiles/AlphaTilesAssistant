@@ -397,7 +397,35 @@ class ExportSheetService
         }
 
         $this->addValuesToSheet($spreadsheetId, $sheetAndRange, $values);
+
         Log::info('export of settings completed');
+        
+        // add google-services.json file to Google Drive root of the export folder if it exists
+        $filePath = storage_path("app/public/languagepacks/{$this->languagePack->id}/res/raw/google-services.json");
+        if (!file_exists($filePath)) {
+            Log::info('No google-services.json file to export');
+            return;
+        }
+        try {
+            $content = file_get_contents($filePath);
+            $fileMetadata = new DriveFile([
+                'name' => 'google-services.json',
+                'parents' => [ $this->exportFolderId ],
+            ]);
+
+            $this->driveService->files->create($fileMetadata, [
+                'data' => $content,
+                'mimeType' => 'application/json',
+                'uploadType' => 'multipart',
+                'fields' => 'id',
+            ]);
+
+            Log::info('Uploaded google-services.json to Drive');
+            $this->logService->handle('Uploaded google-services.json to Drive', ExportStatus::IN_PROGRESS);
+        } catch (Exception $e) {
+            Log::error('Failed to upload google-services.json: ' . $e->getMessage());
+            $this->logService->handle('Failed to upload google-services.json: ' . $e->getMessage(), ExportStatus::FAILED);
+        }
     }      
 
     private function shareSheet(string $spreadsheetId): void

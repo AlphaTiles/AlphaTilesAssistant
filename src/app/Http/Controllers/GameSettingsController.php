@@ -2,10 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\File;
 use App\Models\GameSetting;
 use App\Models\LanguagePack;
+use Illuminate\Http\Request;
+use App\Enums\GameSettingEnum;
+use App\Services\FileUploadService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use App\Repositories\GameSettingsRepository;
 use App\Http\Requests\StoreGameSettingsRequest;
 
@@ -53,23 +59,68 @@ class GameSettingsController extends Controller
     
     private function saveSettings(LanguagePack $languagePack, StoreGameSettingsRequest $request): void
     {
-        GameSetting::where('languagepackid', $languagePack->id)
-            ->delete();
-
-        $settings = [];
-
         if(isset($request->settings)) {
             $key = 0;
             foreach($request->settings as $key => $setting) {
-                if(!empty($setting)) {
-                    $settings[$key]['languagepackid'] = $languagePack->id;
-                    $settings[$key]['name'] = $key;
-                    $settings[$key]['value'] = $setting;
-                    $key++;
+                $removeGoogleServicesFileFlag = $key == 'google_services_json_remove';
+
+                if ($removeGoogleServicesFileFlag) {
+                    // try to resolve a File model first (numeric id or matching name/path)
+                    $fileRecord = null;                    
+                    $googleSerivcesFile = GameSetting::where('languagepackid', $languagePack->id)
+                        ->where('name', GameSettingEnum::GOOGLE_SERVICES_JSON->value)
+                        ->firstOrFail();
+                    $fileRecord = File::find((int) $googleSerivcesFile->value);
+
+                    if ($fileRecord) {
+                        // delete the file from storage
+                        $relative = ltrim(str_replace('/storage/', '', $fileRecord->file_path), '/');
+                        Storage::disk('public')->delete($relative);
+                        // delete the file record
+                        $fileRecord->delete();
+                        $googleSerivcesFile->delete();
+                    }
+                    // do not re-insert this setting
+                    continue;
                 }
-            }
-            
-            GameSetting::insert($settings);
+
+                if($key === GameSettingEnum::GOOGLE_SERVICES_JSON->value) {
+                    // Ensure we pass an array to the service (it may be a string from the request)
+                    $itemForUpload = is_array($setting) ? $setting : [
+                        'languagepackid' => $languagePack->id,
+                        'file' => $setting
+                    ];
+
+                    $fileModel = $this->upload($itemForUpload, 'google_services.json');
+                    $setting = $fileModel ? $fileModel->id : null;
+                }
+
+                if(isset($setting)) {
+                    GameSetting::updateOrCreate(
+                        ['languagepackid' => $languagePack->id, 'name' => $key],
+                        ['value' => $setting]
+                    );
+                }
+            }            
         }
+    }
+
+    public function upload(array $item, $fileName): ?File
+    {
+        $fileField = 'file';
+
+        if(!isset($item[$fileField])) {
+            return null;
+        }
+
+        $fileModel = new File;
+
+        $languagePackPath = "languagepacks/{$item['languagepackid']}/res/raw";
+        $filePath = $item[$fileField]->storeAs($languagePackPath, $fileName, 'public');
+        $fileModel->name = $item[$fileField]->getClientOriginalName();
+        $fileModel->file_path = '/storage/' . $filePath;
+        $fileModel->save();
+
+        return $fileModel;
     }
 }

@@ -187,11 +187,4 @@ class WordlistController extends BaseItemController
 
         return redirect(url('/languagepack/wordlist/' . $languagePack->id) . '?' . http_build_query(request()->query()));
     }
-    
-    public function downloadFile(LanguagePack $languagePack, $filename)
-    {        
-        $filePath = storage_path("app/public/languagepacks/{$languagePack->id}/res/raw/{$filename}");
-
-        return response()->download($filePath, null, ['Cache-Control' => 'no-cache, must-revalidate']);
-    }
 }
