@@ -1,10 +1,15 @@
 <?php
 namespace App\Repositories;
 
-use App\Models\GameSetting;
-use App\Models\LanguagePack;
-use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
+use App\Models\File;
+use App\Models\GameSetting;
+use App\Enums\FieldTypeEnum;
+use App\Models\LanguagePack;
+use App\Enums\GameSettingEnum;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Database\Eloquent\Model;
 
 class BaseSettingsRepository
 {
@@ -22,10 +27,11 @@ class BaseSettingsRepository
                 $settingValue = $setting->defaultValue();
                 if(!$create) {
                     $gameSetting = $this->model::where('languagepackid', $languagePack->id)
-                    ->where('name', $setting->value)->first();
+                        ->where('name', $setting->value)->first();
                     $settingValue = !empty($gameSetting) ? $gameSetting['value'] : $setting->defaultValue();
                 }
             }   
+
             $settings[$i]['label'] = $setting->label();
             $settings[$i]['name'] = $setting->value;
             $settings[$i]['placeholder'] = $setting->defaultValue();

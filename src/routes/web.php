@@ -63,7 +63,6 @@ Route::middleware(['auth', 'authorize.languagepack'])->group(function () {
     Route::get('languagepack/wordlist/{languagePack}/{word}', [WordlistController::class, 'edit']);
     Route::patch('languagepack/wordlist/{languagePack}', [WordlistController::class, 'update']);
     Route::delete('languagepack/wordlist/{languagePack}', [WordlistController::class, 'delete']);
-    Route::get('languagepack/wordlist/{languagePack}/download/{filename}', [WordlistController::class, 'downloadFile']);
 
     Route::post('languagepack/keyboard/{languagePack}', [KeyboardController::class, 'store']);
     Route::get('languagepack/keyboard/{languagePack}', [KeyboardController::class, 'edit']);

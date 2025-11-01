@@ -1,7 +1,8 @@
 <?php
 use App\Enums\FieldTypeEnum;
+use App\Models\File;
 ?>	
-	<form method="post" action="/languagepack/{{ $formPath }}/{{ $languagePackId }}">
+	<form method="post" action="/languagepack/{{ $formPath }}/{{ $languagePackId }}" enctype="multipart/form-data">
 		@csrf
 		<div class="form w-fit">
 			<div x-data="{ showMessage: true }" x-show="showMessage" x-init="setTimeout(() => showMessage = false, 3000)">
@@ -49,6 +50,30 @@ use App\Enums\FieldTypeEnum;
 							<textarea name="settings[{{ $setting['name'] }}]" rows=3 cols=50>{{ $setting['value'] }}</textarea>
 						@elseif($setting['type'] === FieldTypeEnum::NUMBER)
 							<input type="number" class="form-control" name="settings[{{ $setting['name'] }}]" min=1 max="{{ $setting['max'] }}" size="10" value="{{ $value }}" placeholder="{{ $setting['placeholder'] }}">
+						@elseif($setting['type'] === FieldTypeEnum::UPLOAD)
+							<div>
+								<input type="file" class="form-control" name="settings[{{ $setting['name'] }}]" >
+								@if(!empty($value))
+									@php
+										// determine URL for file (keep absolute URLs as-is, use asset() for local paths)
+										$file = File::find($value);
+										$fileName = $file ? $file->name : null;
+										$url = '';
+										if ($fileName) {
+											$url = "/languagepack/items/$languagePackId/download/$fileName";
+										}
+									@endphp
+
+									<div class="mt-2">
+										<a href="{{ $url }}" target="_blank" rel="noopener">{{ $fileName }}</a>
+
+										<label class="ml-2 inline-flex items-center">
+											<input type="checkbox" name="settings[{{ $setting['name'] }}_remove]" value="1" class="ml-1">
+											<span class="ml-1 text-sm">Remove file</span>
+										</label>
+									</div>
+								@endif
+							</div>
 						@else
 							<?php $errorClass = isset($errors) && !empty($errors->keys()) && in_array('settings.' . $setting['name'], $errors->keys()) ? 'inputError' : ''; 
 							?>

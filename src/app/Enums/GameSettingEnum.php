@@ -23,6 +23,7 @@ enum GameSettingEnum: string
     case BOLD_NON_INITIAL_TILES = 'bold_non_initial_tiles';
     case BOLD_INITIAL_TILES = 'bold_initial_tiles';
     case SHARE_LINK = 'share_link';
+    case GOOGLE_SERVICES_JSON = 'google_services_json';
 
     public function defaultValue(): string
     {
@@ -43,6 +44,7 @@ enum GameSettingEnum: string
             self::CHILE_MAX_WORD_LENGTH => 5,
             self::BOLD_NON_INITIAL_TILES => false,
             self::BOLD_INITIAL_TILES => false,
+            self::GOOGLE_SERVICES_JSON => '',
             default                 => '',
         };
     }
@@ -67,6 +69,7 @@ enum GameSettingEnum: string
             self::BOLD_NON_INITIAL_TILES => 'Game 001 bold non-initial tiles',
             self::BOLD_INITIAL_TILES => 'Game 001 bold initial tiles',
             self::SHARE_LINK => 'Share link',
+            self::GOOGLE_SERVICES_JSON => 'Google Services JSON',
         };
     }
 
@@ -114,7 +117,8 @@ enum GameSettingEnum: string
             self::CHILE_MIN_WORD_LENGTH => '13. Chile minimum word length',
             self::CHILE_MAX_WORD_LENGTH => '14. Chile maximum word length',
             self::BOLD_NON_INITIAL_TILES => '15. In Game 001 (Romania) bold non-initial tiles when in focus? (boldNonInitialFocusTiles)',
-            self::BOLD_INITIAL_TILES => '16. In Game 001 (Romania) bold initial tiles when in focus? (boldInitialFocusTiles)',
+            self::BOLD_INITIAL_TILES => '16. In Game 001 (Romania) bold initial tiles when in focus? (boldInitialFocusTiles)',            
+            self::GOOGLE_SERVICES_JSON => '',
             self::SHARE_LINK => 'aa_share.txt',
         };
     }
@@ -138,6 +142,7 @@ enum GameSettingEnum: string
             self::CHILE_MAX_WORD_LENGTH => FieldTypeEnum::NUMBER,
             self::BOLD_NON_INITIAL_TILES => FieldTypeEnum::CHECKBOX,
             self::BOLD_INITIAL_TILES => FieldTypeEnum::CHECKBOX,
+            self::GOOGLE_SERVICES_JSON => FieldTypeEnum::UPLOAD,
             default                 => FieldTypeEnum::INPUT
         };
     }

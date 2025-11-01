@@ -143,7 +143,7 @@ $tabEnum = TabEnum::WORD;
 									?>
 									<div class="mt-1">
 										<audio controls style="width: 200px;">
-											<source src="/languagepack/wordlist/{{ $word->languagepackid }}/download/{{ $storedFileName }}?{{ time() }}" type="audio/mpeg">
+											<source src="/languagepack/items/{{ $word->languagepackid }}/download/{{ $storedFileName }}?{{ time() }}" type="audio/mpeg">
 											Your browser does not support the audio element.
 										</audio> 								
 									</div>
@@ -170,7 +170,7 @@ $tabEnum = TabEnum::WORD;
 									}								
 									?>
 									<div class="mt-1">
-										<img width="30" src="/languagepack/wordlist/{{ $word->languagepackid }}/download/{{ $storedFileName }}?{{ time() }}" />
+										<img width="30" src="/languagepack/items/{{ $word->languagepackid }}/download/{{ $storedFileName }}?{{ time() }}" />
 									</div>
 									<input type="hidden" name="words[{{ $key }}][imageFilename]" value="{{ $imageFilename }}">
 								@endif
