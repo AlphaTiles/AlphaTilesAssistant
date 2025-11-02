@@ -83,7 +83,7 @@ class GenerateZipExportService
         $this->addFolderToZip($fontPath, $zip, "/{$zipFileName}/res/font/");
 
         $avatarPath = resource_path('images/avatars');
-        $this->addFolderToZip($avatarPath, $zip, "/{$zipFileName}/res/drawable-xxxhdpi/");
+        $this->addFolderToZip($avatarPath, $zip, "/{$zipFileName}/res/drawable/");
 
         $settingsPath = resource_path('settings');
         $this->addFolderToZip($settingsPath, $zip, "/{$zipFileName}/res/raw/");
@@ -317,7 +317,7 @@ class GenerateZipExportService
             $resourceFile = "app/public/languagepacks/{$this->languagePack->id}/res/raw/{$fileName}";
             $outputFolder = 'raw';
             if ($extension === 'png') {
-                $outputFolder = 'drawable-xxxhdpi';
+                $outputFolder = 'drawable';
             }
             $outputFolderPath = "{$zipFileName}/res/{$outputFolder}/{$fileName}";
             $zip->addFile(storage_path($resourceFile), $outputFolderPath);
@@ -338,7 +338,7 @@ class GenerateZipExportService
         if ($word->imageFile) {
             $file = basename($word->imageFile->file_path);
             $resourceFile = "app/public/languagepacks/{$this->languagePack->id}/res/raw/{$file}";
-            $outputFolder = "{$zipFileName}/res/drawable-xxxhdpi/{$file}";
+            $outputFolder = "{$zipFileName}/res/drawable/{$file}";
             if (file_exists(storage_path($resourceFile))) {
                 $zip->addFile(storage_path($resourceFile), $outputFolder);
             }
