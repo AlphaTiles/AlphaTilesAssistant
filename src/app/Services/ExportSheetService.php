@@ -232,7 +232,7 @@ class ExportSheetService
                 $fileNameSheet = str_replace('.png', '',$fileImageName);
             }
             $this->saveFileToDrive($word->audioFile, $audioFolderId, 'word audio', $fileAudioName);
-            $this->saveFileToDrive($word->imageFile, $imageFolderId, 'image', $fileImageName);
+            $this->saveFileToDrive($word->imageFile, $imageFolderId, 'word image', $fileImageName);
 
             $mixedTypes = !empty($word->mixed_types) ? $word->mixed_types : '-';  
             $stage = $word->stage ?? '-';
