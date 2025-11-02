@@ -77,12 +77,4 @@ class BaseItemController extends Controller
         ]);
 
     }
-
-    public function getOrderBy(LanguagePack $languagePack, string $key)
-    {
-        $orderBy = LanguagepackConfig::where('languagepackid', $languagePack->id)
-            ->where('name', $key)->first();
-
-        return $orderBy ? $orderBy->value : 'value';
-    }
 }

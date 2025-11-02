@@ -29,10 +29,10 @@ class WordlistController extends BaseItemController
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function edit(LanguagePack $languagePack, string $word = null)
-    {        
-        $orderBy = $this->getOrderBy($languagePack, 'word_orderby');     
+    {                
+        $orderBy = Word::getOrderByValue($languagePack, 'word_orderby');
         $words = Word::where('languagepackid', $languagePack->id)
-        ->orderBy($orderBy)
+        ->orderByConfig($languagePack, 'word_orderby')
         ->when(!empty($word), function ($query) use ($word) {
             return $query->where('value', $word);
         })
@@ -90,7 +90,7 @@ class WordlistController extends BaseItemController
         );
 
         $words = $request->all()['words'];
-        $orderBy = $this->getOrderBy($languagePack, 'word_orderby');          
+        $orderBy = Word::getOrderByValue($languagePack, 'word_orderby');  
           
         $validator = Validator::make(
             $request->all(), 
@@ -146,7 +146,7 @@ class WordlistController extends BaseItemController
         
         $items = $request->all()['words'];
         if(Arr::pluck($items, 'delete')) {
-            $itemsCollection = Word::orderBy($orderBy)
+            $itemsCollection = Word::orderByConfig($languagePack, 'word_orderby')
                 ->where('languagepackid', $languagePack->id)
                 ->paginate(config('pagination.default'));
 

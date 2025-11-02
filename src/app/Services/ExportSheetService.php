@@ -121,7 +121,7 @@ class ExportSheetService
         ]];
         
         $tiles = Tile::where('languagepackid', $this->languagePack->id)
-            ->orderBy('value')
+            ->orderByConfig($this->languagePack, 'tile_orderby')
             ->get();
         $i = 1;        
         foreach($tiles as $tile) {
@@ -214,7 +214,7 @@ class ExportSheetService
         ]];        
 
         $words = Word::where('languagepackid', $this->languagePack->id)
-            ->orderBy('value')
+            ->orderByConfig($this->languagePack, 'word_orderby')
             ->get();
         $i = 1;        
         foreach($words as $word) {

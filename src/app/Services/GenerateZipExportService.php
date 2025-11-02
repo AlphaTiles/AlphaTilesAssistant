@@ -173,7 +173,7 @@ class GenerateZipExportService
     public function generateTilesFile(string $tilesFileName, ZipArchive $zip, string $zipFileName): string
     {
         $tiles = Tile::where('languagepackid', $this->languagePack->id)
-            ->orderBy('value')
+            ->orderByConfig($this->languagePack, 'tile_orderby')
             ->get();
         $fileContent = "tiles\tOr1\tOr2\tOr3\tType\tAudioName\tUpper\t" .
                         "Type2\tAudioName2\tType3\tAudioName3\t" .
@@ -225,7 +225,7 @@ class GenerateZipExportService
     public function generateWordlistFile(string $wordlistFileName, ZipArchive $zip, string $zipFileName): string
     {
         $words = Word::where('languagepackid', $this->languagePack->id)
-            ->orderBy('value')
+            ->orderByConfig($this->languagePack, 'word_orderby')
             ->get();
         $localLangName = LanguageSetting::where('languagepackid', $this->languagePack->id)
             ->where('name', LangInfoEnum::LANG_NAME_LOCAL->value)->first()->value;
