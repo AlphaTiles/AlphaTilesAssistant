@@ -40,12 +40,12 @@ class TilesController extends BaseItemController
      */
     public function edit(LanguagePack $languagePack, string $tile = null)
     {           
-        $orderBy = $this->getOrderBy($languagePack, 'tile_orderby');     
+        $orderBy = Tile::getOrderByValue($languagePack, 'tile_orderby');  
         $tiles = Tile::where('languagepackid', $languagePack->id)
         ->when(!empty($tile), function ($query) use ($tile) {
             return $query->where('value', $tile);
         })
-        ->orderBy($orderBy)
+        ->orderByConfig($languagePack, 'tile_orderby')
         ->paginate(config('pagination.default'));
 
         $validationErrors = null;
@@ -100,7 +100,7 @@ class TilesController extends BaseItemController
         );
         
         $items = $request->all()['items'];   
-        $orderBy = $this->getOrderBy($languagePack, 'tile_orderby');          
+        $orderBy = Tile::getOrderByValue($languagePack, 'tile_orderby');         
                
         $fileRules = 'mimes:mp3|max:1024';
         $customErrorMessage = "The file upload failed. Please verify that the files are of type mp3 and the file size is not bigger than 1 MB.";
@@ -182,7 +182,7 @@ class TilesController extends BaseItemController
         
         $items = $request->all()['items'];
         if(Arr::pluck($items, 'delete')) {
-            $itemsCollection = Tile::orderBy($orderBy)
+            $itemsCollection = Tile::orderByConfig($languagePack, 'tile_orderby')
                 ->where('languagepackid', $languagePack->id)
                 ->with(['file', 'file2', 'file3'])
                 ->paginate(config('pagination.default'));
