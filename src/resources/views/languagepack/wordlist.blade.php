@@ -195,6 +195,8 @@ $tabEnum = TabEnum::WORD;
 		<div>
 			{!! $pagination !!}
 		</div>
+
+		<p class="p-3 bg-blue-200 rounded">To delete an item, first select the check box(es) in the Delete column, then click on "Save".</p>
 		
 		<p>
 			<input type="submit" name="btnHiddenSave" id="saveButton" value="Save" class="hidden" />
