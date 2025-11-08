@@ -24,6 +24,7 @@ enum GameSettingEnum: string
     case BOLD_INITIAL_TILES = 'bold_initial_tiles';
     case SHARE_LINK = 'share_link';
     case GOOGLE_SERVICES_JSON = 'google_services_json';
+    case APP_ID = 'app_id';
 
     public function defaultValue(): string
     {
@@ -70,6 +71,7 @@ enum GameSettingEnum: string
             self::BOLD_INITIAL_TILES => 'Game 001 bold initial tiles',
             self::SHARE_LINK => 'Share link',
             self::GOOGLE_SERVICES_JSON => 'Google Services JSON',
+            self::APP_ID => 'App ID',
         };
     }
 
@@ -95,6 +97,8 @@ enum GameSettingEnum: string
             self::BOLD_NON_INITIAL_TILES => 'In Game 001 (Romania) bold non-initial tiles when in focus? (boldNonInitialFocusTiles)',
             self::BOLD_INITIAL_TILES => 'In Game 001 (Romania) bold initial tiles when in focus? (boldInitialFocusTiles)',
             self::SHARE_LINK => 'The share button allows you to point the user directly to the Play Store or another link. If link included, Share icon will appear at the bottom of Game selection screen. Clicking Share icon will display QR code.',
+            self::GOOGLE_SERVICES_JSON => 'Using Google’s Firebase, we can track how many people are using your app and for how much time and other non-PII data. By default, the Alpha Tiles support team (alpha_tiles@sil.org) will create the necessary google-services.json analytics file when building your app and will have visibility of these analytics. If you are comfortable creating and managing your own Firebase project, you can supply your own google-services.json file.',
+            self::APP_ID => 'The app ID gets automatically extracted when you upload the Google Services JSON file here from the package name.',
             default => null
         };
     }
@@ -119,12 +123,15 @@ enum GameSettingEnum: string
             self::BOLD_NON_INITIAL_TILES => '15. In Game 001 (Romania) bold non-initial tiles when in focus? (boldNonInitialFocusTiles)',
             self::BOLD_INITIAL_TILES => '16. In Game 001 (Romania) bold initial tiles when in focus? (boldInitialFocusTiles)',            
             self::GOOGLE_SERVICES_JSON => '',
+            self::APP_ID => '',
             self::SHARE_LINK => 'aa_share.txt',
         };
     }
 
     public function type(): FieldTypeEnum
     {
+        $isAdmin = auth()->user()->hasRole(['admin']);
+        
         return match($this) {
             self::SCAN_SETTING  => FieldTypeEnum::DROPDOWN,
             self::HAS_TILE_AUDIO => FieldTypeEnum::CHECKBOX,
@@ -143,6 +150,7 @@ enum GameSettingEnum: string
             self::BOLD_NON_INITIAL_TILES => FieldTypeEnum::CHECKBOX,
             self::BOLD_INITIAL_TILES => FieldTypeEnum::CHECKBOX,
             self::GOOGLE_SERVICES_JSON => FieldTypeEnum::UPLOAD,
+            self::APP_ID => $isAdmin ? FieldTypeEnum::INPUT : FieldTypeEnum::LABEL,
             default                 => FieldTypeEnum::INPUT
         };
     }
