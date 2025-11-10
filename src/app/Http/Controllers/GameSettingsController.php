@@ -7,6 +7,7 @@ use App\Models\GameSetting;
 use App\Models\LanguagePack;
 use Illuminate\Http\Request;
 use App\Enums\GameSettingEnum;
+use App\Enums\LangInfoEnum;
 use App\Services\FileUploadService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +15,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Repositories\GameSettingsRepository;
 use App\Http\Requests\StoreGameSettingsRequest;
+use App\Models\LanguageSetting;
+use Carbon\Language;
 
 class GameSettingsController extends Controller
 {
@@ -139,6 +142,10 @@ class GameSettingsController extends Controller
             ];
 
         $fileModel = $this->upload($uploadData, 'google_services.json');
+        // process google-services.json to extract and store APP_ID if present
+        if ($fileModel) {
+            $this->extractAppIdFromGoogleServicesJson($fileModel, $languagePack);
+        }
 
         return $fileModel?->id;
     }    
@@ -160,5 +167,56 @@ class GameSettingsController extends Controller
         $fileModel->save();
 
         return $fileModel;
+    }
+
+    /**
+     * Parse google-services.json file and persist APP_ID game setting when found.
+     */
+    private function extractAppIdFromGoogleServicesJson(File $fileModel, LanguagePack $languagePack): void
+    {
+        $ethnologueCode = LanguageSetting::where('languagepackid', $languagePack->id)
+            ->where('name', LangInfoEnum::ETHNOLOGUE_CODE->value)
+            ->first()?->value;
+
+        try {
+            $relative = ltrim(str_replace('/storage/', '', $fileModel->file_path), '/');
+            $fileContent = Storage::disk('public')->get($relative);
+        } catch (\Throwable $e) {
+            Log::error('Failed to read google-services.json: ' . $e->getMessage());
+            return;
+        }
+
+        $jsonData = json_decode($fileContent, true);
+        if (!is_array($jsonData) || !isset($jsonData['client']) || !is_array($jsonData['client'])) {
+            return;
+        }
+
+        foreach ($jsonData['client'] as $client) {
+            $packageName = $client['client_info']['android_client_info']['package_name'] ?? null;
+            if (empty($packageName)) {
+                continue;
+            }
+
+            $parts = explode('.', $packageName);
+            $appId = end($parts);
+            if (empty($appId)) {
+                continue;
+            }
+
+            // get first 3 letters of appId and apply any project-specific check
+            $packageEthnologueCode = substr($appId, 0, 3);
+            if (strtolower($ethnologueCode) === strtolower($packageEthnologueCode)) {
+                Log::info("Extracted App ID: {$appId} from package name: {$packageName}");
+                GameSetting::updateOrCreate(
+                    [
+                        'languagepackid' => $languagePack->id,
+                        'name' => GameSettingEnum::APP_ID->value,
+                    ],
+                    [
+                        'value' => $appId,
+                    ]
+                );
+            }
+        }
     }
 }

@@ -50,6 +50,8 @@ use App\Models\File;
 							<textarea name="settings[{{ $setting['name'] }}]" rows=3 cols=50>{{ $setting['value'] }}</textarea>
 						@elseif($setting['type'] === FieldTypeEnum::NUMBER)
 							<input type="number" class="form-control" name="settings[{{ $setting['name'] }}]" min=1 max="{{ $setting['max'] }}" size="10" value="{{ $value }}" placeholder="{{ $setting['placeholder'] }}">
+						@elseif($setting['type'] === FieldTypeEnum::LABEL)
+							<span>{{ $value }}</span>
 						@elseif($setting['type'] === FieldTypeEnum::UPLOAD)
 							<div>
 								<input type="file" class="form-control" name="settings[{{ $setting['name'] }}]" >

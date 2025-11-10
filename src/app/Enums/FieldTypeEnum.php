@@ -10,4 +10,5 @@ enum FieldTypeEnum: string
     case TEXTBOX        = 'textbox';    
     case NUMBER         = 'number';
     case UPLOAD         = 'upload';
+    case LABEL          = 'label';
 }

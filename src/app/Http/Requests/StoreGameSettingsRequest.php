@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Enums\FieldTypeEnum;
 use App\Enums\GameSettingEnum;
 use App\Rules\GoogleServicesJson;
+use App\Rules\ValidAppId;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreGameSettingsRequest extends FormRequest
@@ -26,6 +27,7 @@ class StoreGameSettingsRequest extends FormRequest
             ],
             'settings.share_link' => 'sometimes',
             'settings.google_services_json' => ['sometimes', 'file', 'max:256', new GoogleServicesJson],
+            'settings.app_id' => ['sometimes', 'string', new ValidAppId],
             'btnNext' => 'sometimes',
         ] + $requiredSettings;        
     }
