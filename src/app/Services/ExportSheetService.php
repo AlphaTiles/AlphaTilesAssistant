@@ -15,6 +15,7 @@ use App\Enums\LangInfoEnum;
 use App\Enums\FieldTypeEnum;
 use App\Models\LanguagePack;
 use App\Enums\GameSettingEnum;
+use App\Models\GameSetting;
 use App\Models\LanguageSetting;
 use App\Models\Resource;
 use Google\Service\Drive\DriveFile;
@@ -632,16 +633,10 @@ class ExportSheetService
 
     private function generateFilename(): string
     {
-        $settings = app(LangInfoRepository::class)->getSettings(false, $this->languagePack);
-        $ethnologueCode = current(array_filter($settings, function ($setting) {
-            return $setting['name'] === 'ethnologue_code';
-        }))['value'];    
-        $langName = current(array_filter($settings, function ($setting) {
-            return $setting['name'] === 'lang_name_english';
-        }))['value'];    
-        $langNameFirstPart = explode(' ', $langName)[0];    
-        
-        return $ethnologueCode . $langNameFirstPart;
+        return GameSetting::where('languagepackid', $this->languagePack->id)
+            ->where('name', GameSettingEnum::APP_ID->value)
+            ->first()
+            ->value;
     }
 
     private function saveFileToDrive($file, string $folderId, string $fileType, string $fileName)

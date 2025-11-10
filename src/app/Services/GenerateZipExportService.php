@@ -2,21 +2,22 @@
 
 namespace App\Services;
 
-use App\Enums\FieldTypeEnum;
-use App\Enums\GameSettingEnum;
 use ZipArchive;
+use App\Models\Key;
 use App\Models\Tile;
 use App\Models\Word;
-use App\Enums\LangInfoEnum;
-use App\Models\Key;
-use App\Models\LanguagePack;
-use App\Models\LanguageSetting;
 use App\Models\Resource;
 use App\Models\Syllable;
-use App\Repositories\GameSettingsRepository;
+use App\Enums\LangInfoEnum;
+use App\Models\GameSetting;
+use App\Enums\FieldTypeEnum;
+use App\Models\LanguagePack;
+use App\Enums\GameSettingEnum;
+use App\Models\LanguageSetting;
 use Illuminate\Support\Facades\Log;
-use App\Repositories\LangInfoRepository;
 use Illuminate\Database\Eloquent\Model;
+use App\Repositories\LangInfoRepository;
+use App\Repositories\GameSettingsRepository;
 
 class GenerateZipExportService
 {
@@ -35,7 +36,7 @@ class GenerateZipExportService
 
     public function handle(): string
     {
-        $zipFileName = $this->languagePack->name;
+        $zipFileName = $this->generateFilename();
         $zipFile = sys_get_temp_dir() . '/' . $zipFileName . '.zip';
 
         $zip = new ZipArchive();
@@ -358,5 +359,13 @@ class GenerateZipExportService
                 $zip->addFile($filePath, $outputFolder . basename($file));
             }
         }
+    }
+
+    private function generateFilename(): string
+    {
+        return GameSetting::where('languagepackid', $this->languagePack->id)
+            ->where('name', GameSettingEnum::APP_ID->value)
+            ->first()
+            ->value;
     }
 }

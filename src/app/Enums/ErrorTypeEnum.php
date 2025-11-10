@@ -21,6 +21,7 @@ enum ErrorTypeEnum: string
     case KEY_USAGE                     = 'key_usage';
     case TILE_USAGE                    = 'tile_usage';
     case PARSE_WORD_INTO_TILES         = 'parse_word_into_tiles';
+    case MISSING_APP_ID                 = 'missing_app_id';
 
     public function label(): string
     {
@@ -40,6 +41,7 @@ enum ErrorTypeEnum: string
             self::KEY_USAGE                => "It is recommended that each key be used at least " . ValidationService::NUM_TIMES_KEYS_WANTED_IN_WORDS . " times",
             self::TILE_USAGE               => "It is recommended that each tile be used at least " . ValidationService::NUM_TIMES_TILES_WANTED_IN_WORDS . " times",
             self::PARSE_WORD_INTO_TILES   => "The word could not be parsed",
+            self::MISSING_APP_ID          => 'The App ID is missing from the game settings. Please upload a valid google-services.json file under "Game Settings" to extract the App ID.',
         };
     }
 
@@ -61,6 +63,7 @@ enum ErrorTypeEnum: string
             self::KEY_USAGE => TabEnum::KEY,
             self::TILE_USAGE => TabEnum::TILE,
             self::PARSE_WORD_INTO_TILES => TabEnum::WORD,
+            self::MISSING_APP_ID => TabEnum::GAME_SETTINGS,
         };
     }
 
