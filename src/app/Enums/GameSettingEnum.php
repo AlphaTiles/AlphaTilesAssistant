@@ -130,7 +130,7 @@ enum GameSettingEnum: string
 
     public function type(): FieldTypeEnum
     {
-        $isAdmin = auth()->user()->hasRole(['admin']);
+        $isAdmin = !empty(session('masterpw'));
         
         return match($this) {
             self::SCAN_SETTING  => FieldTypeEnum::DROPDOWN,
