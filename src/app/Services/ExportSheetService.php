@@ -532,20 +532,63 @@ class ExportSheetService
 
             $filePath = $fontPath . DIRECTORY_SEPARATOR . $file;
             if (is_file($filePath)) {
+                $content = file_get_contents($filePath);
+                $originalMime = $this->getMimeTypeForFont($filePath) ?? mime_content_type($filePath);
+                Log::info("Uploading font '{$file}' with original mimeType: {$originalMime}");
+
+                // Use a resumable raw upload so Drive stores the raw bytes and we can
+                // preserve the original mime/name in appProperties. We set the
+                // upload mimeType to application/octet-stream to ensure bytes are
+                // treated as raw data by Drive.
                 $fileMetadata = new DriveFile([
                     'name' => $file,
                     'parents' => [$fontFolderId],
+                    // store original info in appProperties so it's visible via API
+                    'appProperties' => [
+                        'original_name' => $file,
+                        'original_mime' => $originalMime,
+                    ],
                 ]);
 
-                $content = file_get_contents($filePath);
-                $this->driveService->files->create($fileMetadata, [
-                    'data' => $content,
-                    'mimeType' => mime_content_type($filePath),
-                    'uploadType' => 'multipart',
-                    'fields' => 'id',
-                ]);
+                try {
+                    $created = $this->driveService->files->create($fileMetadata, [
+                        // send the raw bytes but tell Drive this is a resumable upload
+                        'data' => $content,
+                        'mimeType' => 'application/octet-stream',
+                        'uploadType' => 'resumable',
+                        'fields' => 'id, mimeType, appProperties',
+                        'supportsAllDrives' => true,
+                    ]);
+
+                    if (isset($created->id)) {
+                        Log::info("Uploaded font '{$file}' to Drive with id: {$created->id}");
+                        Log::info('Drive returned mimeType: ' . ($created->mimeType ?? 'n/a'));
+                        if (!empty($created->appProperties)) {
+                            Log::info('Drive appProperties: ' . json_encode($created->appProperties));
+                        }
+                    }
+                } catch (Exception $e) {
+                    Log::error("Failed uploading font '{$file}' to Drive: " . $e->getMessage());
+                    $this->logService->handle('Failed to upload font ' . $file . ': ' . $e->getMessage(), ExportStatus::FAILED);
+                }
             }
         }
+    }
+
+    /**
+     * Return a reliable MIME type for common font file extensions.
+     */
+    private function getMimeTypeForFont(string $filePath): ?string
+    {
+        $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+        return match ($ext) {
+            'ttf' => 'font/ttf',
+            'otf' => 'font/otf',
+            'ttc' => 'application/x-font-ttf',
+            'woff' => 'font/woff',
+            'woff2' => 'font/woff2',
+            default => null,
+        };
     }
 
     private function createSheetTab(string $spreadsheetId, string $sheetName, int $index): void
