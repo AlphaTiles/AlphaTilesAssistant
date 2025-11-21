@@ -9,6 +9,7 @@ enum TabEnum: string
     case TILE       = 'tile';
     case WORD       = 'word';
     case GAME_SETTINGS = 'game_settings';
+    case GAME      = 'game';
 
     public function name(): string
     {
@@ -17,7 +18,8 @@ enum TabEnum: string
             self::SYLLABLE => 'syllable',
             self::TILE => 'tile',
             self::WORD => 'word',   
-            self::GAME_SETTINGS => 'game settings',         
+            self::GAME_SETTINGS => 'game settings',   
+            self::GAME => 'game',      
         };
     }
 
@@ -28,7 +30,8 @@ enum TabEnum: string
             self::SYLLABLE => 'syllables',
             self::TILE => 'tiles',
             self::WORD => 'wordlist',  
-            self::GAME_SETTINGS => 'game_settings',          
+            self::GAME_SETTINGS => 'game_settings',  
+            self::GAME => 'games',        
         };
     }
 

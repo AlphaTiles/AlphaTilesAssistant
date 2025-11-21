@@ -18,7 +18,7 @@ $languagePackId = $languagePack ? $languagePack->id : '';
 		:repository-class="$repositoryClass"
 		:show-next=true
 		form-path="game_settings"
-		next-path="export"
+		next-path="games"
 		back-path="resources"
 	/>
 	

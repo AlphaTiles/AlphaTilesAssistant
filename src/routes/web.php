@@ -9,6 +9,7 @@ use App\Http\Controllers\SocialController;
 use App\Http\Controllers\KeyboardController;
 use App\Http\Controllers\WordlistController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GamesController;
 use App\Http\Controllers\ResourcesController;
 use App\Http\Controllers\SyllablesController;
 use App\Http\Controllers\GoogleDriveController;
@@ -79,10 +80,16 @@ Route::middleware(['auth', 'authorize.languagepack'])->group(function () {
     Route::get('languagepack/syllables/{languagePack}/{syllable}', [SyllablesController::class, 'edit']);
     Route::post('languagepack/syllables/{languagePack}', [SyllablesController::class, 'store']);
     Route::patch('languagepack/syllables/{languagePack}', [SyllablesController::class, 'update']);
-    Route::delete('languagepack/syllables/{languagePack}', [SyllablesController::class, 'delete']);
+    Route::delete('languagepack/syllables/{languagePack}', [SyllablesController::class, 'delete']);    
 
     Route::post('languagepack/game_settings/{languagePack}', [GameSettingsController::class, 'update']);
     Route::get('languagepack/game_settings/{languagePack}', [GameSettingsController::class, 'edit']);
+
+    Route::get('languagepack/games/{languagePack}', [GamesController::class, 'edit']);
+    Route::get('languagepack/games/{languagePack}/{game}', [GamesController::class, 'edit']);
+    Route::post('languagepack/games/{languagePack}', [GamesController::class, 'store']);
+    Route::patch('languagepack/games/{languagePack}', [GamesController::class, 'update'])->name('update-games');;
+    Route::delete('languagepack/games/{languagePack}', [GamesController::class, 'delete'])->name('delete-games');;
 
     Route::get('languagepack/export/{languagePack}', [ExportController::class, 'show']);    
     Route::post('languagepack/export/{languagePack}', [ExportController::class, 'store']);  

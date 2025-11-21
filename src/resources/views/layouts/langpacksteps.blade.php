@@ -7,6 +7,7 @@ $sections = [
   'syllables' => ['label' => 'Syllables', 'attribute' => 'syllables', 'route' => 'syllables'],
   'resources' => ['label' => 'Resources', 'attribute' => 'resources', 'route' => 'resources'],
   'game_settings' => ['label' => 'Settings', 'attribute' => 'gameSettings', 'route' => 'game_settings'],
+  'games' => ['label' => 'Games', 'attribute' => 'games', 'route' => 'games', 'games'],
   'export' => ['label' => 'Export', 'attribute' => 'keys', 'route' => 'export'],
 ];
 
