@@ -57,7 +57,7 @@ $tabEnum = TabEnum::GAME;
 					<col span="1" style="width: 5%;">
 					<col span="1" style="width: 15%;">
 					<col span="1" style="width: 15%;">
-					<col span="1" style="width: 35%;">
+					<col span="1" style="width: 10%;">
 					<col span="1" style="width: 10%;">
 					<col span="1" style="width: 20%;">
 				</colgroup>                        
@@ -67,11 +67,11 @@ $tabEnum = TabEnum::GAME;
 					<th>Door</th> 
 					<th>Friendly Name</th>					
 					<th>Country</th> 
-					<th>Challenge Level</th>
+					<th>Level</th>
 					<th>Color</th>                             
 					<th>Audio instructions</th>
 					<th>Syllable Or Tile</th>
-					<th>Stages Included</th>
+					<th><span class="mr-2">Stages Included</span></th>
 				</tr>
 				</thead> 
 				<tbody>
@@ -97,15 +97,27 @@ $tabEnum = TabEnum::GAME;
 					</td> 
 					<td>
 						<?php $errorClass = isset($errorKeys) && in_array('items.' . $key . '.country', $errorKeys) ? 'inputError' : ''; ?>
-						<input type="text" size=15 name="items[{{ $key }}][country]" value="{{ old('items.' . $key . '.country') ?? $item->country }}" class="{{ $errorClass }}" />
+						@php
+							$countryOptions = \App\Enums\CountryEnum::options();
+							$selectedCountry = old('items.' . $key . '.country') ?? $item->country;
+						@endphp
+						<select name="items[{{ $key }}][country]" class="{{ $errorClass }}" style="min-width: 120px;">
+							<option value="">Select country</option>
+							@foreach($countryOptions as $country)
+								<option value="{{ $country }}" {{ $selectedCountry === $country ? 'selected' : '' }}>{{ $country }}</option>
+							@endforeach
+						</select>
 					</td>
 					<td>
-						<?php $errorClass = isset($errorKeys) && in_array('items.' . $key . '.challenge_level', $errorKeys) ? 'inputError' : ''; ?>
-						<input type="text" size=15 name="items[{{ $key }}][challenge_level]" value="{{ old('items.' . $key . '.challenge_level') ?? $item->challenge_level }}" class="{{ $errorClass }}" />
+						<?php $errorClass = isset($errorKeys) && in_array('items.' . $key . '.level', $errorKeys) ? 'inputError' : ''; ?>
+						<input type="number" size=5 name="items[{{ $key }}][level]" value="{{ old('items.' . $key . '.level') ?? $item->level }}" class="{{ $errorClass }}" />
 					</td>
 					<td>
 						<?php $errorClass = isset($errorKeys) && in_array('items.' . $key . '.color', $errorKeys) ? 'inputError' : ''; ?>
-						<input type="text" size=10 name="items[{{ $key }}][color]" value="{{ old('items.' . $key . '.color') ?? $item->color }}" class="{{ $errorClass }}" />
+						@php
+							$color = old('items.' . $key . '.color') ?? $item->color;
+						@endphp
+						<x-select-color :key="$key" :color="$color" :error-keys="$errorKeys ?? null" />
 					<td>
 						<x-select-file
 						:nr="1"
