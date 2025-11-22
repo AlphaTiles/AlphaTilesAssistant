@@ -188,4 +188,42 @@ class GamesController extends BaseItemController
 
         return redirect(url('/languagepack/games/' . $languagePack->id));
     }        
+
+    public function swapDoor(Game $game, Request $request)
+    {
+        $request->validate([
+            'direction' => 'required|in:up,down',
+            'languagePackId' => 'required|integer',
+        ]);
+
+        $languagePackId = $request->input('languagePackId');
+        $direction = $request->input('direction');
+
+        // Get all games for this language pack ordered by door
+        $games = Game::where('languagepackid', $languagePackId)
+            ->orderBy('door')
+            ->get();
+
+        // Find current game and adjacent game
+        $currentIndex = $games->search(fn($g) => $g->id === $game->id);
+        if ($currentIndex === false) {
+            return response()->json(['error' => 'Game not found'], 404);
+        }
+
+        $adjacentIndex = $direction === 'up' ? $currentIndex - 1 : $currentIndex + 1;
+        
+        // Check bounds
+        if ($adjacentIndex < 0 || $adjacentIndex >= $games->count()) {
+            return response()->json(['error' => 'Cannot move beyond boundaries'], 400);
+        }
+
+        $adjacentGame = $games[$adjacentIndex];
+
+        // Swap door values
+        $tempDoor = $game->door;
+        $game->update(['door' => $adjacentGame->door]);
+        $adjacentGame->update(['door' => $tempDoor]);
+
+        return response()->json(['success' => true, 'message' => 'Game order updated', 'gameId' => $game->id]);
+    }
 }

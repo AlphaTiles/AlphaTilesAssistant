@@ -23,7 +23,7 @@ $tabEnum = TabEnum::GAME;
 			@endif
 		</div>	
 	</div>
-	
+
 	@if(!empty($validationErrors))
 	<x-validation-errors
 		:languagePack="$languagePack"
@@ -82,11 +82,16 @@ $tabEnum = TabEnum::GAME;
 						<input type="hidden" name="items[{{ $key }}][id]" value="{{ $item->id }}" />
 						<input type="hidden" name="items[{{ $key }}][value]" value="{{ $item->value }}" />						
 						<input type="checkbox" name="items[{{ $key }}][include]" {{ $item->include ? 'checked' : '' }} />
+
+						<div class="ml-2 inline-block">
+							<button type="button" class="move-game-btn" data-game-id="{{ $item->id }}" data-direction="up" data-language-pack-id="{{ $languagePack->id }}" title="Move up" style="padding: 2px 6px; font-size: 12px; background-color: #e5e7eb; color: #4b5563; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer;">↑</button>
+							<button type="button" class="move-game-btn" data-game-id="{{ $item->id }}" data-direction="down" data-language-pack-id="{{ $languagePack->id }}" title="Move down" style="padding: 2px 6px; font-size: 12px; background-color: #e5e7eb; color: #4b5563; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer;">↓</button>
+						</div>
 					</td> 
 					<td>
 						<?php $errorClass = isset($errorKeys) && in_array('items.' . $key . '.door', $errorKeys) ? 'inputError' : ''; ?>
-						<input type="text" size=2 name="items[{{ $key }}][door]" value="{{ old('items.' . $key . '.door') ?? $item->door }}" class="{{ $errorClass }}" />							
-					</td> 
+						<input type="text" size=2 name="items[{{ $key }}][door]" value="{{ old('items.' . $key . '.door') ?? $item->door }}" class="{{ $errorClass }}" readonly style="background-color: #f3f4f6; color: #6b7280; cursor: not-allowed;" />							
+					</td>
 					<td>
 						<input type="text" size=20 name="items[{{ $key }}][friendly_name]" value="{{ old('items.' . $key . '.friendly_name') ?? $item->friendly_name }}" />
 					</td> 
@@ -148,4 +153,81 @@ $tabEnum = TabEnum::GAME;
 	</div>
 </div>
 
+@endsection
+
+@section('scripts')
+<style>
+	@keyframes highlightFlash {
+		0% { background-color: #dbeafe; }
+		50% { background-color: #bfdbfe; }
+		100% { background-color: transparent; }
+	}
+	
+	.highlight-reordered {
+		animation: highlightFlash 1.5s ease-in-out forwards;
+	}
+</style>
+
+<script>
+document.querySelectorAll('.move-game-btn').forEach(btn => {
+	btn.addEventListener('click', function(e) {
+		e.preventDefault();
+		const gameId = this.dataset.gameId;
+		const direction = this.dataset.direction;
+		const languagePackId = this.dataset.languagePackId;
+		
+		// Disable buttons during request
+		document.querySelectorAll('.move-game-btn').forEach(b => b.disabled = true);
+		
+		fetch(`/api/games/${gameId}/move`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+			},
+			body: JSON.stringify({
+				direction: direction,
+				languagePackId: languagePackId
+			})
+		})
+		.then(response => {
+			if (!response.ok) throw new Error('Move failed');
+			return response.json();
+		})
+		.then(data => {
+			// Redirect with reordered game ID for highlighting
+			location.href = `{{ url('/languagepack/games') }}/${languagePackId}?reordered=${data.gameId}`;
+		})
+		.catch(error => {
+			console.error('Error moving game:', error);
+			alert('Failed to move game');
+			// Re-enable buttons on error
+			document.querySelectorAll('.move-game-btn').forEach(b => b.disabled = false);
+		});
+	});
+});
+
+// Highlight recently reordered items from URL parameter
+window.addEventListener('load', function() {
+	const params = new URLSearchParams(window.location.search);
+	const reorderedId = params.get('reordered');
+	
+	if (reorderedId) {
+		// Find row with the reordered game
+		const rows = document.querySelectorAll('tbody tr');
+		rows.forEach(row => {
+			const hiddenInput = row.querySelector('input[name*="[id]"]');
+			if (hiddenInput && hiddenInput.value === reorderedId) {
+				row.classList.add('highlight-reordered');
+				// Scroll into view
+				row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+			}
+		});
+		
+		// Remove the reordered parameter from URL
+		const newUrl = window.location.pathname + window.location.search.replace(/[?&]reordered=[^&]*/, '').replace(/^\?&/, '?');
+		window.history.replaceState({}, document.title, newUrl);
+	}
+});
+</script>
 @endsection

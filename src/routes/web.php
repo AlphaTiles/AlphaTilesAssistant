@@ -91,6 +91,8 @@ Route::middleware(['auth', 'authorize.languagepack'])->group(function () {
     Route::patch('languagepack/games/{languagePack}', [GamesController::class, 'update'])->name('update-games');;
     Route::delete('languagepack/games/{languagePack}', [GamesController::class, 'delete'])->name('delete-games');;
 
+    Route::post('api/games/{game}/move', [GamesController::class, 'swapDoor']);
+
     Route::get('languagepack/export/{languagePack}', [ExportController::class, 'show']);    
     Route::post('languagepack/export/{languagePack}', [ExportController::class, 'store']);  
     
