@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\FileTypeEnum;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Traits\HasConfigurableOrder;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -21,10 +22,15 @@ class Game extends Model
         'country',
         'level',
         'color',
-        'audiofile_id',
+        'file_id',
         'audio_duration',
         'syll_or_tile',
         'stages_included',
         'friendly_name',
     ];
+
+    public function file(): HasOne
+    {
+        return $this->hasOne(File::class, 'id', 'file_id');
+    }
 }

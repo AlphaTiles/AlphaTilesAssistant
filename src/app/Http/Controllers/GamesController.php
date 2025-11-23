@@ -60,134 +60,60 @@ class GamesController extends BaseItemController
         ]);
     }
 
-    public function store(LanguagePack $languagePack, Request $request)
-    {
-        /*
-        $this->validateAddItems($request, $languagePack, new Tile(), 'tiles');
-
-        $data = $request->all();
-        $tiles = explode("\r\n", $data['add_items']);
-
-        $insert = [];
-        foreach($tiles as $key => $tile) {
-            if(!empty($tile)) {
-                $insert[$key]['languagepackid'] = $languagePack->id;
-                $insert[$key]['value'] = $tile;
-                $insert[$key]['upper'] = strtoupper($tile);
-            }
-        }
-
-        Tile::insert($insert);
-        */
-        return redirect("languagepack/games/{$languagePack->id}");    
-    }        
-
     public function update(LanguagePack $languagePack, Request $request)
-    {        
-        /*
-        $items = $request->all()['items'];   
-        $orderBy = Tile::getOrderByValue($languagePack, 'tile_orderby');         
-               
+    {
+        $items = $request->all()['items'];
         $fileRules = 'mimes:mp3|max:1024';
         $customErrorMessage = "The file upload failed. Please verify that the files are of type mp3 and the file size is not bigger than 1 MB.";
         $validator = Validator::make(
-            $request->all(), 
+            $request->all(),
             [
                 'items.*' => [
                     'required_unless:items.*.delete,1',
                 ],
                 'items.*.languagepackid' => ['required', 'integer'],
-                'items.*.type2' => ['sometimes'],    
-                'items.*.type3' => ['sometimes'],    
+                'items.*.friendly_name' => ['sometimes'],
+                'items.*.country' => ['sometimes'],
+                'items.*.level' => ['sometimes', 'integer'],
+                'items.*.color' => ['sometimes', 'integer'],
                 'items.*.file' => $fileRules,
-                'items.*.file2' => $fileRules,
-                'items.*.file3' => $fileRules,
-                'items.*.stage' => ['sometimes'],    
-                'items.*.stage2' => ['sometimes'],    
-                'items.*.stage3' => ['sometimes'],    
+                'items.*.syll_or_tile' => ['sometimes'],
+                'items.*.stages_included' => ['sometimes', 'nullable', 'integer'],
             ],
-            [                
-                'items.*.type' => '',
-                'items.*.or_1' => '',
-                'items.*.or_2' => '',
-                'items.*.or_3' => '',
-                'items.*.type2' => '',
-                'items.*.type3' => '',
+            [
                 'items.*.file' => $customErrorMessage,
-                'items.*.file2' => $customErrorMessage,
-                'items.*.file3' => $customErrorMessage,
-                'items.*.stage' => '',    
-                'items.*.stage2' => '',    
-                'items.*.stage3' => '',    
             ]
         );
 
         DB::transaction(function() use($items, $fileRules, $languagePack) {
             $fileUploadService = app(FileUploadService::class);
-
-            foreach($items as $key => $tile) {
-
-                $fileModel1 = $fileUploadService->handle($tile, 'tile', 1, $fileRules, 'mp3');
-                $fileModel2 = $fileUploadService->handle($tile, 'tile', 2, $fileRules, 'mp3');
-                $fileModel3 = $fileUploadService->handle($tile, 'tile', 3, $fileRules, 'mp3');
-                
+            foreach($items as $key => $game) {
+                $fileModel = $fileUploadService->handle($game, 'game', 1, $fileRules, 'mp3');
                 $updateData = [
-                    'upper' => $tile['upper'],
-                    'type' => $tile['type'],
-                    'stage' => $tile['stage'] ?? null,
-                    'or_1' => $tile['or_1'],
-                    'or_2' => $tile['or_2'],
-                    'or_3' => $tile['or_3'],
-                    'file_id' => $tile['file_id'] ?? null,
-                    'type2' => $tile['type2'],
-                    'file2_id' => $tile['file2_id'] ?? null,
-                    'stage2' => $tile['stage2'] ?? null,
-                    'type3' => $tile['type3'],
-                    'file3_id' => $tile['file3_id'] ?? null,
-                    'stage3' => $tile['stage3'] ?? null,                    
-                ];                
-                
-                if (isset($fileModel1->id)) {
-                    $updateData['file_id'] = $fileModel1->id;
-                }
-                if (isset($fileModel2->id)) {
-                    $updateData['file2_id'] = $fileModel2->id;
-                }
-                if (isset($fileModel3->id)) {
-                    $updateData['file3_id'] = $fileModel3->id;
+                    'include' => isset($game['include']) ? 1 : 0,
+                    'door' => $game['door'],
+                    'friendly_name' => $game['friendly_name'] ?? null,
+                    'country' => $game['country'] ?? null,
+                    'level' => $game['level'] ?? null,
+                    'color' => $game['color'] ?? null,
+                    'syll_or_tile' => $game['syll_or_tile'] ?? null,
+                    'stages_included' => $game['stages_included'] ?? null,
+                ];
+                if ($fileModel && isset($fileModel->id)) {
+                    $updateData['file_id'] = $fileModel->id;
                 }
 
-                Tile::where(['id' => $tile['id']])
-                ->update($updateData);
+                Game::where(['id' => $game['id']])->update($updateData);
             }
         });
 
         if($validator->fails()){
             return Redirect::back()->withErrors($validator)->withInput();
         }
-        
-        $items = $request->all()['items'];
-        if(Arr::pluck($items, 'delete')) {
-            $itemsCollection = Tile::orderByConfig($languagePack, 'tile_orderby')
-                ->where('languagepackid', $languagePack->id)
-                ->with(['file', 'file2', 'file3'])
-                ->paginate(config('pagination.default'));
 
-
-            return view('languagepack.tiles', [
-                'completedSteps' => ['lang_info', 'tiles'],
-                'languagePack' => $languagePack,
-                'items' => $itemsCollection,
-                'orderby' => $orderBy,
-                'pagination' => $itemsCollection->links()
-            ]);
-        }
-        
         session()->flash('success', 'Records updated successfully');
-        */
-
-        return redirect(url('/languagepack/games/' . $languagePack->id));
-    }        
+        return redirect(url('/languagepack/games/' . $languagePack->id) . '?' . http_build_query(request()->query()));
+    }
 
     public function swapDoor(Game $game, Request $request)
     {

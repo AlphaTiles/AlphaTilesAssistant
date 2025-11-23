@@ -122,16 +122,16 @@ $tabEnum = TabEnum::GAME;
 						<x-select-file
 						:nr="1"
 						:key=$key
-						:prefix="'$item'"
+						:prefix="'game'"
 						:item=$item
 						:error-keys="$errorKeys ?? null"
 						/>
 					</td> 
 					<td>								
-						<?php $syllableOrTile = old('items.' . $key . '.syllable_or_tile') ?? $item->syllable_or_tile; ?>
-						<select name="items[{{ $key }}][syllable_or_tile]">
-							<option value="tile" {{ $syllableOrTile === 'T' ? 'selected' : '' }}>Tile</option>
-							<option value="syllable" {{ $syllableOrTile === 'S' ? 'selected' : '' }}>Syllable</option>
+						<?php $syllableOrTile = old('items.' . $key . '.syll_or_tile') ?? $item->syll_or_tile; ?>
+						<select name="items[{{ $key }}][syll_or_tile]">
+							<option value="T" {{ $syllableOrTile === 'T' ? 'selected' : '' }}>Tile</option>
+							<option value="S" {{ $syllableOrTile === 'S' ? 'selected' : '' }}>Syllable</option>
 						</select>
 					</td> 					
 					<td>

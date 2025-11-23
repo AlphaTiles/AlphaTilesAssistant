@@ -52,7 +52,7 @@ class GameSeeder
                 'friendly_name' => $row[8], // Friendly Name
                 'languagepackid' => $languagePackId,
                 'include' => true,
-                'audiofile_id' => null,
+                'file_id' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];

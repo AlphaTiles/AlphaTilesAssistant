@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('country');
             $table->integer('level');      
             $table->integer('color');      
-            $table->foreignId('audiofile_id')->nullable()->constrained('files')
+            $table->foreignId('file_id')->nullable()->constrained('files')
                 ->onDelete('cascade');
             $table->string('audio_duration')->nullable();
             $table->char('syll_or_tile');
