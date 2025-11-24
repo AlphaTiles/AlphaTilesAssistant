@@ -118,7 +118,7 @@ $tabEnum = TabEnum::GAME;
 							$color = old('items.' . $key . '.color') ?? $item->color;
 						@endphp
 						<x-select-color :key="$key" :color="$color" :error-keys="$errorKeys ?? null" />
-					<td>
+					<td class="max-w-sm>
 						<x-select-file
 						:nr="1"
 						:key=$key
@@ -182,7 +182,9 @@ $tabEnum = TabEnum::GAME;
 
 <script>
 document.querySelectorAll('.move-game-btn').forEach(btn => {
+	console.log('Attaching event listener to move button');
 	btn.addEventListener('click', function(e) {
+		console.log('Move button clicked');
 		e.preventDefault();
 		const gameId = this.dataset.gameId;
 		const direction = this.dataset.direction;
