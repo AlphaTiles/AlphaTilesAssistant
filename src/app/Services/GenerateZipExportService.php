@@ -4,6 +4,7 @@ namespace App\Services;
 
 use ZipArchive;
 use App\Models\Key;
+use App\Models\Game;
 use App\Models\Tile;
 use App\Models\Word;
 use App\Models\Resource;
@@ -73,6 +74,10 @@ class GenerateZipExportService
         $settingsFileName = 'aa_share.txt';
         $settingsFile = $this->generateShareFile($settingsFileName, $zip, $zipFileName);
         $zip->addFile($settingsFile, "{$zipFileName}/res/raw/{$settingsFileName}");
+
+        $gamesFileName = 'aa_games.txt';
+        $gamesFile = $this->generateGamesFile($gamesFileName, $zip, $zipFileName);
+        $zip->addFile($gamesFile, "{$zipFileName}/res/raw/{$gamesFileName}");
 
         // add google-services.json file to /res/raw if it exists 
         $publicGoogleServices = storage_path("app/public/languagepacks/{$this->languagePack->id}/res/raw/google-services.json");
@@ -305,6 +310,43 @@ class GenerateZipExportService
         }
 
         return $syllablesFile;
+    }    
+
+public function generateGamesFile(string $fileName, ZipArchive $zip, string $zipFileName): string
+    {
+        $items = Game::where('languagepackid', $this->languagePack->id)
+            ->orderBy('door')
+            ->get();
+        $fileContent = "Door\tCountry\tChallengeLevel\tColor\tInstructionAudio\tAudioDuration\tSyllOrTile\t" .
+                        "StagesIncluded\tFriendly Name\n";
+
+        foreach ($items as $item) {
+            if (!$item->include) {
+                continue;
+            }
+            $file = $item->file ? basename($item->file->file_path) : 'X';
+            $file = str_replace('.mp3', '', $file);
+            $stagesIncluded = $item->stages_included ?? '-';
+
+            $fileContent .= "{$item->door}" . self::SEPARATOR .
+            "{$item->country}" . self::SEPARATOR .
+            "{$item->level}" . self::SEPARATOR .
+            "{$item->color}" . self::SEPARATOR .
+            "{$file}" . self::SEPARATOR .
+            "{$item->audio_duration}" . self::SEPARATOR .
+            "{$item->syll_or_tile}" . self::SEPARATOR .
+            "{$stagesIncluded}" . self::SEPARATOR .
+            "{$item->friendly_name}" . self::SEPARATOR . "\n";
+        }
+
+        $exportFile = "{$this->tempDir}/{$fileName}";
+        file_put_contents($exportFile, $fileContent);
+
+        foreach ($items as $item) {
+            $this->saveFile(1, $item, $zip, $zipFileName);
+        }
+
+        return $exportFile;
     }    
 
     private function saveFile(int $nr, Model $item, ZipArchive $zip, string $zipFileName): void

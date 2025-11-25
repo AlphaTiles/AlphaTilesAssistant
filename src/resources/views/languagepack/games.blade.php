@@ -110,7 +110,7 @@ $tabEnum = TabEnum::GAME;
 					</td>
 					<td>
 						<?php $errorClass = isset($errorKeys) && in_array('items.' . $key . '.level', $errorKeys) ? 'inputError' : ''; ?>
-						<input type="number" size=5 name="items[{{ $key }}][level]" value="{{ old('items.' . $key . '.level') ?? $item->level }}" class="{{ $errorClass }}" />
+						<input type="number" size=5 name="items[{{ $key }}][level]" value="{{ old('items.' . $key . '.level') ?? $item->level }}" class="w-20 {{ $errorClass }}" />
 					</td>
 					<td>
 						<?php $errorClass = isset($errorKeys) && in_array('items.' . $key . '.color', $errorKeys) ? 'inputError' : ''; ?>
@@ -135,7 +135,7 @@ $tabEnum = TabEnum::GAME;
 						</select>
 					</td> 					
 					<td>
-						<input type="number" size=5 name="items[{{ $key }}][stages_included]" value="{{ old('items.' . $key . '.stages_included') ?? $item->stages_included }}" />
+						<input type="number" size=5 class="w-20" name="items[{{ $key }}][stages_included]" value="{{ old('items.' . $key . '.stages_included') ?? $item->stages_included }}" />
 					</td>
 				</tr>
 				@endforeach
@@ -152,7 +152,6 @@ $tabEnum = TabEnum::GAME;
 		</p>			
 	@endif
 
-		</div>
 	</form>
 
 	<div class="mt-6 w-9/12">	

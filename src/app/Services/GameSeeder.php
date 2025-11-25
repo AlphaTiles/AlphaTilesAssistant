@@ -18,7 +18,7 @@ class GameSeeder
             return;
         }
 
-        $csvPath = resource_path('settings/games.csv');
+        $csvPath = database_path('seeders/games.csv');
 
         if (!file_exists($csvPath)) {
             Log::warning("Games CSV file not found: {$csvPath}");
