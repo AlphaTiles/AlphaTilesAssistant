@@ -16,7 +16,8 @@ return new class extends Migration
             $table->boolean('include')->default(true);
             $table->foreignId('languagepackid')->constrained('language_packs')
                 ->onDelete('cascade');      
-            $table->integer('door');
+            $table->integer('door')->nullable();
+            $table->integer('order');
             $table->string('country');
             $table->integer('level');      
             $table->integer('color');      

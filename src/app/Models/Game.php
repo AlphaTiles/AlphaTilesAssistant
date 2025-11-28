@@ -19,6 +19,7 @@ class Game extends Model
         'include',
         'languagepackid',
         'door',
+        'order',
         'country',
         'level',
         'color',

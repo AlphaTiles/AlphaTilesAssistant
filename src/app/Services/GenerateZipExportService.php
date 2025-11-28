@@ -315,11 +315,12 @@ class GenerateZipExportService
 public function generateGamesFile(string $fileName, ZipArchive $zip, string $zipFileName): string
     {
         $items = Game::where('languagepackid', $this->languagePack->id)
-            ->orderBy('door')
+            ->orderBy('order')
             ->get();
         $fileContent = "Door\tCountry\tChallengeLevel\tColor\tInstructionAudio\tAudioDuration\tSyllOrTile\t" .
                         "StagesIncluded\tFriendly Name\n";
 
+        $door = 1;
         foreach ($items as $item) {
             if (!$item->include) {
                 continue;
@@ -328,7 +329,7 @@ public function generateGamesFile(string $fileName, ZipArchive $zip, string $zip
             $file = str_replace('.mp3', '', $file);
             $stagesIncluded = $item->stages_included ?? '-';
 
-            $fileContent .= "{$item->door}" . self::SEPARATOR .
+            $fileContent .= "{$door}" . self::SEPARATOR .
             "{$item->country}" . self::SEPARATOR .
             "{$item->level}" . self::SEPARATOR .
             "{$item->color}" . self::SEPARATOR .
@@ -337,6 +338,7 @@ public function generateGamesFile(string $fileName, ZipArchive $zip, string $zip
             "{$item->syll_or_tile}" . self::SEPARATOR .
             "{$stagesIncluded}" . self::SEPARATOR .
             "{$item->friendly_name}" . self::SEPARATOR . "\n";
+            $door++;
         }
 
         $exportFile = "{$this->tempDir}/{$fileName}";

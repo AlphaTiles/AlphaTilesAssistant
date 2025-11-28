@@ -36,6 +36,7 @@ class GameSeeder
 
         $games = [];
 
+        $order = 1;
         while (($row = fgetcsv($handle, 0, ';')) !== false) {
             if (empty(array_filter($row))) {
                 continue; // Skip empty rows
@@ -43,6 +44,7 @@ class GameSeeder
 
             $games[] = [
                 'door' => (int) $row[0], // Door
+                'order' => $order++,     // Order
                 'country' => $row[1], // Country
                 'level' => (int) $row[2], // ChallengeLevel
                 'color' => (int) $row[3], // Color

@@ -42,7 +42,7 @@ class GamesController extends BaseItemController
     public function edit(LanguagePack $languagePack, string $tile = null)
     {           
         $items = Game::where('languagepackid', $languagePack->id)
-            ->orderBy('door')
+            ->orderBy('order')
             ->paginate(config('pagination.default'));
 
         $validationErrors = null;
@@ -88,10 +88,15 @@ class GamesController extends BaseItemController
         DB::transaction(function() use($items, $fileRules, $languagePack) {
             $fileUploadService = app(FileUploadService::class);
             foreach($items as $key => $game) {
+                $door = !empty($game['door']) ? $game['door'] : null;
+                if(empty($game['include'])) {
+                    $door = null;
+                }
+
                 $fileModel = $fileUploadService->handle($game, 'game', 1, $fileRules, 'mp3');
                 $updateData = [
                     'include' => isset($game['include']) ? 1 : 0,
-                    'door' => $game['door'],
+                    'door' => $door,
                     'friendly_name' => $game['friendly_name'] ?? null,
                     'country' => $game['country'] ?? null,
                     'level' => $game['level'] ?? null,
@@ -106,6 +111,16 @@ class GamesController extends BaseItemController
                 Game::where(['id' => $game['id']])->update($updateData);
             }
         });
+
+        // reset door numbers to be sequential
+        $games = Game::where('languagepackid', $languagePack->id)
+            ->whereNotNull('door')
+            ->orderBy('door')
+            ->get();    
+        $doorNumber = 1;
+        foreach($games as $game) {
+            $game->update(['door' => $doorNumber++]);
+        }
 
         if($validator->fails()){
             return Redirect::back()->withErrors($validator)->withInput();
@@ -125,9 +140,9 @@ class GamesController extends BaseItemController
         $languagePackId = $request->input('languagePackId');
         $direction = $request->input('direction');
 
-        // Get all games for this language pack ordered by door
+        // Get all games for this language pack ordered by order
         $games = Game::where('languagepackid', $languagePackId)
-            ->orderBy('door')
+            ->orderBy('order')
             ->get();
 
         // Find current game and adjacent game
@@ -145,10 +160,17 @@ class GamesController extends BaseItemController
 
         $adjacentGame = $games[$adjacentIndex];
 
-        // Swap door values
+        // Swap order values
         $tempDoor = $game->door;
-        $game->update(['door' => $adjacentGame->door]);
-        $adjacentGame->update(['door' => $tempDoor]);
+        $tempOrder = $game->order;
+        $game->update([
+            'door' => $adjacentGame->door,
+            'order' => $adjacentGame->order
+        ]);
+        $adjacentGame->update([
+            'door' => $tempDoor ?? $game->door,
+            'order' => $tempOrder
+        ]);
 
         return response()->json(['success' => true, 'message' => 'Game order updated', 'gameId' => $game->id]);
     }
