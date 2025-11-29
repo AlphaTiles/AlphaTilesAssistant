@@ -26,7 +26,6 @@ if(isset($colorNr)) {
 ?>
 <div id=displayColor{{ $key }} class="{{ $hidden }} inline-block align-bottom ml-3 p-4 rounded-lg shadow-md" style="width:5px; height:5px; background-color:{{ $hexCode }};"></div>						
 
-@section('scripts')
 <script>	
 function changeColor(selectElement) {
 	var selectedValue = selectElement.value;    
@@ -43,4 +42,3 @@ function changeColor(selectElement) {
 	displayColorBox.classList.remove('hidden');
 }
 </script>
-@endsection

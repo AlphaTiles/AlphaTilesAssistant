@@ -31,7 +31,7 @@ if(empty($item->{$typeField}) && $nr > 1) {
             $extension = File::extension($item->{$fileRelation}->file_path);            
             ?>
             @if($extension === 'mp3')
-                <audio controls style="width: 200px; height: 30px;">
+                <audio controls style="width: 200px; height: 30px; margin-top: 5px;">
                     <source src="/languagepack/items/{{ $item->languagepackid }}/download/{{ $prefix }}_{{ $storedFileNumber }}_{{ $nr }}.mp3?{{ time() }}" type="audio/mpeg">
                     Your browser does not support the audio element.
                 </audio> 								

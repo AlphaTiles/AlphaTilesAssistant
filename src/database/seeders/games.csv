@@ -1,0 +1,129 @@
+Door;Country;ChallengeLevel;Color;InstructionAudio;AudioDuration;SyllOrTile;StagesIncluded;Friendly Name
+1;Romania;1;5;X;naWhileMPOnly;T;-;Learn the Tiles
+2;Malaysia;1;5;X;naWhileMPOnly;T;-;Word List
+3;Iraq;1;5;X;naWhileMPOnly;T;-;Interactive Tile Chart
+4;Thailand;155;0;X;naWhileMPOnly;T;-;Basic Matching: Word Image to Word Image: Level 1
+5;Thailand;255;0;X;naWhileMPOnly;T;-;Basic Matching: Word Image to Word Image: Level 2
+6;Thailand;355;0;X;naWhileMPOnly;T;-;Basic Matching: Word Image to Word Image: Level 3
+7;Thailand;165;1;X;naWhileMPOnly;T;-;Basic Matching: Word Audio to Word Image: Level 1
+8;Thailand;265;1;X;naWhileMPOnly;T;-;Basic Matching: Word Audio to Word Image: Level 2
+9;Thailand;365;1;X;naWhileMPOnly;T;-;Basic Matching: Word Audio to Word Image: Level 3
+10;Sudan;1;5;X;naWhileMPOnly;S;-;Syllable List
+11;Thailand;177;2;X;naWhileMPOnly;S;-;Basic Matching: Syllable Text to Syllable Text: Level 1
+12;Thailand;277;2;X;naWhileMPOnly;S;-;Basic Matching: Syllable Text to Syllable Text: Level 2
+13;Sudan;1;5;X;naWhileMPOnly;T;-;Tile List
+14;Thailand;111;3;X;naWhileMPOnly;T;-;Basic Matching: Lower Case Tile Text to Lower Case Tile Text: Level 1
+15;Thailand;211;3;X;naWhileMPOnly;T;-;Basic Matching: Lower Case Tile Text to Lower Case Tile Text: Level 2
+16;Thailand;122;4;X;naWhileMPOnly;T;-;Basic Matching: Upper Case Tile Text to Upper Case Tile Text: Level 1
+17;Thailand;222;4;X;naWhileMPOnly;T;-;Basic Matching: Upper Case Tile Text to Upper Case Tile Text: Level 2
+18;Thailand;112;7;X;naWhileMPOnly;T;-;Basic Matching: Lower Case Tile Text to Upper Case Tile Text: Level 1
+19;Thailand;121;7;X;naWhileMPOnly;T;-;Basic Matching: Upper Case Tile Text to Lower Case Tile Text: Level 1
+20;Thailand;212;7;X;naWhileMPOnly;T;-;Basic Matching: Lower Case Tile Text to Upper Case Tile Text: Level 2
+21;Thailand;221;7;X;naWhileMPOnly;T;-;Basic Matching: Upper Case Tile Text to Lower Case Tile Text: Level 2
+22;Thailand;185;8;X;naWhileMPOnly;S;-;Basic Matching: Syllable Audio to Word Image: Level 1
+23;Thailand;285;8;X;naWhileMPOnly;S;-;Basic Matching: Syllable Audio to Word Image: Level 2
+24;Thailand;175;8;X;naWhileMPOnly;S;-;Basic Matching: Syllable Text to Word Image: Level 1
+25;Thailand;275;8;X;naWhileMPOnly;S;-;Basic Matching: Syllable Text to Word Image: Level 2
+26;Thailand;135;9;X;naWhileMPOnly;T;-;Basic Matching: Tile Audio to Word Image: Level 1
+27;Thailand;235;9;X;naWhileMPOnly;T;-;Basic Matching: Tile Audio to Word Image: Level 2
+28;Thailand;115;9;X;naWhileMPOnly;T;-;Basic Matching: Lower Case Tile Text to Word Image: Level 1
+29;Thailand;215;9;X;naWhileMPOnly;T;-;Basic Matching: Lower Case Tile Text to Word Image: Level 2
+30;Thailand;125;10;X;naWhileMPOnly;T;-;Basic Matching: Upper Case Tile Text to Word Image: Level 1
+31;Thailand;225;10;X;naWhileMPOnly;T;-;Basic Matching: Upper Case Tile Text to Word Image: Level 2
+32;Thailand;187;11;X;naWhileMPOnly;S;-;Basic Matching: Syllable Audio to Syllable Text: Level 1
+33;Thailand;287;11;X;naWhileMPOnly;S;-;Basic Matching: Syllable Audio to Syllable Text: Level 2
+34;Thailand;131;12;X;naWhileMPOnly;T;-;Basic Matching: Tile Audio to Lower Case Tile Text: Level 1
+35;Thailand;231;12;X;naWhileMPOnly;T;-;Basic Matching: Tile Audio to Lower Case Tile Text: Level 2
+36;Thailand;132;12;X;naWhileMPOnly;T;-;Basic Matching: Tile Audio to Upper Case Tile Text: Level 1
+37;Thailand;232;12;X;naWhileMPOnly;T;-;Basic Matching: Tile Audio to Upper Case Tile Text: Level 2
+38;Thailand;174;0;X;naWhileMPOnly;S;-;Basic Matching: Syllable Text to Word Text: Level 1
+39;Thailand;184;0;X;naWhileMPOnly;S;-;Basic Matching: Syllable Audio to Word Text: Level 1
+40;Thailand;145;1;X;naWhileMPOnly;T;-;Basic Matching: Word Text to Word Image: Level 1
+41;Thailand;245;1;X;naWhileMPOnly;T;-;Basic Matching: Word Text to Word Image: Level 2
+42;Thailand;345;1;X;naWhileMPOnly;T;-;Basic Matching: Word Text to Word Image: Level 3
+43;Thailand;151;2;X;naWhileMPOnly;T;-;Basic Matching: Word Image to Lower Case Tile Text: Level 1
+44;Thailand;251;2;X;naWhileMPOnly;T;-;Basic Matching: Word Image to Lower Case Tile Text: Level 2
+45;Thailand;152;2;X;naWhileMPOnly;T;-;Basic Matching: Word Image to Upper Case Tile Text: Level 1
+46;Thailand;252;2;X;naWhileMPOnly;T;-;Basic Matching: Word Image to Upper Case Tile Text: Level 2
+47;Thailand;161;3;X;naWhileMPOnly;T;-;Basic Matching: Word Audio to Lower Case Tile Text: Level 1
+48;Thailand;261;3;X;naWhileMPOnly;T;-;Basic Matching: Word Audio to Lower Case Tile Text: Level 2
+49;Thailand;162;3;X;naWhileMPOnly;T;-;Basic Matching: Word Audio to Upper Case Tile Text: Level 1
+50;Thailand;262;3;X;naWhileMPOnly;T;-;Basic Matching: Word Audio to Upper Case Tile Text: Level 2
+51;Thailand;141;4;X;naWhileMPOnly;T;-;Basic Matching: Word Text to Lower Case Tile Text: Level 1
+52;Thailand;241;4;X;naWhileMPOnly;T;-;Basic Matching: Word Text to Lower Case Tile Text: Level 2
+53;Thailand;142;4;X;naWhileMPOnly;T;-;Basic Matching: Word Text to Upper Case Tile Text: Level 1
+54;Thailand;242;4;X;naWhileMPOnly;T;-;Basic Matching: Word Text to Upper Case Tile Text: Level 2
+55;Thailand;114;7;X;naWhileMPOnly;T;-;Basic Matching: Lower Case Tile Text to Word Text: Level 1
+56;Thailand;214;7;X;naWhileMPOnly;T;-;Basic Matching: Lower Case Tile Text to Word Text: Level 2
+57;Thailand;124;7;X;naWhileMPOnly;T;-;Basic Matching: Upper Case Tile Text to Word Text: Level 1
+58;Thailand;224;7;X;naWhileMPOnly;T;-;Basic Matching: Upper Case Tile Text to Word Text: Level 2
+59;Thailand;134;8;X;naWhileMPOnly;T;-;Basic Matching: Tile Audio to Word Text: Level 1
+60;Thailand;234;8;X;naWhileMPOnly;T;-;Basic Matching: Tile Audio to Word Text: Level 2
+61;Thailand;154;9;X;naWhileMPOnly;T;-;Basic Matching: Word Image to Word Text: Level 1
+62;Thailand;254;9;X;naWhileMPOnly;T;-;Basic Matching: Word Image to Word Text: Level 2
+63;Thailand;354;9;X;naWhileMPOnly;T;-;Basic Matching: Word Image to Word Text: Level 3
+64;Thailand;144;10;X;naWhileMPOnly;T;-;Basic Matching: Word Text to Word Text: Level 1
+65;Thailand;244;10;X;naWhileMPOnly;T;-;Basic Matching: Word Text to Word Text: Level 2
+66;Thailand;344;10;X;naWhileMPOnly;T;-;Basic Matching: Word Text to Word Text: Level 3
+67;Thailand;164;12;X;naWhileMPOnly;T;-;Basic Matching: Word Audio to Word Text: Level 1
+68;Thailand;264;12;X;naWhileMPOnly;T;-;Basic Matching: Word Audio to Word Text: Level 2
+69;Thailand;364;12;X;naWhileMPOnly;T;-;Basic Matching: Word Audio to Word Text: Level 3
+70;Georgia;1;11;X;naWhileMPOnly;S;-;Identify the Initial Syllable: Level 1
+71;Georgia;1;4;X;naWhileMPOnly;T;-;Identify the Initial Tile: Level 1
+72;Brazil;1;9;X;naWhileMPOnly;S;-;Identify the Missing Syllable: Level 1
+73;Brazil;1;2;X;naWhileMPOnly;T;-;Identify the Missing Vowel: Level 1
+74;Brazil;4;2;X;naWhileMPOnly;T;-;Identify the Missing Consonant: Level 1
+75;Georgia;2;11;X;naWhileMPOnly;S;-;Identify the Initial Syllable: Level 2
+76;Georgia;2;4;X;naWhileMPOnly;T;-;Identify the Initial Tile: Level 2
+77;Brazil;2;9;X;naWhileMPOnly;S;-;Identify the Missing Syllable: Level 2
+78;Brazil;2;2;X;naWhileMPOnly;T;-;Identify the Missing Vowel: Level 2
+79;Brazil;5;2;X;naWhileMPOnly;T;-;Identify the Missing Consonant: Level 2
+80;Peru;1;3;X;naWhileMPOnly;T;-;Choose the Correctly Spelled Word: Level 1
+81;Ecuador;1;0;X;naWhileMPOnly;T;-;Choose the Matching Word: Level 1
+82;Italy;1;1;X;naWhileMPOnly;T;-;Lotería (Bingo): Level 1
+83;Brazil;3;2;X;naWhileMPOnly;T;-;Identify the Missing Vowel: Level 3
+84;Brazil;6;2;X;naWhileMPOnly;T;-;Identify the Missing Consonant: Level 3
+85;Mexico;1;0;X;naWhileMPOnly;T;-;Memory: Level 1
+86;Georgia;3;4;X;naWhileMPOnly;T;-;Identify the Initial Tile: Level 3
+87;Peru;2;3;X;naWhileMPOnly;T;-;Choose the Correctly Spelled Word: Level 2
+88;Georgia;3;11;X;naWhileMPOnly;S;-;Identify the Initial Syllable: Level 3
+89;Georgia;4;4;X;naWhileMPOnly;T;-;Identify the Initial Tile: Level 1
+90;Mexico;2;0;X;naWhileMPOnly;T;-;Memory: Level 2
+91;Georgia;4;11;X;naWhileMPOnly;S;-;Identify the Initial Syllable: Level 4
+92;Georgia;5;4;X;naWhileMPOnly;T;-;Identify the Initial Tile: Level 2
+93;Peru;3;3;X;naWhileMPOnly;T;-;Choose the Correctly Spelled Word: Level 3
+94;Colombia;1;7;X;naWhileMPOnly;S;-;Spell the Word (with Syllables): Level 1
+95;Mexico;3;0;X;naWhileMPOnly;T;-;Memory: Level 3
+96;Georgia;5;11;X;naWhileMPOnly;S;-;Identify the Initial Syllable: Level 5
+97;Georgia;6;11;X;naWhileMPOnly;S;-;Identify the Initial Syllable: Level 6
+98;Georgia;6;4;X;naWhileMPOnly;T;-;Identify the Initial Tile: Level 3
+99;Colombia;2;7;X;naWhileMPOnly;S;-;Spell the Word (with Syllables): Level 2
+100;Mexico;4;0;X;naWhileMPOnly;T;-;Memory: Level 4
+101;UnitedStates;1;10;X;naWhileMPOnly;T;-;Build the Word from Tile Pairs: Level 1
+102;Colombia;1;1;X;naWhileMPOnly;T;-;Spell the Word: Level 1
+103;Myanmar;1;8;X;naWhileMPOnly;T;-;Word Search: Level 1
+104;UnitedStates;1;10;X;naWhileMPOnly;S;-;Build the Word from Syllable Pairs: Level 1
+105;Colombia;3;7;X;naWhileMPOnly;S;-;Spell the Word (with Syllables): Level 3
+106;Japan;1;12;X;naWhileMPOnly;S;-;Join Tiles into Syllables: Level 1
+107;Colombia;2;1;X;naWhileMPOnly;T;-;Spell the Word: Level 2
+108;UnitedStates;2;10;X;naWhileMPOnly;T;-;Build the Word from Tile Pairs: Level 2
+109;Mexico;5;0;X;naWhileMPOnly;T;-;Memory: Level 5
+110;Myanmar;2;8;X;naWhileMPOnly;T;-;Word Search: Level 2
+111;UnitedStates;3;10;X;naWhileMPOnly;T;-;Build the Word from Tile Pairs: Level 3
+112;Japan;2;12;X;naWhileMPOnly;S;-;Join Tiles into Syllables: Level 2
+113;Myanmar;3;8;X;naWhileMPOnly;T;-;Word Search: Level 3
+114;China;1;9;X;naWhileMPOnly;T;-;Game of Fifteen (15): Level 1
+115;Chile;1;6;X;naWhileMPOnly;T;-;Guess the Word: Level 1
+116;Colombia;3;1;X;naWhileMPOnly;T;-;Spell the Word: Level 3
+117;Thailand;1911;8;X;naWhileMPOnly;T;-;Basic Matching: initial to isolate: Level 1
+118;Thailand;1912;9;X;naWhileMPOnly;T;-;Basic Matching: medial to isolate: Level 1
+119;Thailand;1913;10;X;naWhileMPOnly;T;-;Basic Matching: final to isolate: Level 1
+120;Thailand;1191;8;X;naWhileMPOnly;T;-;Basic Matching: isolate to initial: Level 1
+121;Thailand;1192;9;X;naWhileMPOnly;T;-;Basic Matching: isolate to medial: Level 1
+122;Thailand;1193;10;X;naWhileMPOnly;T;-;Basic Matching: isolate to final: Level 1
+123;Thailand;2911;8;X;naWhileMPOnly;T;-;Basic Matching: initial to isolate: Level 2
+124;Thailand;2912;9;X;naWhileMPOnly;T;-;Basic Matching: medial to isolate: Level 2
+125;Thailand;2913;10;X;naWhileMPOnly;T;-;Basic Matching: final to isolate: Level 2
+126;Thailand;2191;8;X;naWhileMPOnly;T;-;Basic Matching: isolate to initial: Level 2
+127;Thailand;2192;9;X;naWhileMPOnly;T;-;Basic Matching: isolate to medial: Level 2
+128;Thailand;2193;10;X;naWhileMPOnly;T;-;Basic Matching: isolate to final: Level 2

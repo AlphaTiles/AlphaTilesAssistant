@@ -40,7 +40,7 @@ class ExportController extends Controller
             $groupedErrors = collect($errors)->sortBy('tab')->groupBy('type');
 
             return view('languagepack.export', [
-                'completedSteps' => ['lang_info', 'tiles', 'wordlist', 'keyboard', 'syllables', 'resources', 'game_settings', 'export'],            
+                'completedSteps' => ['lang_info', 'tiles', 'wordlist', 'keyboard', 'syllables', 'resources', 'game_settings', 'games', 'export'],            
                 'languagePack' => $languagePack,
                 'errors' => $groupedErrors->toArray(),
                 'criticalError' => true
@@ -52,7 +52,7 @@ class ExportController extends Controller
         
 
         return view('languagepack.export', [
-            'completedSteps' => ['lang_info', 'tiles', 'wordlist', 'keyboard', 'syllables', 'resources', 'game_settings', 'export'],            
+            'completedSteps' => ['lang_info', 'tiles', 'wordlist', 'keyboard', 'syllables', 'resources', 'game_settings', 'games', 'export'],            
             'languagePack' => $languagePack,
             'errors' => $errors
         ]);

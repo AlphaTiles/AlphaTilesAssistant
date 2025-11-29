@@ -9,11 +9,12 @@ use App\Models\Word;
 use App\Enums\LangInfoEnum;
 use App\Models\LanguagePack;
 use App\Models\LanguageSetting;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Repositories\LangInfoRepository;
 use App\Http\Requests\StoreLangPackRequest;
+use App\Services\GameSeeder;
+use Illuminate\Support\Facades\Log;
 
 class LanguageInfoController extends Controller
 {
@@ -68,7 +69,9 @@ class LanguageInfoController extends Controller
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function edit(LanguagePack $languagePack)
-    {       
+    {  
+        app(GameSeeder::class)->seedIfEmpty($languagePack->id);
+  
         return view('languagepack.info', [
             'languagePack' => $languagePack,
             'completedSteps' => ['lang_info'],
@@ -95,6 +98,9 @@ class LanguageInfoController extends Controller
         }
 
         $this->saveSettings($languagePackSaved, $request);
+
+        // Seed games if the games table is empty for this language pack
+        app(GameSeeder::class)->seedIfEmpty($languagePackSaved->id);
 
         return redirect("languagepack/edit/{$languagePackSaved->id}");    
     }    

@@ -204,7 +204,6 @@ class TilesController extends BaseItemController
 
     public function words(string $languagePack)
     {
-        dd($languagePack);
         $parseWordsIntoTilesService = new ParseWordsIntoTilesService($languagePack);
         $words = $parseWordsIntoTilesService->handle([]);
 
