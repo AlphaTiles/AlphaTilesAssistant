@@ -2,22 +2,23 @@
 
 namespace App\Services;
 
-use App\Enums\ExportStatus;
 use Exception;
 use Google\Client;
 use App\Models\Key;
+use App\Models\Game;
 use App\Models\Tile;
 use App\Models\Word;
+use App\Models\Resource;
 use App\Models\Syllable;
 use Google\Service\Drive;
 use Google\Service\Sheets;
+use App\Enums\ExportStatus;
 use App\Enums\LangInfoEnum;
+use App\Models\GameSetting;
 use App\Enums\FieldTypeEnum;
 use App\Models\LanguagePack;
 use App\Enums\GameSettingEnum;
-use App\Models\GameSetting;
 use App\Models\LanguageSetting;
-use App\Models\Resource;
 use Google\Service\Drive\DriveFile;
 use Illuminate\Support\Facades\Log;
 use Google\Service\Sheets\ValueRange;
@@ -73,25 +74,28 @@ class ExportSheetService
     private function notesSheet(string $spreadsheetId): void
     {
         $sheetName = 'notes';
-        $this->createSheetTab($spreadsheetId, $sheetName, 0);
-        $sheetAndRange = "{$sheetName}!A1:B1"; 
+        $this->createSheetTab($spreadsheetId, $sheetName, 0);        
         $values = [
             ["#", "1"],
         ];
+        
+        $sheetAndRange = $this->getSheetAndRange($sheetName, $values, count($values));
+
         $this->addValuesToSheet($spreadsheetId, $sheetAndRange, $values);
     }
 
     private function langInfoSheet(string $spreadsheetId): void
     {
         $sheetName = 'langinfo';
-        $this->createSheetTab($spreadsheetId, $sheetName, 1);
-        $sheetAndRange = "{$sheetName}!A1:B15"; 
+        $this->createSheetTab($spreadsheetId, $sheetName, 1);        
 
         $values = [
             ["Item", "Answer"],
         ];
 
         $langItems = app(LangInfoRepository::class)->getSettings(false, $this->languagePack);
+        $sheetAndRange = $this->getSheetAndRange($sheetName, $values, count($langItems));
+
         $i = 1;
         foreach($langItems as $item) {
             $value = !empty($item['value']) ? $item['value'] : 'none';
@@ -112,8 +116,7 @@ class ExportSheetService
         
         $folderId = $this->googleService->createFolder($folderName, $this->exportFolderId);        
         $sheetName = 'gametiles';
-        $this->createSheetTab($spreadsheetId, $sheetName, 2);
-        $sheetAndRange = "{$sheetName}!A1:Q100"; 
+        $this->createSheetTab($spreadsheetId, $sheetName, 2);        
 
         $values = [[
                 'tiles', 'Or1', 'Or2', 'Or3', 'Type', 'AudioName', 'Upper', 'Type2', 'AudioName2',
@@ -124,6 +127,7 @@ class ExportSheetService
         $tiles = Tile::where('languagepackid', $this->languagePack->id)
             ->orderByConfig($this->languagePack, 'tile_orderby')
             ->get();
+        $sheetAndRange = $this->getSheetAndRange($sheetName, $values, count($tiles));       
         $i = 1;        
         foreach($tiles as $tile) {
             $file1 = $tile->file ? basename($tile->file->name) : 'X';   
@@ -204,8 +208,7 @@ class ExportSheetService
         }        
         $audioFolderId = $this->googleService->createFolder($wordFolderName, $this->exportFolderId);        
         Log::error('audio folder: ' . $audioFolderId);        
-        $this->createSheetTab($spreadsheetId, $sheetName, 3);
-        $sheetAndRange = "{$sheetName}!A1:F2000"; 
+        $this->createSheetTab($spreadsheetId, $sheetName, 3);        
 
         $localLangName = LanguageSetting::where('languagepackid', $this->languagePack->id)
             ->where('name', LangInfoEnum::LANG_NAME_LOCAL->value)->first()->value;
@@ -217,6 +220,7 @@ class ExportSheetService
         $words = Word::where('languagepackid', $this->languagePack->id)
             ->orderByConfig($this->languagePack, 'word_orderby')
             ->get();
+        $sheetAndRange = $this->getSheetAndRange($sheetName, $values, count($words));           
         $i = 1;        
         foreach($words as $word) {
             $fileAudioName = '';
@@ -259,14 +263,13 @@ class ExportSheetService
     private function syllablesSheet(string $spreadsheetId): void
     {
         $sheetName = 'syllables';
-        $this->createSheetTab($spreadsheetId, $sheetName, 5);
-        $sheetAndRange = "{$sheetName}!A1:G100"; 
+        $folderName = 'audio_syllables_optional';
+        $this->createSheetTab($spreadsheetId, $sheetName, 5);        
 
         $values = [
             ["Syllable", "Or1", "Or2", "Or3", "SyllableAudioName", "Duration", "Color"],
         ];
-
-        $folderName = 'audio_syllables_optional';
+        
         $oldFolderId = $this->googleService->folderExists($folderName, $this->exportFolderId);
         if($oldFolderId) {
             $this->googleService->deleteFolder($oldFolderId);             
@@ -279,6 +282,7 @@ class ExportSheetService
         $items = Syllable::where('languagepackid', $this->languagePack->id)
             ->orderBy('value')
             ->get();
+        $sheetAndRange = $this->getSheetAndRange($sheetName, $values, count($items));            
         $i = 1;        
         foreach($items as $item) {
             $file1 = $item->file ? basename($item->file->name) : 'X';   
@@ -307,8 +311,7 @@ class ExportSheetService
     private function keyboardSheet(string $spreadsheetId): void
     {
         $sheetName = 'keyboard';
-        $this->createSheetTab($spreadsheetId, $sheetName, 4);
-        $sheetAndRange = "{$sheetName}!A1:B100"; 
+        $this->createSheetTab($spreadsheetId, $sheetName, 4);        
 
         $values = [
             ['keys', 'theme_color'],
@@ -317,6 +320,7 @@ class ExportSheetService
         $keys = Key::where('languagepackid', $this->languagePack->id)
             ->orderBy('id')
             ->get();
+        $sheetAndRange = $this->getSheetAndRange($sheetName, $values, count($keys));
 
         $i = 1;
         foreach ($keys as $keyItem) {            
@@ -334,8 +338,7 @@ class ExportSheetService
     private function resourcesSheet(string $spreadsheetId): void
     {        
         $sheetName = 'resources';        
-        $this->createSheetTab($spreadsheetId, $sheetName, 6);
-        $sheetAndRange = "{$sheetName}!A1:C50"; 
+        $this->createSheetTab($spreadsheetId, $sheetName, 6);        
 
         $folderName = 'images_resources_optional';
         $oldFolderId = $this->googleService->folderExists($folderName, $this->exportFolderId);
@@ -351,6 +354,8 @@ class ExportSheetService
         $items = Resource::where('languagepackid', $this->languagePack->id)
             ->orderBy('name')
             ->get();
+        $sheetAndRange = $this->getSheetAndRange($sheetName, $values, count($items));           
+
         $i = 1;        
         $storagePath = "/storage/languagepacks/{$this->languagePack->id}/res/raw/";
 
@@ -375,14 +380,15 @@ class ExportSheetService
     private function settingsSheet(string $spreadsheetId): void
     {
         $sheetName = 'settings';
-        $this->createSheetTab($spreadsheetId, $sheetName, 7);
-        $sheetAndRange = "{$sheetName}!A1:B20"; 
+        $this->createSheetTab($spreadsheetId, $sheetName, 7);        
 
         $values = [
             ["Setting", "Value"],
         ];
 
         $items = app(GameSettingsRepository::class)->getSettings(false, $this->languagePack);
+        $sheetAndRange = $this->getSheetAndRange($sheetName, $values, count($items));           
+
         $i = 1;
         foreach($items as $item) {
             if($item['name'] === GameSettingEnum::SHARE_LINK->value) {
@@ -432,13 +438,14 @@ class ExportSheetService
     private function shareSheet(string $spreadsheetId): void
     {
         $sheetName = 'share';
-        $this->createSheetTab($spreadsheetId, $sheetName, 8);
-        $sheetAndRange = "{$sheetName}!A1:A2"; 
-
-        $items = app(GameSettingsRepository::class)->getSettings(false, $this->languagePack);
+        $this->createSheetTab($spreadsheetId, $sheetName, 8);        
         $values = [
             ['Link'], 
         ];
+
+        $items = app(GameSettingsRepository::class)->getSettings(false, $this->languagePack);
+        $sheetAndRange = $this->getSheetAndRange($sheetName, $values, count($items));            
+
         foreach($items as $item) {
             if($item['name'] === GameSettingEnum::SHARE_LINK->value) {
                 $values[] = [$item['value']];
@@ -452,13 +459,13 @@ class ExportSheetService
     private function namesSheet(string $spreadsheetId): void
     {
         $sheetName = 'names';
-        $this->createSheetTab($spreadsheetId, $sheetName, 9);
-        $sheetAndRange = "{$sheetName}!A1:B1"; 
+        $this->createSheetTab($spreadsheetId, $sheetName, 9);        
 
         $values = [
             ['Entry', 'Name'],
         ];
 
+        $sheetAndRange = $this->getSheetAndRange($sheetName, $values, count($values));           
         $this->addValuesToSheet($spreadsheetId, $sheetAndRange, $values);
         Log::info('export of names completed');
     }  
@@ -467,26 +474,52 @@ class ExportSheetService
     {
         $sheetName = 'games';
         $folderName = 'audio_instructions_optional';
+        $this->createSheetTab($spreadsheetId, $sheetName, 10);        
+
+        $values = [
+            ["Door", "Country",	"ChallengeLevel", "Color", "InstructionAudio",	"AudioDuration",
+            	"SyllOrTile", "StagesIncluded", "Friendly Name"],
+        ];
+
         $oldFolderId = $this->googleService->folderExists($folderName, $this->exportFolderId);
         if($oldFolderId) {
             $this->googleService->deleteFolder($oldFolderId);             
         }        
-        $this->googleService->createFolder($folderName, $this->exportFolderId);        
+        $folderId = $this->googleService->createFolder($folderName, $this->exportFolderId);        
 
-        $this->createSheetTab($spreadsheetId, $sheetName, 10);
-        $sheetAndRange = "{$sheetName}!A1:I37"; 
+        $this->createSheetTab($spreadsheetId, $sheetName, 10);        
 
-        $filePath = resource_path('settings/aa_games.txt');
-        $fileContents = file_get_contents($filePath);
-        $lines = explode(PHP_EOL, $fileContents);
+        $items = Game::where('languagepackid', $this->languagePack->id)
+            ->where('include', true)
+            ->orderBy('order')
+            ->get();
 
-        $values = [];
-        $i=0;
-        foreach ($lines as $line) {
-            $parts = explode("\t", $line);
-            $values[$i] = $parts;
+        $sheetAndRange = $this->getSheetAndRange($sheetName, $values, count($items));                       
+
+        $i = 1;     
+        foreach($items as $item) {
+            $file1 = $item->file ? basename($item->file->name) : 'X';   
+            if($item->file) {
+                $this->saveFileToDrive($item->file, $folderId, 'game audio', $file1);
+            }            
+              
+            $fileName1 = str_replace('.mp3', '', $file1);       
+
+            $stagesIncluded = $item->stages_included ?? '-';
+
+            $values[$i] = [
+                $i,
+                $item->country,
+                $item->level,
+                $item->color,
+                $fileName1,
+                $item->audio_duration,
+                $item->syll_or_tile,
+                $stagesIncluded,
+                $item->friendly_name
+            ];
             $i++;
-        }
+        }        
 
         $this->addValuesToSheet($spreadsheetId, $sheetAndRange, $values);
         Log::info('export of games completed');
@@ -495,14 +528,16 @@ class ExportSheetService
     private function colorsSheet(string $spreadsheetId): void
     {
         $sheetName = 'colors';
-        $this->createSheetTab($spreadsheetId, $sheetName, 11);
         $sheetAndRange = "{$sheetName}!A1:C20"; 
+        //$sheetAndRange = $this->getSheetAndRange($sheetName, $values, count($lines));                   
+        $this->createSheetTab($spreadsheetId, $sheetName, 11);        
 
         $filePath = resource_path('settings/aa_colors.txt');
         $fileContents = file_get_contents($filePath);
         $lines = explode(PHP_EOL, $fileContents);
 
-        $values = [];
+        $values = [];        
+
         $i=0;
         foreach ($lines as $line) {
             $parts = explode("\t", $line);
@@ -664,4 +699,19 @@ class ExportSheetService
             'fields' => 'id'
         ]);    
     }
+
+    public function getSheetAndRange(string $sheetName, array $values, int $countItems): string
+    {
+        $endColumn = $this->getEndColumn($values);
+        $endRow = $countItems + 1; // +1 for header row
+
+        return "{$sheetName}!A1:{$endColumn}{$endRow}";
+    }
+
+    public function getEndColumn(array $values): string
+    {
+        $columnCount = count($values[0]);
+
+        return chr(64 + $columnCount); // 65 is ASCII for 'A'
+    }   
 }
