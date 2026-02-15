@@ -37,8 +37,11 @@ class GenerateZipExportService
 
     public function handle(): string
     {
-        $zipFileName = $this->generateFilename();
-        $zipFile = sys_get_temp_dir() . '/' . $zipFileName . '.zip';
+        $gameSettingsRepositoryClass = GameSettingsRepository::class;
+        $appId = app($gameSettingsRepositoryClass)->getAppId($this->languagePack->id);
+
+        $zipFileName = $appId;
+        $zipFile = sys_get_temp_dir() . '/' . $appId . '.zip';
 
         $zip = new ZipArchive();
         $zip->open($zipFile, ZipArchive::CREATE | ZipArchive::OVERWRITE);
@@ -403,13 +406,5 @@ public function generateGamesFile(string $fileName, ZipArchive $zip, string $zip
                 $zip->addFile($filePath, $outputFolder . basename($file));
             }
         }
-    }
-
-    private function generateFilename(): string
-    {
-        return GameSetting::where('languagepackid', $this->languagePack->id)
-            ->where('name', GameSettingEnum::APP_ID->value)
-            ->first()
-            ->value;
-    }
+    }   
 }

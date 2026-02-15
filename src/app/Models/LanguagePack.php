@@ -3,16 +3,17 @@
 namespace App\Models;
 
 use App\Enums\ImportStatus;
+use App\Enums\LangInfoEnum;
 use App\Models\Key;
+use App\Models\LanguageSetting;
 use App\Models\Tile;
 use App\Models\Word;
-use App\Enums\LangInfoEnum;
-use App\Models\LanguageSetting;
+use App\Repositories\GameSettingsRepository;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class LanguagePack extends Model
 {    
@@ -31,6 +32,13 @@ class LanguagePack extends Model
             'import_status' => ImportStatus::class, 
         ];
     }    
+
+    public function getAppIdAttribute(): ?string
+    {
+        $gameSettingsRepositoryClass = GameSettingsRepository::class;
+
+        return app($gameSettingsRepositoryClass)->getAppId($this->id);
+    }
 
     public function collaborators(): HasMany
     {
