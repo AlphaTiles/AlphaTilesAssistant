@@ -62,7 +62,10 @@ use Illuminate\Support\Facades\Auth;
                             </td>                             
                             <td>
                                 <a href="/languagepack/edit/{{ $languagepack->id }}">
-                                    {{ $languagepack->name }}
+                                    {{ $languagepack->name }} 
+                                    @if($languagepack->appId)
+                                        ({{ $languagepack->appId }})
+                                    @endif
                                 </a>
                                 @if($languagepack->import_status === ImportStatus::IMPORTING->value)
                                     <span class="text-blue-700 ml-4">Import in progress</span>

@@ -645,8 +645,9 @@ class ExportSheetService
     {
         $this->logService->handle('Creating spreadsheet', ExportStatus::IN_PROGRESS);
 
-        $fileName = $this->generateFilename();
-        $fileId = $this->googleService->fileExists($fileName, $folderId, 'application/vnd.google-apps.spreadsheet');
+        $gameSettingsRepositoryClass = GameSettingsRepository::class;
+        $appId = app($gameSettingsRepositoryClass)->getAppId($this->languagePack->id);
+        $fileId = $this->googleService->fileExists($appId, $folderId, 'application/vnd.google-apps.spreadsheet');
         if($fileId) {
             return $fileId;
         }
@@ -664,14 +665,6 @@ class ExportSheetService
         ]);
         
         return $file->id;
-    }
-
-    private function generateFilename(): string
-    {
-        return GameSetting::where('languagepackid', $this->languagePack->id)
-            ->where('name', GameSettingEnum::APP_ID->value)
-            ->first()
-            ->value;
     }
 
     private function saveFileToDrive($file, string $folderId, string $fileType, string $fileName)
