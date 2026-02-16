@@ -103,7 +103,7 @@ class ValidationService
             ->where('name', GameSettingEnum::HAS_TILE_AUDIO->value)
             ->first();
             
-            if(empty($audioFileRequired)) {
+            if(empty($audioFileRequired) || empty($audioFileRequired->value)) {
                 return $errors;
             }
         }        
@@ -113,7 +113,7 @@ class ValidationService
             ->where('name', GameSettingEnum::SYLLABLE_AUDIO->value)
             ->first();
             
-            if(empty($audioFileRequired)) {
+            if(empty($audioFileRequired) ||  empty($audioFileRequired->value)) {
                 return $errors;
             }
         }             
@@ -130,7 +130,7 @@ class ValidationService
         })
         ->get();
 
-        $i = 0;
+        $i = count($errors);
         foreach ($itemsWithoutFile as $item) {
             if (empty($item->file_id) || 
                 (!empty($item->type2) && empty($item->file2_id)) || 
