@@ -72,12 +72,8 @@ class GamesController extends BaseItemController
                     'required_unless:items.*.delete,1',
                 ],
                 'items.*.languagepackid' => ['required', 'integer'],
-                'items.*.friendly_name' => ['sometimes'],
-                'items.*.country' => ['sometimes'],
-                'items.*.level' => ['sometimes', 'integer'],
                 'items.*.color' => ['sometimes', 'integer'],
                 'items.*.file' => $fileRules,
-                'items.*.syll_or_tile' => ['sometimes'],
                 'items.*.stages_included' => ['sometimes', 'nullable', 'integer'],
             ],
             [
@@ -97,11 +93,7 @@ class GamesController extends BaseItemController
                 $updateData = [
                     'include' => isset($game['include']) ? 1 : 0,
                     'door' => $door,
-                    'friendly_name' => $game['friendly_name'] ?? null,
-                    'country' => $game['country'] ?? null,
-                    'level' => $game['level'] ?? null,
-                    'color' => $game['color'] ?? null,
-                    'syll_or_tile' => $game['syll_or_tile'] ?? null,
+                    'color' => $game['color'] ?? 0,
                     'stages_included' => $game['stages_included'] ?? null,
                 ];
                 if ($fileModel && isset($fileModel->id)) {
