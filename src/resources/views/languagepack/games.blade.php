@@ -93,24 +93,13 @@ $tabEnum = TabEnum::GAME;
 						<input type="text" size=2 name="items[{{ $key }}][door]" value="{{ old('items.' . $key . '.door') ?? $item->door }}" class="{{ $errorClass }}" readonly style="background-color: #f3f4f6; color: #6b7280; cursor: not-allowed;" />							
 					</td>
 					<td>
-						<input type="text" size=20 name="items[{{ $key }}][friendly_name]" value="{{ old('items.' . $key . '.friendly_name') ?? $item->friendly_name }}" />
+						{{ $item->friendly_name }}
 					</td> 
 					<td>
-						<?php $errorClass = isset($errorKeys) && in_array('items.' . $key . '.country', $errorKeys) ? 'inputError' : ''; ?>
-						@php
-							$countryOptions = \App\Enums\CountryEnum::options();
-							$selectedCountry = old('items.' . $key . '.country') ?? $item->country;
-						@endphp
-						<select name="items[{{ $key }}][country]" class="{{ $errorClass }}" style="min-width: 120px;">
-							<option value="">Select country</option>
-							@foreach($countryOptions as $country)
-								<option value="{{ $country }}" {{ $selectedCountry === $country ? 'selected' : '' }}>{{ $country }}</option>
-							@endforeach
-						</select>
+						{{ $item->country }}
 					</td>
 					<td>
-						<?php $errorClass = isset($errorKeys) && in_array('items.' . $key . '.level', $errorKeys) ? 'inputError' : ''; ?>
-						<input type="number" size=5 name="items[{{ $key }}][level]" value="{{ old('items.' . $key . '.level') ?? $item->level }}" class="w-20 {{ $errorClass }}" />
+						{{ $item->level }}
 					</td>
 					<td>
 						<?php $errorClass = isset($errorKeys) && in_array('items.' . $key . '.color', $errorKeys) ? 'inputError' : ''; ?>
@@ -128,11 +117,7 @@ $tabEnum = TabEnum::GAME;
 						/>
 					</td> 
 					<td>								
-						<?php $syllableOrTile = old('items.' . $key . '.syll_or_tile') ?? $item->syll_or_tile; ?>
-						<select name="items[{{ $key }}][syll_or_tile]">
-							<option value="T" {{ $syllableOrTile === 'T' ? 'selected' : '' }}>Tile</option>
-							<option value="S" {{ $syllableOrTile === 'S' ? 'selected' : '' }}>Syllable</option>
-						</select>
+						{{ $item->syll_or_tile}}
 					</td> 					
 					<td>
 						<input type="number" size=5 class="w-20" name="items[{{ $key }}][stages_included]" value="{{ old('items.' . $key . '.stages_included') ?? $item->stages_included }}" />
