@@ -12,6 +12,7 @@ use App\Services\FileUploadService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\Repositories\GameSettingsRepository;
 use App\Http\Requests\StoreGameSettingsRequest;
@@ -206,6 +207,7 @@ class GameSettingsController extends Controller
             // get first 3 letters of appId and apply any project-specific check
             $packageEthnologueCode = substr($appId, 0, 3);
             if (strtolower($ethnologueCode) === strtolower($packageEthnologueCode)) {
+                $appId = $this->resolveUniqueAppId($appId, $languagePack->id);
                 Log::info("Extracted App ID: {$appId} from package name: {$packageName}");
                 GameSetting::updateOrCreate(
                     [
@@ -218,5 +220,51 @@ class GameSettingsController extends Controller
                 );
             }
         }
+    }
+
+    /**
+     * Return a unique app_id by appending a numeric suffix (2, 3, …) whenever
+     * the candidate already exists in existing_apps or in another language
+     * pack's game_settings app_id entry.
+     *
+     * @param  string  $appId          The raw app_id extracted from the JSON.
+     * @param  int     $languagePackId  The current language pack (excluded from game_settings check).
+     */
+    private function resolveUniqueAppId(string $appId, int $languagePackId): string
+    {
+        $candidate = $appId;
+        $suffix    = 2;
+
+        while ($this->appIdIsTaken($candidate, $languagePackId)) {
+            $candidate = $appId . $suffix;
+            $suffix++;
+        }
+
+        return $candidate;
+    }
+
+    /**
+     * Check whether an app_id is already in use.
+     *
+     * Checks:
+     *  1. existing_apps table
+     *  2. game_settings for any other language pack
+     */
+    private function appIdIsTaken(string $appId, int $languagePackId): bool
+    {
+        if (DB::table('existing_apps')->where('app_id', $appId)->exists()) {
+            return true;
+        }
+
+        if (DB::table('game_settings')
+            ->where('name', GameSettingEnum::APP_ID->value)
+            ->where('value', $appId)
+            ->where('languagepackid', '!=', $languagePackId)
+            ->exists()
+        ) {
+            return true;
+        }
+
+        return false;
     }
 }
