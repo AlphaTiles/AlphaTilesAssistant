@@ -82,10 +82,11 @@ class GenerateZipExportService
         $gamesFile = $this->generateGamesFile($gamesFileName, $zip, $zipFileName);
         $zip->addFile($gamesFile, "{$zipFileName}/res/raw/{$gamesFileName}");
 
-        // add google-services.json file to /res/raw if it exists 
-        $publicGoogleServices = storage_path("app/public/languagepacks/{$this->languagePack->id}/res/raw/google-services.json");
+        // add google_services.json file to /res/raw and to the root of the zip folder if it exists
+        $publicGoogleServices = storage_path("app/public/languagepacks/{$this->languagePack->id}/res/raw/google_services.json");
         if (file_exists($publicGoogleServices)) {
-            $zip->addFile($publicGoogleServices, "{$zipFileName}/res/raw/google-services.json");
+            //$zip->addFile($publicGoogleServices, "{$zipFileName}/res/raw/google-services.json");
+            $zip->addFile($publicGoogleServices, "{$zipFileName}/google-services.json");
         }
 
         $fontPath = resource_path('font');
