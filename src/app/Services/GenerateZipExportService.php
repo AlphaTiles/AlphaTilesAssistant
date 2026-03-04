@@ -390,8 +390,105 @@ public function generateGamesFile(string $fileName, ZipArchive $zip, string $zip
             $outputFolder = "{$zipFileName}/res/drawable/{$file}";
             if (file_exists(storage_path($resourceFile))) {
                 $zip->addFile(storage_path($resourceFile), $outputFolder);
+                
+                // Create a second image file with _2 suffix
+                $this->createAndAddResizedImage($word->imageFile->file_path, $zip, $zipFileName);
             }
         }
+    }
+
+    private function createAndAddResizedImage(string $originalFilePath, ZipArchive $zip, string $zipFileName): void
+    {
+        $file = basename($originalFilePath);
+        $resourceFile = "app/public/languagepacks/{$this->languagePack->id}/res/raw/{$file}";
+        $fullPath = storage_path($resourceFile);
+        
+        if (!file_exists($fullPath)) {
+            return;
+        }
+
+        // Get file extension and name without extension
+        $pathInfo = pathinfo($file);
+        $extension = $pathInfo['extension'];
+        $filename = $pathInfo['filename'];
+        
+        // Create new filename with _2 suffix
+        $newFilename = $filename . '_2.' . $extension;
+        $tempFilePath = "{$this->tempDir}/{$newFilename}";
+        
+        // Get image dimensions
+        $imageInfo = getimagesize($fullPath);
+        if ($imageInfo === false) {
+            return;
+        }
+        
+        list($width, $height) = $imageInfo;
+        
+        // Check if resizing is needed
+        if ($width > 512 || $height > 512) {
+            // Calculate new dimensions maintaining aspect ratio
+            $ratio = min(512 / $width, 512 / $height);
+            $newWidth = (int)($width * $ratio);
+            $newHeight = (int)($height * $ratio);
+            
+            // Create image resource based on type
+            $sourceImage = null;
+            switch ($imageInfo[2]) {
+                case IMAGETYPE_PNG:
+                    $sourceImage = imagecreatefrompng($fullPath);
+                    break;
+                case IMAGETYPE_JPEG:
+                    $sourceImage = imagecreatefromjpeg($fullPath);
+                    break;
+                case IMAGETYPE_GIF:
+                    $sourceImage = imagecreatefromgif($fullPath);
+                    break;
+                default:
+                    return;
+            }
+            
+            if (!$sourceImage) {
+                return;
+            }
+            
+            // Create new image with resized dimensions
+            $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
+            
+            // Preserve transparency for PNG images
+            if ($imageInfo[2] === IMAGETYPE_PNG) {
+                imagealphablending($resizedImage, false);
+                imagesavealpha($resizedImage, true);
+                $transparent = imagecolorallocatealpha($resizedImage, 255, 255, 255, 127);
+                imagefilledrectangle($resizedImage, 0, 0, $newWidth, $newHeight, $transparent);
+            }
+            
+            // Resize the image
+            imagecopyresampled($resizedImage, $sourceImage, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+            
+            // Save the resized image
+            switch ($imageInfo[2]) {
+                case IMAGETYPE_PNG:
+                    imagepng($resizedImage, $tempFilePath, 9);
+                    break;
+                case IMAGETYPE_JPEG:
+                    imagejpeg($resizedImage, $tempFilePath, 90);
+                    break;
+                case IMAGETYPE_GIF:
+                    imagegif($resizedImage, $tempFilePath);
+                    break;
+            }
+            
+            // Free memory
+            imagedestroy($sourceImage);
+            imagedestroy($resizedImage);
+        } else {
+            // If no resizing needed, just copy the file
+            copy($fullPath, $tempFilePath);
+        }
+        
+        // Add the new file to the zip
+        $outputFolder = "{$zipFileName}/res/drawable/{$newFilename}";
+        $zip->addFile($tempFilePath, $outputFolder);
     }
 
     private function addFolderToZip($folder, $zip, $outputFolder)
