@@ -498,10 +498,21 @@ public function generateGamesFile(string $fileName, ZipArchive $zip, string $zip
             \RecursiveIteratorIterator::LEAVES_ONLY
         );
 
+        $addedDirs = [];
+
         foreach ($files as $name => $file) {
             if (!$file->isDir()) {
                 $filePath = $file->getRealPath();
-                $zip->addFile($filePath, $outputFolder . basename($file));
+                $relativePath = substr($filePath, strlen($folder) + 1);
+                
+                // Add directory entry if not already added
+                $dirPath = dirname($relativePath);
+                if ($dirPath !== '.' && !isset($addedDirs[$dirPath])) {
+                    $zip->addEmptyDir($outputFolder . $dirPath);
+                    $addedDirs[$dirPath] = true;
+                }
+                
+                $zip->addFile($filePath, $outputFolder . $relativePath);
             }
         }
     }   
