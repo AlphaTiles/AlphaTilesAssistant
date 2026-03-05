@@ -156,16 +156,22 @@ class GameSettingsController extends Controller
         $fileField = 'file';
 
         if(!isset($item[$fileField])) {
+            Log::error("File field '{$fileField}' is missing in the upload data.");
             return null;
         }
 
         $fileModel = new File;
 
-        $languagePackPath = "languagepacks/{$item['languagepackid']}/res/raw";
-        $filePath = $item[$fileField]->storeAs($languagePackPath, $fileName, 'public');
-        $fileModel->name = $item[$fileField]->getClientOriginalName();
-        $fileModel->file_path = '/storage/' . $filePath;
-        $fileModel->save();
+        try {
+            $languagePackPath = "languagepacks/{$item['languagepackid']}/res/raw";
+            $filePath = $item[$fileField]->storeAs($languagePackPath, $fileName, 'public');
+            $fileModel->name = $item[$fileField]->getClientOriginalName();
+            $fileModel->file_path = '/storage/' . $filePath;
+            $fileModel->save();
+        } catch (\Throwable $e) {
+            Log::error('Failed to upload file: ' . $e->getMessage());
+            return null;
+        }
 
         return $fileModel;
     }
