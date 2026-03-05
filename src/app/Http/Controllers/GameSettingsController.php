@@ -189,23 +189,27 @@ class GameSettingsController extends Controller
 
         $jsonData = json_decode($fileContent, true);
         if (!is_array($jsonData) || !isset($jsonData['client']) || !is_array($jsonData['client'])) {
+            Log::error('Invalid google-services.json structure: missing "client" array');
             return;
         }
 
         foreach ($jsonData['client'] as $client) {
             $packageName = $client['client_info']['android_client_info']['package_name'] ?? null;
+            Log::error('Processing client with package name: ' . ($packageName ?? 'N/A'));
             if (empty($packageName)) {
                 continue;
             }
 
             $parts = explode('.', $packageName);
             $appId = end($parts);
+            Log::error('Extracted app ID: ' . $appId);
             if (empty($appId)) {
                 continue;
             }
 
             // get first 3 letters of appId and apply any project-specific check
             $packageEthnologueCode = substr($appId, 0, 3);
+            Log::error("Comparing ethnologue code from settings: {$ethnologueCode} with package-derived code: {$packageEthnologueCode}");
             if (strtolower($ethnologueCode) === strtolower($packageEthnologueCode)) {
                 $appId = $this->resolveUniqueAppId($appId, $languagePack->id);
                 Log::info("Extracted App ID: {$appId} from package name: {$packageName}");
