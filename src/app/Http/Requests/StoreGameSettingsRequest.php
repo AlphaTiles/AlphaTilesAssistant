@@ -12,14 +12,28 @@ class StoreGameSettingsRequest extends FormRequest
 {
     public function rules()
     {
+        $requiredSettings = [];
+        $hasGoogleServicesUpload = $this->hasFile('settings.' . GameSettingEnum::GOOGLE_SERVICES_JSON->value);
+
         foreach(GameSettingEnum::cases() as $gameSetting) {
             $required = 'sometimes';
             if($gameSetting->type() != FieldTypeEnum::CHECKBOX && $gameSetting->value != GameSettingEnum::GOOGLE_SERVICES_JSON->value) {
                  $required = 'required'; 
-            }   
-            $requiredSettings['settings.' . $gameSetting->value] = $required;         
+            }
+
+            // App ID is extracted from uploaded google-services.json, so do not require it on upload requests.
+            if ($hasGoogleServicesUpload && $gameSetting->value === GameSettingEnum::APP_ID->value) {
+                $required = 'sometimes';
+            }
+
+            $requiredSettings['settings.' . $gameSetting->value] = $required;
         }
-        
+
+        $appIdRules = ['sometimes', 'nullable', 'string'];
+        if (!$hasGoogleServicesUpload) {
+            $appIdRules[] = new ValidAppId;
+        }
+
         return [
             'id' => 'sometimes',
             'settings' => [
@@ -27,9 +41,9 @@ class StoreGameSettingsRequest extends FormRequest
             ],
             'settings.share_link' => 'sometimes',
             'settings.google_services_json' => ['sometimes', 'file', 'max:256', new GoogleServicesJson],
-            'settings.app_id' => ['sometimes', 'string', new ValidAppId],
+            'settings.app_id' => $appIdRules,
             'btnNext' => 'sometimes',
-        ] + $requiredSettings;        
+        ] + $requiredSettings;
     }
 
     public function attributes()
