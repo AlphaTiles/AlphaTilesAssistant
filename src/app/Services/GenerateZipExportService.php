@@ -89,14 +89,26 @@ class GenerateZipExportService
             $zip->addFile($publicGoogleServices, "{$zipFileName}/google-services.json");
         }
 
+        // add aa_colors.txt file if it exists
+        $colorsFile = storage_path("app/public/languagepacks/{$this->languagePack->id}/res/raw/aa_colors.txt");
+        if (file_exists($colorsFile)) {
+            $zip->addFile($colorsFile, "{$zipFileName}/res/raw/aa_colors.txt");
+        }
+
+        // add aa_names.txt file if it exists
+        $namesFile = storage_path("app/public/languagepacks/{$this->languagePack->id}/res/raw/aa_names.txt");
+        if (file_exists($namesFile)) {
+            $zip->addFile($namesFile, "{$zipFileName}/res/raw/aa_names.txt");
+        }
+
         $fontPath = resource_path('font');
-        $this->addFolderToZip($fontPath, $zip, "/{$zipFileName}/res/font/");
+        $this->addFolderToZip($fontPath, $zip, "{$zipFileName}/res/font/");
 
         $avatarPath = resource_path('images/avatars');
-        $this->addFolderToZip($avatarPath, $zip, "/{$zipFileName}/res/drawable/");
+        $this->addFolderToZip($avatarPath, $zip, "{$zipFileName}/res/drawable/");
 
         $settingsPath = resource_path('settings');
-        $this->addFolderToZip($settingsPath, $zip, "/{$zipFileName}/res/raw/");
+        $this->addFolderToZip($settingsPath, $zip, "{$zipFileName}/res/raw/");
 
         return $zipFile;
     }
@@ -493,6 +505,15 @@ public function generateGamesFile(string $fileName, ZipArchive $zip, string $zip
 
     private function addFolderToZip($folder, $zip, $outputFolder)
     {
+        // Ensure output folder ends with / for proper path concatenation
+        if (substr($outputFolder, -1) !== '/') {
+            $outputFolder .= '/';
+        }
+        
+        if (!is_dir($folder)) {
+            return;
+        }
+        
         $files = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($folder),
             \RecursiveIteratorIterator::LEAVES_ONLY
