@@ -114,7 +114,7 @@ class ExportSheetService
             $this->googleService->deleteFolder($oldFolderId);             
         }
         
-        $folderId = $this->googleService->createFolder($folderName, $this->exportFolderId);        
+        $folderId = $this->googleService->createFolder($folderName, $this->exportFolderId, true);        
         $sheetName = 'gametiles';
         $this->createSheetTab($spreadsheetId, $sheetName, 2);        
 
@@ -179,7 +179,6 @@ class ExportSheetService
         }        
 
         $this->addValuesToSheet($spreadsheetId, $sheetAndRange, $values);
-        Log::error('export of tiles completed');
     }
 
     private function wordlistSheet(string $spreadsheetId): void
@@ -191,14 +190,14 @@ class ExportSheetService
         if($oldFolderId) {
             $this->googleService->deleteFolder($oldFolderId);                     
         }        
-        $imageFolderId = $this->googleService->createFolder($imageFolderName, $this->exportFolderId);        
+        $imageFolderId = $this->googleService->createFolder($imageFolderName, $this->exportFolderId, true);        
 
         $imageFolderNameLowRes = 'images_words_low_res';
         $oldFolderLowResId = $this->googleService->folderExists($imageFolderNameLowRes, $this->exportFolderId);        
         if($oldFolderLowResId) {
             $this->googleService->deleteFolder($oldFolderLowResId);                     
         }        
-        $this->googleService->createFolder($imageFolderNameLowRes, $this->exportFolderId);        
+        $this->googleService->createFolder($imageFolderNameLowRes, $this->exportFolderId, true);        
 
 
         $wordFolderName = 'audio_words';
@@ -206,8 +205,7 @@ class ExportSheetService
         if($oldFolderId) {
             $this->googleService->deleteFolder($oldFolderId);             
         }        
-        $audioFolderId = $this->googleService->createFolder($wordFolderName, $this->exportFolderId);        
-        Log::error('audio folder: ' . $audioFolderId);        
+        $audioFolderId = $this->googleService->createFolder($wordFolderName, $this->exportFolderId, true);        
         $this->createSheetTab($spreadsheetId, $sheetName, 3);        
 
         $localLangName = LanguageSetting::where('languagepackid', $this->languagePack->id)
@@ -275,7 +273,7 @@ class ExportSheetService
             $this->googleService->deleteFolder($oldFolderId);             
         }
         
-        $folderId = $this->googleService->createFolder($folderName, $this->exportFolderId);        
+        $folderId = $this->googleService->createFolder($folderName, $this->exportFolderId, true);        
         $sheetName = 'syllables';
         $this->createSheetTab($spreadsheetId, $sheetName, 2);
         
@@ -345,7 +343,7 @@ class ExportSheetService
         if($oldFolderId) {
             $this->googleService->deleteFolder($oldFolderId);             
         }        
-        $imageFolderId = $this->googleService->createFolder($folderName, $this->exportFolderId);        
+        $imageFolderId = $this->googleService->createFolder($folderName, $this->exportFolderId, true);        
 
         $values = [
             ['Name', 'Link', 'Image'],
@@ -486,7 +484,7 @@ class ExportSheetService
         if($oldFolderId) {
             $this->googleService->deleteFolder($oldFolderId);             
         }        
-        $folderId = $this->googleService->createFolder($folderName, $this->exportFolderId);        
+        $folderId = $this->googleService->createFolder($folderName, $this->exportFolderId, true);        
 
         $this->createSheetTab($spreadsheetId, $sheetName, 10);        
 
@@ -557,7 +555,7 @@ class ExportSheetService
         if($oldFolderId) {
             $this->googleService->deleteFolder($oldFolderId);             
         }        
-        $fontFolderId = $this->googleService->createFolder($folderName, $this->exportFolderId);        
+        $fontFolderId = $this->googleService->createFolder($folderName, $this->exportFolderId, true);        
 
         $fontPath = resource_path('font');
         $files = scandir($fontPath);
@@ -725,13 +723,29 @@ class ExportSheetService
             'parents' => [ $folderId ],
         ]);
     
-        $this->driveService->files->create($fileMetadata, [
-            'data' => $content,
-            'mimeType' => mime_content_type($filePath),
-            'uploadType' => 'multipart',
-            'fields' => 'id',
-            'supportsAllDrives' => true,
-        ]);    
+        try {
+            $this->driveService->files->create($fileMetadata, [
+                'data' => $content,
+                'mimeType' => mime_content_type($filePath),
+                'uploadType' => 'multipart',
+                'fields' => 'id',
+                'supportsAllDrives' => true,
+            ]);
+        } catch (Exception $e) {
+            if (str_contains($e->getMessage(), 'File not found:')) {
+                usleep(500000);
+                $this->driveService->files->create($fileMetadata, [
+                    'data' => $content,
+                    'mimeType' => mime_content_type($filePath),
+                    'uploadType' => 'multipart',
+                    'fields' => 'id',
+                    'supportsAllDrives' => true,
+                ]);
+                return;
+            }
+
+            throw $e;
+        }
     }
 
     public function getSheetAndRange(string $sheetName, array $values, int $countItems): string

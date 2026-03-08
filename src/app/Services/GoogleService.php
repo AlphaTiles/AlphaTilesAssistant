@@ -159,12 +159,14 @@ class GoogleService
         }
     }    
 
-    function createFolder(string $folderName, $parentId = null): string
+    function createFolder(string $folderName, $parentId = null, bool $forceCreate = false): string
     {
         $this->logService->handle("Creating folder $folderName", ExportStatus::IN_PROGRESS);
-        $folderId = $this->folderExists($folderName, $parentId);
-        if($folderId) {
-            return $folderId;
+        if(!$forceCreate) {
+            $folderId = $this->folderExists($folderName, $parentId);
+            if($folderId) {
+                return $folderId;
+            }
         }
 
         $folderMeta = new DriveFile(array(
@@ -184,10 +186,17 @@ class GoogleService
     }    
 
     function deleteFolder(string $folderId): void
-    {    
-        $this->driveService->files->delete($folderId, [
-            'supportsAllDrives' => true,
-        ]);
+    {
+        try {
+            $this->driveService->files->delete($folderId, [
+                'supportsAllDrives' => true,
+            ]);
+        } catch (Exception $e) {
+            Log::warning('Ignoring folder delete error during export restart', [
+                'folder_id' => $folderId,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }       
 
     function handleExport(LanguagePack $languagePack, string $driveRootFolderId): void
