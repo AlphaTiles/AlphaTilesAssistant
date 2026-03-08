@@ -655,7 +655,7 @@ class ExportSheetService
         $driveService = new Drive($this->client);
 
         $fileMetadata = new DriveFile([
-            'name' => $fileName,
+            'name' => $appId,
             'parents' => [ $folderId ],
             'mimeType' => 'application/vnd.google-apps.spreadsheet'
         ]);
