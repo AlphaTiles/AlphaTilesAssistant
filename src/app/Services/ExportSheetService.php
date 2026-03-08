@@ -425,6 +425,7 @@ class ExportSheetService
                 'mimeType' => 'application/json',
                 'uploadType' => 'multipart',
                 'fields' => 'id',
+                'supportsAllDrives' => true,
             ]);
 
             Log::info('Uploaded google-services.json to Drive');
@@ -569,7 +570,6 @@ class ExportSheetService
             if (is_file($filePath)) {
                 $content = file_get_contents($filePath);
                 $originalMime = $this->getMimeTypeForFont($filePath) ?? mime_content_type($filePath);
-                Log::info("Uploading font '{$file}' with original mimeType: {$originalMime}");
 
                 // Use a resumable raw upload so Drive stores the raw bytes and we can
                 // preserve the original mime/name in appProperties. We set the
@@ -596,14 +596,11 @@ class ExportSheetService
                     ]);
 
                     if (isset($created->id)) {
-                        Log::info("Uploaded font '{$file}' to Drive with id: {$created->id}");
-                        Log::info('Drive returned mimeType: ' . ($created->mimeType ?? 'n/a'));
                         if (!empty($created->appProperties)) {
                             Log::info('Drive appProperties: ' . json_encode($created->appProperties));
                         }
                     }
                 } catch (Exception $e) {
-                    Log::error("Failed uploading font '{$file}' to Drive: " . $e->getMessage());
                     $this->logService->handle('Failed to upload font ' . $file . ': ' . $e->getMessage(), ExportStatus::FAILED);
                 }
             }
@@ -704,7 +701,8 @@ class ExportSheetService
         ]);
     
         $file = $driveService->files->create($fileMetadata, [
-            'fields' => 'id'
+            'fields' => 'id',
+            'supportsAllDrives' => true,
         ]);
         
         return $file->id;
@@ -722,7 +720,6 @@ class ExportSheetService
         $relativeFilePath = str_replace('/storage', '', $relativeFilePath);
         $filePath = Storage::disk('public')->path($relativeFilePath);
         $content = Storage::disk('public')->get($relativeFilePath);            
-        Log::error("{$fileType} file: " . $fileName);
         $fileMetadata = new DriveFile([
             'name' => $fileName,
             'parents' => [ $folderId ],
@@ -732,7 +729,8 @@ class ExportSheetService
             'data' => $content,
             'mimeType' => mime_content_type($filePath),
             'uploadType' => 'multipart',
-            'fields' => 'id'
+            'fields' => 'id',
+            'supportsAllDrives' => true,
         ]);    
     }
 
