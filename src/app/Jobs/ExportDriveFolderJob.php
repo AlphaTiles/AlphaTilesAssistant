@@ -46,7 +46,6 @@ class ExportDriveFolderJob implements ShouldQueue
      */
     public function handle()
     {        
-        Log::error('Export Job started for language pack id: ' . $this->languagePack->id);
         $this->googleService = new GoogleService($this->languagePack, $this->token, 'export');                
         $this->googleService->handleExport($this->languagePack, $this->driveRootFolderId);
     }
