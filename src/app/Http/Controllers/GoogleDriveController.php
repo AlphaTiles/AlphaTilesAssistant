@@ -32,7 +32,6 @@ class GoogleDriveController extends Controller
                 ->redirect();        
         }
 
-        Log::error("starting export");
         $logService = new LogToDatabaseService($languagePack->id, 'export');
         $logService->handle('Export Job started', ExportStatus::STARTED);
 

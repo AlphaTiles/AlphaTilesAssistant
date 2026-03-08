@@ -425,6 +425,7 @@ class ExportSheetService
                 'mimeType' => 'application/json',
                 'uploadType' => 'multipart',
                 'fields' => 'id',
+                'supportsAllDrives' => true,
             ]);
 
             Log::info('Uploaded google-services.json to Drive');
@@ -578,6 +579,7 @@ class ExportSheetService
                     'mimeType' => mime_content_type($filePath),
                     'uploadType' => 'multipart',
                     'fields' => 'id',
+                    'supportsAllDrives' => true,
                 ]);
             }
         }
@@ -661,7 +663,8 @@ class ExportSheetService
         ]);
     
         $file = $driveService->files->create($fileMetadata, [
-            'fields' => 'id'
+            'fields' => 'id',
+            'supportsAllDrives' => true,
         ]);
         
         return $file->id;
@@ -679,7 +682,6 @@ class ExportSheetService
         $relativeFilePath = str_replace('/storage', '', $relativeFilePath);
         $filePath = Storage::disk('public')->path($relativeFilePath);
         $content = Storage::disk('public')->get($relativeFilePath);            
-        Log::error("{$fileType} file: " . $fileName);
         $fileMetadata = new DriveFile([
             'name' => $fileName,
             'parents' => [ $folderId ],
@@ -689,7 +691,8 @@ class ExportSheetService
             'data' => $content,
             'mimeType' => mime_content_type($filePath),
             'uploadType' => 'multipart',
-            'fields' => 'id'
+            'fields' => 'id',
+            'supportsAllDrives' => true,
         ]);    
     }
 

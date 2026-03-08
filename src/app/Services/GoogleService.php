@@ -33,12 +33,18 @@ class GoogleService
 
     public function getFolder($folderId)
     {
-        return $this->driveService->files->get($folderId, ['fields' => 'name']);        
+        return $this->driveService->files->get($folderId, [
+            'fields' => 'name',
+            'supportsAllDrives' => true,
+        ]);        
     }
 
     public function downloadExcelSheet(string $spreadsheetId, string $downloadPath)
     {
-        $response = $this->driveService->files->get($spreadsheetId, ['alt' => 'media']);
+        $response = $this->driveService->files->get($spreadsheetId, [
+            'alt' => 'media',
+            'supportsAllDrives' => true,
+        ]);
         file_put_contents($downloadPath, $response->getBody()->getContents());
     }
 
@@ -48,7 +54,9 @@ class GoogleService
 
         $optParams = [
             'fields' => 'files(id, name, mimeType)',
-            'q' => $query
+            'q' => $query,
+            'includeItemsFromAllDrives' => true,
+            'supportsAllDrives' => true,
         ];
  
         $results = $this->driveService->files->listFiles($optParams);    
@@ -61,6 +69,8 @@ class GoogleService
         $optParams = [
             'q' => "'$parentFolderId' in parents and name='$folderPath' and mimeType='application/vnd.google-apps.folder'",
             'fields' => 'files(id)',
+            'includeItemsFromAllDrives' => true,
+            'supportsAllDrives' => true,
         ];
         $results = $this->driveService->files->listFiles($optParams);
     
@@ -75,6 +85,8 @@ class GoogleService
         $optParams = [
             'q' => "'$parentId' in parents and name='$fileName'",
             'fields' => 'files(id)',
+            'includeItemsFromAllDrives' => true,
+            'supportsAllDrives' => true,
         ];
         $results = $this->driveService->files->listFiles($optParams);
 
@@ -87,10 +99,15 @@ class GoogleService
 
     public function saveFile(string $path, string $fileId, string $newFileName): void
     {
-        $file = $this->driveService->files->get($fileId);
+        $file = $this->driveService->files->get($fileId, [
+            'supportsAllDrives' => true,
+        ]);
 
         // Download file content
-        $content = $this->driveService->files->get($fileId, ['alt' => 'media']);
+        $content = $this->driveService->files->get($fileId, [
+            'alt' => 'media',
+            'supportsAllDrives' => true,
+        ]);
 
         try {
             // Save file to Laravel storage
@@ -108,7 +125,9 @@ class GoogleService
         $response = $this->driveService->files->listFiles([
             'q' => $query,
             'spaces' => 'drive',
-            'fields' => 'files(id, name)'
+            'fields' => 'files(id, name)',
+            'includeItemsFromAllDrives' => true,
+            'supportsAllDrives' => true,
         ]);
     
         if (count($response->files) > 0) {
@@ -129,6 +148,8 @@ class GoogleService
             'q' => $query,
             'spaces' => 'drive',
             'fields' => 'files(id)',
+            'includeItemsFromAllDrives' => true,
+            'supportsAllDrives' => true,
         ]);
     
         if (count($response->files) > 0) {
@@ -155,14 +176,18 @@ class GoogleService
         }
     
         $folder = $this->driveService->files->create($folderMeta, array(
-            'fields' => 'id'));
+            'fields' => 'id',
+            'supportsAllDrives' => true,
+        ));
 
         return $folder->id;
     }    
 
     function deleteFolder(string $folderId): void
     {    
-        $this->driveService->files->delete($folderId);
+        $this->driveService->files->delete($folderId, [
+            'supportsAllDrives' => true,
+        ]);
     }       
 
     function handleExport(LanguagePack $languagePack, string $driveRootFolderId): void
