@@ -18,21 +18,52 @@ class GoogleService
     protected DriveFile $driveFile;
     protected Drive $driveService;
     protected string $token;
+    protected ?string $refreshToken = null;
 
-    public function __construct(?LanguagePack $languagePack, string $token, $logType = 'unknown')
+    public function __construct(?LanguagePack $languagePack, string $token, $logType = 'unknown', ?string $refreshToken = null)
     {
         $this->client = new Client();
         $this->token = $token;
+        $this->refreshToken = $refreshToken;
+        
+        if($refreshToken) {
+            $this->client->setClientId(env('GOOGLE_CLIENT_ID'));
+            $this->client->setClientSecret(env('GOOGLE_CLIENT_SECRET'));
+        }
+        
         $this->client->setAccessToken($token);
+        if($refreshToken) {
+            // Refresh token support: stored but not set on client directly
+            // Token refresh is handled via ensureValidToken() using refreshToken()
+        }
+        
         $this->driveService = new Drive($this->client);
         $this->driveFile = new DriveFile($this->client);
         if(isset($languagePack)) {
             $this->logService = new LogToDatabaseService($languagePack->id, $logType);
         }
     }
+    
+    private function ensureValidToken(): void
+    {
+        try {
+            if ($this->client->isAccessTokenExpired()) {
+                if ($this->refreshToken) {
+                    Log::info('Refreshing expired Google access token');
+                    $this->client->refreshToken($this->refreshToken);
+                    $this->token = $this->client->getAccessToken()['access_token'] ?? $this->token;
+                } else {
+                    Log::warning('Access token expired but no refresh token available');
+                }
+            }
+        } catch (Exception $e) {
+            Log::error('Error checking/refreshing access token: ' . $e->getMessage());
+        }
+    }
 
     public function getFolder($folderId)
     {
+        $this->ensureValidToken();
         return $this->driveService->files->get($folderId, [
             'fields' => 'name',
             'supportsAllDrives' => true,
@@ -41,6 +72,7 @@ class GoogleService
 
     public function downloadExcelSheet(string $spreadsheetId, string $downloadPath)
     {
+        $this->ensureValidToken();
         $response = $this->driveService->files->get($spreadsheetId, [
             'alt' => 'media',
             'supportsAllDrives' => true,
@@ -50,6 +82,7 @@ class GoogleService
 
     public function listFiles($folderId)
     {        
+        $this->ensureValidToken();
         $query = "'{$folderId}' in parents and trashed=false";
 
         $optParams = [
@@ -120,6 +153,7 @@ class GoogleService
 
     function fileExists(string $fileName, string $folderId, string $mimeType) 
     {
+        $this->ensureValidToken();
         $query = "name='$fileName' and '$folderId' in parents and mimeType='{$mimeType}' and trashed=false";
         
         $response = $this->driveService->files->listFiles([
@@ -161,6 +195,7 @@ class GoogleService
 
     function createFolder(string $folderName, $parentId = null, bool $forceCreate = false): string
     {
+        $this->ensureValidToken();
         $this->logService->handle("Creating folder $folderName", ExportStatus::IN_PROGRESS);
         if(!$forceCreate) {
             $folderId = $this->folderExists($folderName, $parentId);
@@ -201,8 +236,9 @@ class GoogleService
 
     function handleExport(LanguagePack $languagePack, string $driveRootFolderId): void
     {        
+        $this->ensureValidToken();
         $folderId = $this->createFolder($languagePack->name, $driveRootFolderId);
-        $exportSheetService = new ExportSheetService($languagePack, $this->token, $folderId);
+        $exportSheetService = new ExportSheetService($languagePack, $this->token, $folderId, $this->refreshToken);
         $exportSheetService->handle($folderId);
     }
 
