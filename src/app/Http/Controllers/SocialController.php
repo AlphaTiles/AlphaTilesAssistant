@@ -22,7 +22,10 @@ class SocialController extends Controller
     {
         try {
                 $googleUser = Socialite::driver('google')->user();
-                Session::put('socialite_token', $googleUser->token);      
+                Session::put('socialite_token', $googleUser->token);
+                if(isset($googleUser->refreshToken)) {
+                    Session::put('socialite_refresh_token', $googleUser->refreshToken);
+                }
                 
                 $hasDrivePermissions = in_array(Drive::DRIVE_FILE, $googleUser->approvedScopes);          
 

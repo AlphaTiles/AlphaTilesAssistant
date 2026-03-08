@@ -39,13 +39,13 @@ class ExportSheetService
     protected string $exportFolderId;
     protected bool $debug;    
 
-    public function __construct(LanguagePack $languagePack, string $googleToken, string $exportFolderId)
+    public function __construct(LanguagePack $languagePack, string $googleToken, string $exportFolderId, ?string $refreshToken = null)
     {
         $this->debug = env('DEBUG', false);
         $this->client = new Client();
         $this->client->setAccessToken($googleToken);
         $this->languagePack = $languagePack;    
-        $this->googleService = new GoogleService($languagePack, $googleToken, 'export'); 
+        $this->googleService = new GoogleService($languagePack, $googleToken, 'export', $refreshToken); 
         $this->logService = new LogToDatabaseService($languagePack->id, 'export');
         $this->driveService = new Drive($this->client);     
         $this->googleSheet = new Sheets($this->client);    
