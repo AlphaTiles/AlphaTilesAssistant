@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\FileTypeEnum;
+use App\Enums\RequiredAssetsEnum;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Traits\HasConfigurableOrder;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -28,6 +28,16 @@ class Game extends Model
         'syll_or_tile',
         'stages_included',
         'friendly_name',
+        'required_assets',
+        'basic',
+        'abs',
+    ];
+
+    protected $casts = [
+        'include' => 'boolean',
+        'basic' => 'boolean',
+        'abs' => 'boolean',
+        'required_assets' => RequiredAssetsEnum::class,
     ];
 
     public function file(): HasOne

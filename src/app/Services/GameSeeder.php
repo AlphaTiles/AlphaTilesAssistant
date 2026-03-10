@@ -2,58 +2,114 @@
 
 namespace App\Services;
 
+use App\Enums\RequiredAssetsEnum;
 use App\Models\Game;
 use Illuminate\Support\Facades\Log;
 
 class GameSeeder
 {
     /**
-     * Seed games from CSV for the given language pack ID.
-     * Only seeds if no games exist for that language pack.
+        * Seed games from CSV files for the given language pack ID.
+        * Seeds normal games when empty and backfills ABS games when missing.
      */
     public function seedIfEmpty(int $languagePackId): void
     {
-        // Check if games table already has entries for this language pack
-        if (Game::where('languagepackid', $languagePackId)->exists()) {
+        $hasAnyGames = Game::where('languagepackid', $languagePackId)->exists();
+        $hasAbsGames = Game::where('languagepackid', $languagePackId)
+            ->where('abs', true)
+            ->exists();
+
+        if ($hasAnyGames && $hasAbsGames) {
             return;
         }
 
-        $csvPath = database_path('seeders/games.csv');
+        $games = [];
+        $order = ((int) Game::where('languagepackid', $languagePackId)->max('order')) + 1;
+        if ($order <= 0) {
+            $order = 1;
+        }
 
+        $defaultGames = [];
+        if (!$hasAnyGames) {
+            $defaultGames = $this->loadGamesFromCsv(
+                database_path('seeders/games.csv'),
+                $languagePackId,
+                false,
+                $order
+            );
+        }
+
+        $absGames = [];
+        if (!$hasAbsGames) {
+            $absGames = $this->loadGamesFromCsv(
+                database_path('seeders/abs_games.csv'),
+                $languagePackId,
+                true,
+                $order
+            );
+        }
+
+        $games = array_merge($defaultGames, $absGames);
+
+        if (!empty($games)) {
+            Game::insert($games);
+            Log::info("Seeded " . count($games) . " games for language pack id {$languagePackId}.");
+        }
+    }
+
+    private function loadGamesFromCsv(string $csvPath, int $languagePackId, bool $isAbs, int &$order): array
+    {
         if (!file_exists($csvPath)) {
             Log::warning("Games CSV file not found: {$csvPath}");
-            return;
+            return [];
         }
 
         $handle = fopen($csvPath, 'r');
         if (!$handle) {
             Log::warning("Unable to open games CSV file: {$csvPath}");
-            return;
+            return [];
         }
 
-        // Skip the header row
-        fgetcsv($handle, 0, ';');
+        $headers = fgetcsv($handle);
+        if ($headers === false) {
+            fclose($handle);
+            Log::warning("Games CSV file has no header: {$csvPath}");
+            return [];
+        }
 
+        $headerMap = $this->buildHeaderMap($headers);
         $games = [];
 
-        $order = 1;
-        while (($row = fgetcsv($handle, 0, ';')) !== false) {
+        while (($row = fgetcsv($handle)) !== false) {
             if (empty(array_filter($row))) {
                 continue; // Skip empty rows
             }
 
+            $requiredAssetsRaw = $this->getCsvValue($row, $headerMap, 'Required Assets');
+            $requiredAssets = $requiredAssetsRaw ? RequiredAssetsEnum::tryFrom($requiredAssetsRaw) : null;
+            if ($requiredAssetsRaw !== null && !$requiredAssets) {
+                Log::warning("Unknown required assets value '{$requiredAssetsRaw}' in {$csvPath}");
+            }
+            $requiredAssetsValue = $requiredAssets ? $requiredAssets->value : null;
+
+            $stagesIncluded = $this->getCsvValue($row, $headerMap, 'StagesIncluded');
+            $basic = $this->getCsvValue($row, $headerMap, 'basic') === '1';
+
             $games[] = [
-                'door' => (int) $row[0], // Door
-                'order' => $order++,     // Order
-                'country' => $row[1], // Country
-                'level' => (int) $row[2], // ChallengeLevel
-                'color' => (int) $row[3], // Color
-                'audio_duration' => $row[5], // AudioDuration
-                'syll_or_tile' => $row[6], // SyllOrTile
-                'stages_included' => $row[7] === '-' ? null : (int) $row[7], // StagesIncluded
-                'friendly_name' => $row[8], // Friendly Name
+                'door' => (int) ($this->getCsvValue($row, $headerMap, 'Door') ?? 0),
+                'order' => $order++,
+                'country' => $this->getCsvValue($row, $headerMap, 'Country') ?? '',
+                'level' => (int) ($this->getCsvValue($row, $headerMap, 'ChallengeLevel') ?? 0),
+                'color' => (int) ($this->getCsvValue($row, $headerMap, 'Color') ?? 0),
+                'audio_duration' => $this->getCsvValue($row, $headerMap, 'AudioDuration'),
+                'syll_or_tile' => $this->getCsvValue($row, $headerMap, 'SyllOrTile') ?? '',
+                'stages_included' => ($stagesIncluded === null || $stagesIncluded === '-') ? null : (int) $stagesIncluded,
+                'friendly_name' => $this->getCsvValue($row, $headerMap, 'Friendly Name'),
+                'required_assets' => $requiredAssetsValue,
+                'basic' => $basic,
+                'abs' => $isAbs,
                 'languagepackid' => $languagePackId,
-                'include' => true,
+                'include' => $basic,
                 'file_id' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -62,9 +118,35 @@ class GameSeeder
 
         fclose($handle);
 
-        if (!empty($games)) {
-            Game::insert($games);
-            Log::info("Seeded " . count($games) . " games for language pack id {$languagePackId}.");
+        return $games;
+    }
+
+    private function buildHeaderMap(array $headers): array
+    {
+        $map = [];
+        foreach ($headers as $index => $header) {
+            $normalized = trim((string) $header);
+            if ($normalized === '') {
+                continue;
+            }
+            $map[$normalized] = $index;
         }
+
+        return $map;
+    }
+
+    private function getCsvValue(array $row, array $headerMap, string $header): ?string
+    {
+        if (!array_key_exists($header, $headerMap)) {
+            return null;
+        }
+
+        $value = $row[$headerMap[$header]] ?? null;
+        if ($value === null) {
+            return null;
+        }
+
+        $value = trim((string) $value);
+        return $value === '' ? null : $value;
     }
 }
