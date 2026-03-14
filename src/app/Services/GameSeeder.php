@@ -29,9 +29,9 @@ class GameSeeder
             $order = 1;
         }
 
-        $maxDoor = (int) (Game::where('languagepackid', $languagePackId)->max('door') ?? 0);
-        if ($maxDoor < 0) {
-            $maxDoor = 0;
+        $door = ((int) Game::where('languagepackid', $languagePackId)->max('door')) + 1;
+        if ($door <= 0) {
+            $door = 1;
         }
 
         $defaultGames = [];
@@ -41,12 +41,8 @@ class GameSeeder
                 $languagePackId,
                 false,
                 $order,
-                0
+                $door
             );
-
-            if (!empty($defaultGames)) {
-                $maxDoor = max($maxDoor, (int) max(array_column($defaultGames, 'door')));
-            }
         }
 
         $absGames = [];
@@ -56,7 +52,7 @@ class GameSeeder
                 $languagePackId,
                 true,
                 $order,
-                $maxDoor
+                $door
             );
         }
 
@@ -68,7 +64,7 @@ class GameSeeder
         }
     }
 
-    private function loadGamesFromCsv(string $csvPath, int $languagePackId, bool $isAbs, int &$order, int $doorOffset = 0): array
+    private function loadGamesFromCsv(string $csvPath, int $languagePackId, bool $isAbs, int &$order, int &$door): array
     {
         if (!file_exists($csvPath)) {
             Log::warning("Games CSV file not found: {$csvPath}");
@@ -106,13 +102,14 @@ class GameSeeder
             $stagesIncluded = $this->getCsvValue($row, $headerMap, 'StagesIncluded');
             $basic = $this->getCsvValue($row, $headerMap, 'basic') === '1';
             $include = $basic;
-            $csvDoor = (int) ($this->getCsvValue($row, $headerMap, 'Door') ?? 0);
-            $door = $isAbs ? $doorOffset + $csvDoor : $csvDoor;
-            $door = $include ? $door : null;
+            $currentOrder = $order++;
+            // CSV "Door" values are intentionally ignored.
+            // Door increments only for included games.
+            $currentDoor = $include ? $door++ : null;
 
             $games[] = [
-                'door' => $door,
-                'order' => $order++,
+                'door' => $currentDoor,
+                'order' => $currentOrder,
                 'country' => $this->getCsvValue($row, $headerMap, 'Country') ?? '',
                 'level' => (int) ($this->getCsvValue($row, $headerMap, 'ChallengeLevel') ?? 0),
                 'color' => (int) ($this->getCsvValue($row, $headerMap, 'Color') ?? 0),

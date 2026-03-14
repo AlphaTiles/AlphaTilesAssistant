@@ -36,17 +36,27 @@ class GamesControllerTest extends TestCase
     }
 
     /** @test */
-    public function default_filter_shows_only_basic_games(): void
+    public function default_filter_shows_only_included_games(): void
     {
-        $basic    = Game::factory()->create(['languagepackid' => $this->languagePack->id, 'basic' => true,  'order' => 1]);
-        $nonBasic = Game::factory()->create(['languagepackid' => $this->languagePack->id, 'basic' => false, 'order' => 2]);
+        $includedGame = Game::factory()->create([
+            'languagepackid' => $this->languagePack->id,
+            'include' => true,
+            'basic' => false,
+            'order' => 1,
+        ]);
+        $excludedGame = Game::factory()->create([
+            'languagepackid' => $this->languagePack->id,
+            'include' => false,
+            'basic' => true,
+            'order' => 2,
+        ]);
 
         $response = $this->actingAs($this->user)->get($this->url());
 
         $response->assertOk();
-        $response->assertViewHas('items', function ($items) use ($basic, $nonBasic) {
+        $response->assertViewHas('items', function ($items) use ($includedGame, $excludedGame) {
             $ids = $this->ids($items);
-            return $ids->contains($basic->id) && !$ids->contains($nonBasic->id);
+            return $ids->contains($includedGame->id) && !$ids->contains($excludedGame->id);
         });
     }
 
@@ -219,5 +229,88 @@ class GamesControllerTest extends TestCase
             $ids = $this->ids($items);
             return $ids->contains($ownGame->id) && !$ids->contains($otherGame->id);
         });
+    }
+
+    /** @test */
+    public function update_resequences_doors_for_included_games_only(): void
+    {
+        $g1 = Game::factory()->create([
+            'languagepackid' => $this->languagePack->id,
+            'order' => 10,
+            'include' => false,
+            'door' => null,
+            'color' => 1,
+        ]);
+        $g2 = Game::factory()->create([
+            'languagepackid' => $this->languagePack->id,
+            'order' => 20,
+            'include' => true,
+            'door' => 99,
+            'color' => 1,
+        ]);
+        $g3 = Game::factory()->create([
+            'languagepackid' => $this->languagePack->id,
+            'order' => 30,
+            'include' => false,
+            'door' => null,
+            'color' => 1,
+        ]);
+        $g4 = Game::factory()->create([
+            'languagepackid' => $this->languagePack->id,
+            'order' => 40,
+            'include' => true,
+            'door' => 88,
+            'color' => 1,
+        ]);
+
+        $response = $this->actingAs($this->user)
+            ->patch("/languagepack/games/{$this->languagePack->id}", [
+                'items' => [
+                    [
+                        'id' => $g1->id,
+                        'languagepackid' => $this->languagePack->id,
+                        'color' => 1,
+                        'stages_included' => null,
+                        'include' => '1',
+                    ],
+                    [
+                        'id' => $g2->id,
+                        'languagepackid' => $this->languagePack->id,
+                        'color' => 1,
+                        'stages_included' => null,
+                    ],
+                    [
+                        'id' => $g3->id,
+                        'languagepackid' => $this->languagePack->id,
+                        'color' => 1,
+                        'stages_included' => null,
+                        'include' => '1',
+                    ],
+                    [
+                        'id' => $g4->id,
+                        'languagepackid' => $this->languagePack->id,
+                        'color' => 1,
+                        'stages_included' => null,
+                        'include' => '1',
+                    ],
+                ],
+            ]);
+
+        $response->assertRedirect();
+
+        $g1->refresh();
+        $g2->refresh();
+        $g3->refresh();
+        $g4->refresh();
+
+        $this->assertTrue($g1->include);
+        $this->assertFalse($g2->include);
+        $this->assertTrue($g3->include);
+        $this->assertTrue($g4->include);
+
+        $this->assertSame(1, $g1->door);
+        $this->assertNull($g2->door);
+        $this->assertSame(2, $g3->door);
+        $this->assertSame(3, $g4->door);
     }
 }

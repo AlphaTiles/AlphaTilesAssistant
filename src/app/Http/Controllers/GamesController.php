@@ -56,7 +56,7 @@ class GamesController extends BaseItemController
             ->orderBy('order');
 
         if (!$showExcludedGames) {
-            $gamesQuery->where('basic', true);
+            $gamesQuery->where('include', true);
         }
 
         $validRequiredAssetsFilters = [
@@ -117,18 +117,15 @@ class GamesController extends BaseItemController
 
         DB::transaction(function() use($items, $fileRules, $languagePack) {
             $fileUploadService = app(FileUploadService::class);
-            $gameOrders = Game::whereIn('id', array_column($items, 'id'))
-                ->pluck('order', 'id');
 
             foreach($items as $key => $game) {
                 $gameId = (int) ($game['id'] ?? 0);
                 $include = isset($game['include']);
-                $door = $include ? ($gameOrders[$gameId] ?? null) : null;
 
                 $fileModel = $fileUploadService->handle($game, 'game', 1, $fileRules, 'mp3');
                 $updateData = [
                     'include' => $include ? 1 : 0,
-                    'door' => $door,
+                    'door' => null,
                     'color' => $game['color'] ?? 0,
                     'stages_included' => $game['stages_included'] ?? null,
                 ];
@@ -138,16 +135,21 @@ class GamesController extends BaseItemController
 
                 Game::where(['id' => $gameId])->update($updateData);
             }
+
+            // Re-sequence doors for included games based on order, skipping excluded games.
+            Game::where('languagepackid', $languagePack->id)
+                ->where('include', false)
+                ->update(['door' => null]);
+
+            $door = 1;
+            Game::where('languagepackid', $languagePack->id)
+                ->where('include', true)
+                ->orderBy('order')
+                ->select('id')
+                ->each(function (Game $includedGame) use (&$door) {
+                    $includedGame->update(['door' => $door++]);
+                });
         });
-
-        // Keep door values in sync with include state and order.
-        Game::where('languagepackid', $languagePack->id)
-            ->where('include', false)
-            ->update(['door' => null]);
-
-        Game::where('languagepackid', $languagePack->id)
-            ->where('include', true)
-            ->update(['door' => DB::raw('`order`')]);
 
         if($validator->fails()){
             return Redirect::back()->withErrors($validator)->withInput();
