@@ -29,14 +29,24 @@ class GameSeeder
             $order = 1;
         }
 
+        $maxDoor = (int) (Game::where('languagepackid', $languagePackId)->max('door') ?? 0);
+        if ($maxDoor < 0) {
+            $maxDoor = 0;
+        }
+
         $defaultGames = [];
         if (!$hasAnyGames) {
             $defaultGames = $this->loadGamesFromCsv(
                 database_path('seeders/games.csv'),
                 $languagePackId,
                 false,
-                $order
+                $order,
+                0
             );
+
+            if (!empty($defaultGames)) {
+                $maxDoor = max($maxDoor, (int) max(array_column($defaultGames, 'door')));
+            }
         }
 
         $absGames = [];
@@ -45,7 +55,8 @@ class GameSeeder
                 database_path('seeders/abs_games.csv'),
                 $languagePackId,
                 true,
-                $order
+                $order,
+                $maxDoor
             );
         }
 
@@ -57,7 +68,7 @@ class GameSeeder
         }
     }
 
-    private function loadGamesFromCsv(string $csvPath, int $languagePackId, bool $isAbs, int &$order): array
+    private function loadGamesFromCsv(string $csvPath, int $languagePackId, bool $isAbs, int &$order, int $doorOffset = 0): array
     {
         if (!file_exists($csvPath)) {
             Log::warning("Games CSV file not found: {$csvPath}");
@@ -94,9 +105,13 @@ class GameSeeder
 
             $stagesIncluded = $this->getCsvValue($row, $headerMap, 'StagesIncluded');
             $basic = $this->getCsvValue($row, $headerMap, 'basic') === '1';
+            $include = $basic;
+            $csvDoor = (int) ($this->getCsvValue($row, $headerMap, 'Door') ?? 0);
+            $door = $isAbs ? $doorOffset + $csvDoor : $csvDoor;
+            $door = $include ? $door : null;
 
             $games[] = [
-                'door' => (int) ($this->getCsvValue($row, $headerMap, 'Door') ?? 0),
+                'door' => $door,
                 'order' => $order++,
                 'country' => $this->getCsvValue($row, $headerMap, 'Country') ?? '',
                 'level' => (int) ($this->getCsvValue($row, $headerMap, 'ChallengeLevel') ?? 0),
@@ -109,7 +124,7 @@ class GameSeeder
                 'basic' => $basic,
                 'abs' => $isAbs,
                 'languagepackid' => $languagePackId,
-                'include' => $basic,
+                'include' => $include,
                 'file_id' => null,
                 'created_at' => now(),
                 'updated_at' => now(),

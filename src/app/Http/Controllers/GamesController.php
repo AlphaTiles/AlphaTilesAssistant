@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\RequiredAssetsEnum;
 use App\Models\Tile;
 use Carbon\Language;
 use App\Enums\TabEnum;
@@ -41,9 +42,40 @@ class GamesController extends BaseItemController
      */
     public function edit(LanguagePack $languagePack, string $tile = null)
     {           
-        $items = Game::where('languagepackid', $languagePack->id)
-            ->orderBy('order')
-            ->paginate(config('pagination.default'));
+        $showExcludedGames = request()->boolean('show_excluded');
+        $requiredAssetsFilter = request()->query(
+            'required_assets_filter',
+            request()->boolean('show_abs_exclusive') ? 'abs' : 'all'
+        );
+
+        if (!$showExcludedGames) {
+            $requiredAssetsFilter = 'all';
+        }
+
+        $gamesQuery = Game::where('languagepackid', $languagePack->id)
+            ->orderBy('order');
+
+        if (!$showExcludedGames) {
+            $gamesQuery->where('basic', true);
+        }
+
+        $validRequiredAssetsFilters = [
+            RequiredAssetsEnum::TA->value,
+            RequiredAssetsEnum::SB_T->value,
+            RequiredAssetsEnum::SB_T_SA->value,
+        ];
+
+        if ($requiredAssetsFilter === 'abs') {
+            $gamesQuery->where('abs', true);
+        } elseif ($requiredAssetsFilter !== 'all' && in_array($requiredAssetsFilter, $validRequiredAssetsFilters, true)) {
+            $gamesQuery->where('required_assets', $requiredAssetsFilter);
+        }
+
+        Log::info($gamesQuery->toRawSql());
+
+        $items = $gamesQuery
+            ->paginate(config('pagination.default'))
+            ->withQueryString();
 
         $validationErrors = null;
         if(empty($tile)) {
@@ -55,6 +87,8 @@ class GamesController extends BaseItemController
             'completedSteps' => ['lang_info', 'tiles', 'wordlist', 'keyboard', 'syllables', 'resources', 'game_settings', 'games'],
             'languagePack' => $languagePack,
             'items' => $items,
+            'showExcludedGames' => $showExcludedGames,
+            'requiredAssetsFilter' => $requiredAssetsFilter,
             'validationErrors' => $validationErrors,
             'pagination' => $items->links(),
         ]);
@@ -83,15 +117,17 @@ class GamesController extends BaseItemController
 
         DB::transaction(function() use($items, $fileRules, $languagePack) {
             $fileUploadService = app(FileUploadService::class);
+            $gameOrders = Game::whereIn('id', array_column($items, 'id'))
+                ->pluck('order', 'id');
+
             foreach($items as $key => $game) {
-                $door = !empty($game['door']) ? $game['door'] : null;
-                if(empty($game['include'])) {
-                    $door = null;
-                }
+                $gameId = (int) ($game['id'] ?? 0);
+                $include = isset($game['include']);
+                $door = $include ? ($gameOrders[$gameId] ?? null) : null;
 
                 $fileModel = $fileUploadService->handle($game, 'game', 1, $fileRules, 'mp3');
                 $updateData = [
-                    'include' => isset($game['include']) ? 1 : 0,
+                    'include' => $include ? 1 : 0,
                     'door' => $door,
                     'color' => $game['color'] ?? 0,
                     'stages_included' => $game['stages_included'] ?? null,
@@ -100,19 +136,18 @@ class GamesController extends BaseItemController
                     $updateData['file_id'] = $fileModel->id;
                 }
 
-                Game::where(['id' => $game['id']])->update($updateData);
+                Game::where(['id' => $gameId])->update($updateData);
             }
         });
 
-        // reset door numbers to be sequential
-        $games = Game::where('languagepackid', $languagePack->id)
-            ->whereNotNull('door')
-            ->orderBy('door')
-            ->get();    
-        $doorNumber = 1;
-        foreach($games as $game) {
-            $game->update(['door' => $doorNumber++]);
-        }
+        // Keep door values in sync with include state and order.
+        Game::where('languagepackid', $languagePack->id)
+            ->where('include', false)
+            ->update(['door' => null]);
+
+        Game::where('languagepackid', $languagePack->id)
+            ->where('include', true)
+            ->update(['door' => DB::raw('`order`')]);
 
         if($validator->fails()){
             return Redirect::back()->withErrors($validator)->withInput();
@@ -166,4 +201,5 @@ class GamesController extends BaseItemController
 
         return response()->json(['success' => true, 'message' => 'Game order updated', 'gameId' => $game->id]);
     }
+
 }
