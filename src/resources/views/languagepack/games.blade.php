@@ -1,6 +1,5 @@
 <?php
 use App\Enums\TabEnum;
-use Illuminate\Support\Arr;
 $tabEnum = TabEnum::GAME;
 ?>
 
@@ -45,6 +44,41 @@ $tabEnum = TabEnum::GAME;
 		</ul>
 	</div>
 	@endif
+
+	<form id="games-filter-form" method="get" action="{{ url('/languagepack/games/' . $languagePack->id) }}" class="mt-4 mb-0 space-y-1">
+		@foreach(request()->except(['show_excluded', 'required_assets_filter', 'show_tile_audio', 'show_syllable_breaks_only', 'show_syllable_breaks_and_audio', 'show_abs_exclusive', 'page', 'reordered']) as $queryKey => $queryValue)
+			@if(is_array($queryValue))
+				@foreach($queryValue as $nestedValue)
+					<input type="hidden" name="{{ $queryKey }}[]" value="{{ $nestedValue }}" />
+				@endforeach
+			@else
+				<input type="hidden" name="{{ $queryKey }}" value="{{ $queryValue }}" />
+			@endif
+		@endforeach
+		<div class="flex flex-wrap gap-x-6 gap-y-1">
+			<label class="inline-flex items-center gap-2 text-sm">
+				<input type="hidden" name="show_excluded" value="0" />
+				<input
+					type="checkbox"
+					name="show_excluded"
+					value="1"
+					{{ $showExcludedGames ? 'checked' : '' }}
+				/>
+				<span class="ml-1 mr-4">Excluded games</span>
+			</label>
+
+			<label class="inline-flex items-center gap-2 text-sm ml-2">
+				<span class="ml-1">Required assets</span>
+				<select name="required_assets_filter" class="input input-bordered input-sm w-52">
+					<option value="all" {{ $requiredAssetsFilter === 'all' ? 'selected' : '' }}>All (excluding ABS)</option>
+					<option value="TA" {{ $requiredAssetsFilter === 'TA' ? 'selected' : '' }}>Requires tile audio</option>
+					<option value="SB/T" {{ $requiredAssetsFilter === 'SB/T' ? 'selected' : '' }}>Requires syllable breaks only</option>
+					<option value="SB/T+SA" {{ $requiredAssetsFilter === 'SB/T+SA' ? 'selected' : '' }}>Requires syllable breaks and syllable audio</option>
+					<option value="abs" {{ $requiredAssetsFilter === 'abs' ? 'selected' : '' }}>Requires Arabic Based Script setup</option>
+				</select>
+			</label>
+		</div>
+	</form>
 
 	<form method="post" action="{{ route('update-games', $languagePack->id) . '?' . http_build_query(request()->query()) }}" enctype="multipart/form-data">			
 	@csrf
@@ -165,6 +199,102 @@ $tabEnum = TabEnum::GAME;
 </style>
 
 <script>
+function syncFilterFallbackInputs() {
+	const filterForm = document.getElementById('games-filter-form');
+	if (!filterForm) {
+		return;
+	}
+
+	const checkboxes = filterForm.querySelectorAll('input[type="checkbox"][name]');
+	checkboxes.forEach((checkbox) => {
+		const hiddenFallback = filterForm.querySelector(`input[type="hidden"][name="${checkbox.name}"]`);
+		if (hiddenFallback) {
+			hiddenFallback.disabled = checkbox.checked;
+		}
+	});
+}
+
+const gamesFilterForm = document.getElementById('games-filter-form');
+if (gamesFilterForm) {
+	const filterCheckboxes = gamesFilterForm.querySelectorAll('input[type="checkbox"][name]');
+	const requiredAssetsFilterSelect = gamesFilterForm.querySelector('select[name="required_assets_filter"]');
+	const excludedGamesCheckbox = gamesFilterForm.querySelector('input[type="checkbox"][name="show_excluded"]');
+
+	function enforceExcludedGamesDependency() {
+		if (!excludedGamesCheckbox) {
+			return;
+		}
+
+		const hasRequiredAssetsFilter = requiredAssetsFilterSelect && requiredAssetsFilterSelect.value !== 'all';
+
+		if (hasRequiredAssetsFilter) {
+			excludedGamesCheckbox.checked = true;
+		}
+	}
+
+	enforceExcludedGamesDependency();
+	syncFilterFallbackInputs();
+	gamesFilterForm.addEventListener('submit', syncFilterFallbackInputs);
+
+	filterCheckboxes.forEach((checkbox) => {
+		checkbox.addEventListener('change', () => {
+			if (checkbox.name === 'show_excluded' && !checkbox.checked && requiredAssetsFilterSelect) {
+				requiredAssetsFilterSelect.value = 'all';
+			}
+
+			enforceExcludedGamesDependency();
+			syncFilterFallbackInputs();
+			if (typeof gamesFilterForm.requestSubmit === 'function') {
+				gamesFilterForm.requestSubmit();
+			} else {
+				gamesFilterForm.submit();
+			}
+		});
+	});
+
+	if (requiredAssetsFilterSelect) {
+		requiredAssetsFilterSelect.addEventListener('change', () => {
+			enforceExcludedGamesDependency();
+			syncFilterFallbackInputs();
+			if (typeof gamesFilterForm.requestSubmit === 'function') {
+				gamesFilterForm.requestSubmit();
+			} else {
+				gamesFilterForm.submit();
+			}
+		});
+	}
+}
+
+function parseQueryParams(search) {
+	const query = (search || '').replace(/^\?/, '');
+	if (!query) {
+		return {};
+	}
+
+	return query.split('&').reduce((result, pair) => {
+		if (!pair) {
+			return result;
+		}
+
+		const [rawKey, ...rawValueParts] = pair.split('=');
+		const key = decodeURIComponent(rawKey || '');
+		const value = decodeURIComponent((rawValueParts.join('=') || '').replace(/\+/g, ' '));
+
+		if (key) {
+			result[key] = value;
+		}
+
+		return result;
+	}, {});
+}
+
+function buildQueryString(params) {
+	return Object.keys(params)
+		.filter(key => params[key] !== undefined && params[key] !== null && params[key] !== '')
+		.map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
+		.join('&');
+}
+
 document.querySelectorAll('.move-game-btn').forEach(btn => {
 	console.log('Attaching event listener to move button');
 	btn.addEventListener('click', function(e) {
@@ -193,8 +323,13 @@ document.querySelectorAll('.move-game-btn').forEach(btn => {
 			return response.json();
 		})
 		.then(data => {
-			// Redirect with reordered game ID for highlighting
-			location.href = `{{ url('/languagepack/games') }}/${languagePackId}?reordered=${data.gameId}`;
+			// Redirect with reordered game ID for highlighting while preserving current filters.
+			const params = parseQueryParams(window.location.search);
+			params.reordered = String(data.gameId);
+			const queryString = buildQueryString(params);
+			location.href = queryString
+				? `{{ url('/languagepack/games') }}/${languagePackId}?${queryString}`
+				: `{{ url('/languagepack/games') }}/${languagePackId}`;
 		})
 		.catch(error => {
 			console.error('Error moving game:', error);
@@ -207,8 +342,8 @@ document.querySelectorAll('.move-game-btn').forEach(btn => {
 
 // Highlight recently reordered items from URL parameter
 window.addEventListener('load', function() {
-	const params = new URLSearchParams(window.location.search);
-	const reorderedId = params.get('reordered');
+	const params = parseQueryParams(window.location.search);
+	const reorderedId = params.reordered;
 	
 	if (reorderedId) {
 		// Find row with the reordered game
@@ -222,8 +357,10 @@ window.addEventListener('load', function() {
 			}
 		});
 		
-		// Remove the reordered parameter from URL
-		const newUrl = window.location.pathname + window.location.search.replace(/[?&]reordered=[^&]*/, '').replace(/^\?&/, '?');
+		// Remove the reordered parameter from URL.
+		delete params.reordered;
+		const queryString = buildQueryString(params);
+		const newUrl = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname;
 		window.history.replaceState({}, document.title, newUrl);
 	}
 });
