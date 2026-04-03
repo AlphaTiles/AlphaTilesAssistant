@@ -389,7 +389,7 @@ class ExportSheetService
 
         $i = 1;
         foreach($items as $item) {
-            if($item['name'] === GameSettingEnum::SHARE_LINK->value) {
+            if($item['export_key'] === null) {
                 continue;
             }
 

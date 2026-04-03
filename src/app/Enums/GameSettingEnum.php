@@ -103,7 +103,11 @@ enum GameSettingEnum: string
         };
     }
 
-    public function exportKey(): string
+    /**
+     * Returns the export key for the settings Google Sheet tab.
+     * Only cases defined here will be included in the export; all others return null and are skipped.
+     */
+    public function exportKey(): ?string
     {
         return match ($this) {
             self::SCAN_SETTING       => '1. Game 001 Scan Setting',
@@ -121,10 +125,8 @@ enum GameSettingEnum: string
             self::CHILE_MIN_WORD_LENGTH => '13. Chile minimum word length',
             self::CHILE_MAX_WORD_LENGTH => '14. Chile maximum word length',
             self::BOLD_NON_INITIAL_TILES => '15. In Game 001 (Romania) bold non-initial tiles when in focus? (boldNonInitialFocusTiles)',
-            self::BOLD_INITIAL_TILES => '16. In Game 001 (Romania) bold initial tiles when in focus? (boldInitialFocusTiles)',            
-            self::GOOGLE_SERVICES_JSON => '',
-            self::APP_ID => '',
-            self::SHARE_LINK => 'aa_share.txt',
+            self::BOLD_INITIAL_TILES => '16. In Game 001 (Romania) bold initial tiles when in focus? (boldInitialFocusTiles)',
+            default => null,
         };
     }
 
