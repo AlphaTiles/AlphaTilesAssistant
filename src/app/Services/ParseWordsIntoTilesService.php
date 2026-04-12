@@ -273,72 +273,14 @@ class ParseWordsIntoTilesService
     
     public function parseWordIntoTilesPreliminary(string $wordListWord, $tileHashMap, $placeholderCharacter, $MULTITYPE_TILES)
     {
-        $wordPreliminaryTileArray = [];
         $wordPreliminaryTileArrayFinal = [];
-    
-        $LOPwordString = strtolower($wordListWord);
+
+        $wordString = strtolower($wordListWord);
         $tileIndex = 0;
-    
-        for ($i = 0; $i < mb_strlen($LOPwordString); $i++) {
-            // Create character blocks for matching
-            $next1Chars = mb_substr($LOPwordString, $i, 1);
-            $next2Chars = ($i < mb_strlen($LOPwordString) - 1) ? mb_substr($LOPwordString, $i, 2) : "XYZXYZ";
-            $next3Chars = ($i < mb_strlen($LOPwordString) - 2) ? mb_substr($LOPwordString, $i, 3) : "XYZXYZ";
-            $next4Chars = ($i < mb_strlen($LOPwordString) - 3) ? mb_substr($LOPwordString, $i, 4) : "XYZXYZ";
-    
-            // Determine the longest matching tile
-            $charBlockLength = 0;
-            if (isset($tileHashMap[$next1Chars]) || isset($tileHashMap[$placeholderCharacter . $next1Chars]) ||
-                isset($tileHashMap[$next1Chars . $placeholderCharacter]) || isset($tileHashMap[$placeholderCharacter . $next1Chars . $placeholderCharacter])) {
-                $charBlockLength = 1;
-            }
-            if (isset($tileHashMap[$next2Chars]) || isset($tileHashMap[$placeholderCharacter . $next2Chars]) ||
-                isset($tileHashMap[$next2Chars . $placeholderCharacter]) || isset($tileHashMap[$placeholderCharacter . $next2Chars . $placeholderCharacter])) {
-                $charBlockLength = 2;
-            }
-            if (isset($tileHashMap[$next3Chars]) || isset($tileHashMap[$placeholderCharacter . $next3Chars]) ||
-                isset($tileHashMap[$next3Chars . $placeholderCharacter]) || isset($tileHashMap[$placeholderCharacter . $next3Chars . $placeholderCharacter])) {
-                $charBlockLength = 3;
-            }
-            if (isset($tileHashMap[$next4Chars]) || isset($tileHashMap[$placeholderCharacter . $next4Chars]) ||
-                isset($tileHashMap[$next4Chars . $placeholderCharacter]) || isset($tileHashMap[$placeholderCharacter . $next4Chars . $placeholderCharacter])) {
-                $charBlockLength = 4;
-            }
-    
-            // Select the best-matching tile
-            $tileString = "";
-            switch ($charBlockLength) {                
-                case 1:
-                    $tileString = $tileHashMap[$next1Chars] ?? $tileHashMap[$placeholderCharacter . $next1Chars] ?? 
-                                  $tileHashMap[$next1Chars . $placeholderCharacter] ?? $tileHashMap[$placeholderCharacter . $next1Chars . $placeholderCharacter] ?? "";
-                    break;
-                case 2:
-                    $tileString = $tileHashMap[$next2Chars] ?? $tileHashMap[$placeholderCharacter . $next2Chars] ?? 
-                                  $tileHashMap[$next2Chars . $placeholderCharacter] ?? $tileHashMap[$placeholderCharacter . $next2Chars . $placeholderCharacter] ?? "";
-                    $i++;
-                    break;
-                case 3:
-                    $tileString = $tileHashMap[$next3Chars] ?? $tileHashMap[$placeholderCharacter . $next3Chars] ?? 
-                                  $tileHashMap[$next3Chars . $placeholderCharacter] ?? $tileHashMap[$placeholderCharacter . $next3Chars . $placeholderCharacter] ?? "";
-                    $i += 2;
-                    break;
-                case 4:
-                    $tileString = $tileHashMap[$next4Chars] ?? $tileHashMap[$placeholderCharacter . $next4Chars] ?? 
-                                  $tileHashMap[$next4Chars . $placeholderCharacter] ?? $tileHashMap[$placeholderCharacter . $next4Chars . $placeholderCharacter] ?? "";
-                    $i += 3;
-                    break;
-            }
-    
-            if (!empty($tileString)) {
-                $nextTile = $tileHashMap[$tileString->value] ?? null;
-                if ($nextTile) {
-                    $wordPreliminaryTileArray[] = $nextTile;
-                }
-            } 
-            // elseif (!in_array($next1Chars, [".", "#"])) {
-            //     return null;
-            // }
-        }
+
+        $parseWordByInventoryService = new ParseWordByInventoryService();
+        $parseResult = $parseWordByInventoryService->handle($wordString, $tileHashMap, 4, $placeholderCharacter);
+        $wordPreliminaryTileArray = $parseResult['items'];
     
         // Process multi-type tiles
         foreach ($wordPreliminaryTileArray as $tile) {

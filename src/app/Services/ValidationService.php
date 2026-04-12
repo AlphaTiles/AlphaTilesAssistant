@@ -36,7 +36,8 @@ class ValidationService
         if(empty($tab) || $tab === TabEnum::WORD) {
             $errors = $this->checkWordFilesMissing();
             $errors = $this->checkDuplicates($errors, new Word(), ErrorTypeEnum::DUPLICATE_WORD);     
-            $errors = $this->checkParsingWordsIntoTiles($errors);       
+            $errors = $this->checkParsingWordsIntoTiles($errors);
+            $errors = $this->checkParsingWordsIntoKeys($errors);
         }
 
         if(empty($tab) || $tab === TabEnum::KEY) {
@@ -275,6 +276,26 @@ class ValidationService
             $errors[$i]['tab'] = ErrorTypeEnum::PARSE_WORD_INTO_TILES->tab()->name();
             $i++;
         }        
+
+        return $errors;
+    }
+
+    public function checkParsingWordsIntoKeys(array $errors): array
+    {
+        $parseWordsIntoKeysService = new ParseWordsIntoKeysService($this->languagePack);
+        $parseErrors = $parseWordsIntoKeysService->handle();
+
+        $i = count($errors);
+        foreach ($parseErrors as $word => $details) {
+            $missingCharacters = $details['missing_characters'] ?? [];
+
+            $message = sprintf("%s - missing key character(s): %s", $word, implode(", ", $missingCharacters));
+
+            $errors[$i]['value'] = $message;
+            $errors[$i]['type'] = ErrorTypeEnum::PARSE_WORD_INTO_KEYS;
+            $errors[$i]['tab'] = ErrorTypeEnum::PARSE_WORD_INTO_KEYS->tab()->name();
+            $i++;
+        }
 
         return $errors;
     }

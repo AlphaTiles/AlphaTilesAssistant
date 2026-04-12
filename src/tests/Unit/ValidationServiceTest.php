@@ -118,6 +118,85 @@ class ValidationServiceTest extends TestCase
         ], $values);
     }
 
+    public function test_check_parsing_words_into_keys_with_missing_character()
+    {
+        // Clear default words and add test words
+        Word::query()->where('languagepackid', $this->languagePack->id)->delete();
+
+        Word::factory()->create([
+            'value' => 'Tür',
+            'languagepackid' => $this->languagePack->id,
+        ]);
+
+        $result = $this->validationService->handle();
+
+        $this->assertArrayHasKey(ErrorTypeEnum::PARSE_WORD_INTO_KEYS->value, $result);
+
+        $keyParseErrors = collect($result[ErrorTypeEnum::PARSE_WORD_INTO_KEYS->value]);
+        $this->assertTrue(
+            $keyParseErrors->contains(function ($error) {
+                return str_contains($error['value'], 'Tür') && str_contains($error['value'], 'ü');
+            }),
+            "Should contain error for word 'Tür' with missing character 'ü'"
+        );
+    }
+
+    public function test_check_parsing_words_into_keys_successful_parse()
+    {
+        // Clear default words and keys
+        Word::query()->where('languagepackid', $this->languagePack->id)->delete();
+        Key::query()->where('languagepackid', $this->languagePack->id)->delete();
+
+        // Add keys for all characters in German word 'Katze'
+        foreach (str_split('katze') as $char) {
+            Key::factory()->create([
+                'value' => $char,
+                'languagepackid' => $this->languagePack->id
+            ]);
+        }
+
+        Word::factory()->create([
+            'value' => 'Katze',
+            'languagepackid' => $this->languagePack->id,
+        ]);
+
+        $result = $this->validationService->handle();
+
+        // Should not have key parse errors
+        $this->assertArrayNotHasKey(ErrorTypeEnum::PARSE_WORD_INTO_KEYS->value, $result);
+    }
+
+    public function test_check_parsing_words_into_keys_multiple_missing()
+    {
+        // Clear default words and keys
+        Word::query()->where('languagepackid', $this->languagePack->id)->delete();
+        Key::query()->where('languagepackid', $this->languagePack->id)->delete();
+
+        // Add only 'h' as key
+        Key::factory()->create([
+            'value' => 'h',
+            'languagepackid' => $this->languagePack->id
+        ]);
+
+        Word::factory()->create([
+            'value' => 'hello',
+            'languagepackid' => $this->languagePack->id,
+        ]);
+
+        $result = $this->validationService->handle();
+
+        $this->assertArrayHasKey(ErrorTypeEnum::PARSE_WORD_INTO_KEYS->value, $result);
+
+        $keyParseErrors = collect($result[ErrorTypeEnum::PARSE_WORD_INTO_KEYS->value]);
+        $errorValue = $keyParseErrors->first()['value'];
+
+        $this->assertStringContainsString('hello', $errorValue);
+        $this->assertStringContainsString('e', $errorValue);
+        $this->assertStringContainsString('l', $errorValue);
+        $this->assertStringContainsString('o', $errorValue);
+    }
+
+
     public function test_parse_words_into_tiles()
     {
         $result = $this->validationService->handle();
