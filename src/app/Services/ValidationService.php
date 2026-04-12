@@ -40,6 +40,7 @@ class ValidationService
         }
 
         if(empty($tab) || $tab === TabEnum::KEY) {
+            $errors = $this->checkKeyboardHasKeys($errors);
             $errors = $this->checkDuplicates($errors, new Key(), ErrorTypeEnum::DUPLICATE_KEY);
             $errors = $this->checkColor($errors, new Key(), ErrorTypeEnum::COLOR_KEY);
         }
@@ -65,6 +66,22 @@ class ValidationService
         $groupedErrors = collect($errors)->sortBy('tab')->groupBy('type');
 
         return $groupedErrors->toArray();
+    }
+
+    private function checkKeyboardHasKeys(array $errors): array
+    {
+        $hasKeys = Key::where('languagepackid', $this->languagePack->id)->exists();
+
+        if ($hasKeys) {
+            return $errors;
+        }
+
+        $i = count($errors);
+        $errors[$i]['value'] = 'Add at least one key in the keyboard tab.';
+        $errors[$i]['type'] = ErrorTypeEnum::NO_KEYBOARD_KEYS;
+        $errors[$i]['tab'] = ErrorTypeEnum::NO_KEYBOARD_KEYS->tab()->name();
+
+        return $errors;
     }
 
     private function checkWordFilesMissing(): array

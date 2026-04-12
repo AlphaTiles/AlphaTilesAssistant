@@ -6,6 +6,7 @@ use App\Services\ValidationService;
 
 enum ErrorTypeEnum: string
 {
+    case NO_KEYBOARD_KEYS            = 'no_keyboard_keys';
     case MISSING_WORD_AUDIO_FILE       = 'missing_word_audio_file';
     case MISSING_WORD_IMAGE_FILE       = 'missing_word_image_file';
     case MISSING_SYLLABLE_AUDIO_FILE       = 'missing_syllable_audio_file';
@@ -26,6 +27,7 @@ enum ErrorTypeEnum: string
     public function label(): string
     {
         return match($this) {
+            self::NO_KEYBOARD_KEYS => 'No keyboard keys found',
             self::MISSING_WORD_AUDIO_FILE => 'An audio file is required',
             self::MISSING_WORD_IMAGE_FILE => 'An image file is required',
             self::MISSING_SYLLABLE_AUDIO_FILE => 'An audio file is required',
@@ -48,6 +50,7 @@ enum ErrorTypeEnum: string
     public function tab(): TabEnum
     {
         return match($this) {
+            self::NO_KEYBOARD_KEYS => TabEnum::KEY,
             self::MISSING_WORD_AUDIO_FILE => TabEnum::WORD,
             self::MISSING_WORD_IMAGE_FILE => TabEnum::WORD,
             self::MISSING_SYLLABLE_AUDIO_FILE => TabEnum::SYLLABLE,
@@ -70,6 +73,7 @@ enum ErrorTypeEnum: string
     public function isLinkable(): bool
     {
         return match($this) {
+            self::NO_KEYBOARD_KEYS => false,
             self::KEY_USAGE => false,
             self::TILE_USAGE => false,
             self::PARSE_WORD_INTO_TILES => false,
