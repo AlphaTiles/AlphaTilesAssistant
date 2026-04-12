@@ -16,7 +16,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class ValidationService
 {
-    const NUM_TIMES_KEYS_WANTED_IN_WORDS = 5;
     const NUM_TIMES_TILES_WANTED_IN_WORDS = 5;
 
     protected LanguagePack $languagePack;
@@ -36,10 +35,12 @@ class ValidationService
         if(empty($tab) || $tab === TabEnum::WORD) {
             $errors = $this->checkWordFilesMissing();
             $errors = $this->checkDuplicates($errors, new Word(), ErrorTypeEnum::DUPLICATE_WORD);     
-            $errors = $this->checkParsingWordsIntoTiles($errors);       
+            $errors = $this->checkParsingWordsIntoTiles($errors);
+            $errors = $this->checkParsingWordsIntoKeys($errors);
         }
 
         if(empty($tab) || $tab === TabEnum::KEY) {
+            $errors = $this->checkKeyboardHasKeys($errors);
             $errors = $this->checkDuplicates($errors, new Key(), ErrorTypeEnum::DUPLICATE_KEY);
             $errors = $this->checkColor($errors, new Key(), ErrorTypeEnum::COLOR_KEY);
         }
@@ -59,12 +60,28 @@ class ValidationService
 
         if(empty($tab)) {
             $errors = $this->checkTileUsage($errors);
-            $errors = $this->checkKeyUsage($errors);
+            $errors = $this->checkKeyExistsInWords($errors);
         }
 
         $groupedErrors = collect($errors)->sortBy('tab')->groupBy('type');
 
         return $groupedErrors->toArray();
+    }
+
+    private function checkKeyboardHasKeys(array $errors): array
+    {
+        $hasKeys = Key::where('languagepackid', $this->languagePack->id)->exists();
+
+        if ($hasKeys) {
+            return $errors;
+        }
+
+        $i = count($errors);
+        $errors[$i]['value'] = 'Add at least one key in the keyboard tab.';
+        $errors[$i]['type'] = ErrorTypeEnum::NO_KEYBOARD_KEYS;
+        $errors[$i]['tab'] = ErrorTypeEnum::NO_KEYBOARD_KEYS->tab()->name();
+
+        return $errors;
     }
 
     private function checkWordFilesMissing(): array
@@ -262,21 +279,41 @@ class ValidationService
         return $errors;
     }
 
-    public function checkKeyUsage(array $errors): array
+    public function checkParsingWordsIntoKeys(array $errors): array
     {
-        $counKeysService = new CountKeysService($this->languagePack);
-        $keyUsage = $counKeysService->handle();
+        $parseWordsIntoKeysService = new ParseWordsIntoKeysService($this->languagePack);
+        $parseErrors = $parseWordsIntoKeysService->handle();
+
+        $i = count($errors);
+        foreach ($parseErrors as $word => $details) {
+            $missingCharacters = $details['missing_characters'] ?? [];
+
+            $message = sprintf("%s - missing key character(s): %s", $word, implode(", ", $missingCharacters));
+
+            $errors[$i]['value'] = $message;
+            $errors[$i]['type'] = ErrorTypeEnum::PARSE_WORD_INTO_KEYS;
+            $errors[$i]['tab'] = ErrorTypeEnum::PARSE_WORD_INTO_KEYS->tab()->name();
+            $i++;
+        }
+
+        return $errors;
+    }
+
+    public function checkKeyExistsInWords(array $errors): array
+    {
+        $countKeysService = new CountKeysService($this->languagePack);
+        $keyUsage = $countKeysService->handle();
 
         $i = count($errors);
         foreach ($keyUsage as $key => $count) {
-            if ($count < self::NUM_TIMES_KEYS_WANTED_IN_WORDS) {
-                $errors[$i]['value'] = $key . ' (' . $count . ')';
-                $errors[$i]['type'] = ErrorTypeEnum::KEY_USAGE;
-                $errors[$i]['tab'] = ErrorTypeEnum::KEY_USAGE->tab()->name();
+            if ($count === 0) {
+                $errors[$i]['value'] = $key;
+                $errors[$i]['type'] = ErrorTypeEnum::KEY_NOT_USED_IN_WORDS;
+                $errors[$i]['tab'] = ErrorTypeEnum::KEY_NOT_USED_IN_WORDS->tab()->name();
                 $i++;
             }
         }
 
         return $errors;
-    }    
+    }
 }

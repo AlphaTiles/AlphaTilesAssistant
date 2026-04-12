@@ -58,32 +58,54 @@ class ValidationServiceTest extends TestCase
         $this->validationService = new ValidationService($this->languagePack);
     }
 
-    public function test_check_key_usage()
+    public function test_check_key_exists_in_words()
     {
+        // Add a key that does not appear in any seeded word.
+        Key::factory()->create([
+            'value' => 'q',
+            'languagepackid' => $this->languagePack->id,
+        ]);
+
         $result = $this->validationService->handle();
 
-        $this->assertArrayHasKey(ErrorTypeEnum::KEY_USAGE->value, $result);
-        
-        $keyErrors = collect($result[ErrorTypeEnum::KEY_USAGE->value]);
-        
-        // Keys that should have errors (used less than 5 times)
-        $expectedUnderusedKeys= ['a', 'b', 'c'];
-        
-        foreach ($expectedUnderusedKeys as $key) {
-            $this->assertTrue(
-                $keyErrors->contains(function ($error) use ($key) {
-                    return str_starts_with($error['value'], $key);
-                }),
-                "Should contain error for underused key '$key'"
-            );
-        }
+        $this->assertArrayHasKey(ErrorTypeEnum::KEY_NOT_USED_IN_WORDS->value, $result);
 
+        $keyErrors = collect($result[ErrorTypeEnum::KEY_NOT_USED_IN_WORDS->value]);
         $values = $keyErrors->pluck('value')->toArray();
-        $this->assertEquals([
-            "a (1)",
-            "b (1)",
-            "c (3)",
-        ], $values);
+
+        $this->assertContains('q', $values);
+    }
+
+    public function test_check_key_not_used_in_words()
+    {
+        // Clear default words and keys
+        Word::query()->where('languagepackid', $this->languagePack->id)->delete();
+        Key::query()->where('languagepackid', $this->languagePack->id)->delete();
+
+        // Add one used key and one unused key
+        Key::factory()->create([
+            'value' => 'a',
+            'languagepackid' => $this->languagePack->id,
+        ]);
+        Key::factory()->create([
+            'value' => 'z',
+            'languagepackid' => $this->languagePack->id,
+        ]);
+
+        Word::factory()->create([
+            'value' => 'aaa',
+            'languagepackid' => $this->languagePack->id,
+        ]);
+
+        $result = $this->validationService->handle();
+
+        $this->assertArrayHasKey(ErrorTypeEnum::KEY_NOT_USED_IN_WORDS->value, $result);
+
+        $keyErrors = collect($result[ErrorTypeEnum::KEY_NOT_USED_IN_WORDS->value]);
+        $errorValues = $keyErrors->pluck('value')->toArray();
+
+        $this->assertContains('z', $errorValues);
+        $this->assertNotContains('a', $errorValues);
     }
 
     public function test_check_tile_usage()
@@ -117,6 +139,85 @@ class ValidationServiceTest extends TestCase
             "sch (1)"
         ], $values);
     }
+
+    public function test_check_parsing_words_into_keys_with_missing_character()
+    {
+        // Clear default words and add test words
+        Word::query()->where('languagepackid', $this->languagePack->id)->delete();
+
+        Word::factory()->create([
+            'value' => 'Tür',
+            'languagepackid' => $this->languagePack->id,
+        ]);
+
+        $result = $this->validationService->handle();
+
+        $this->assertArrayHasKey(ErrorTypeEnum::PARSE_WORD_INTO_KEYS->value, $result);
+
+        $keyParseErrors = collect($result[ErrorTypeEnum::PARSE_WORD_INTO_KEYS->value]);
+        $this->assertTrue(
+            $keyParseErrors->contains(function ($error) {
+                return str_contains($error['value'], 'Tür') && str_contains($error['value'], 'ü');
+            }),
+            "Should contain error for word 'Tür' with missing character 'ü'"
+        );
+    }
+
+    public function test_check_parsing_words_into_keys_successful_parse()
+    {
+        // Clear default words and keys
+        Word::query()->where('languagepackid', $this->languagePack->id)->delete();
+        Key::query()->where('languagepackid', $this->languagePack->id)->delete();
+
+        // Add keys for all characters in German word 'Katze'
+        foreach (str_split('katze') as $char) {
+            Key::factory()->create([
+                'value' => $char,
+                'languagepackid' => $this->languagePack->id
+            ]);
+        }
+
+        Word::factory()->create([
+            'value' => 'Katze',
+            'languagepackid' => $this->languagePack->id,
+        ]);
+
+        $result = $this->validationService->handle();
+
+        // Should not have key parse errors
+        $this->assertArrayNotHasKey(ErrorTypeEnum::PARSE_WORD_INTO_KEYS->value, $result);
+    }
+
+    public function test_check_parsing_words_into_keys_multiple_missing()
+    {
+        // Clear default words and keys
+        Word::query()->where('languagepackid', $this->languagePack->id)->delete();
+        Key::query()->where('languagepackid', $this->languagePack->id)->delete();
+
+        // Add only 'h' as key
+        Key::factory()->create([
+            'value' => 'h',
+            'languagepackid' => $this->languagePack->id
+        ]);
+
+        Word::factory()->create([
+            'value' => 'hello',
+            'languagepackid' => $this->languagePack->id,
+        ]);
+
+        $result = $this->validationService->handle();
+
+        $this->assertArrayHasKey(ErrorTypeEnum::PARSE_WORD_INTO_KEYS->value, $result);
+
+        $keyParseErrors = collect($result[ErrorTypeEnum::PARSE_WORD_INTO_KEYS->value]);
+        $errorValue = $keyParseErrors->first()['value'];
+
+        $this->assertStringContainsString('hello', $errorValue);
+        $this->assertStringContainsString('e', $errorValue);
+        $this->assertStringContainsString('l', $errorValue);
+        $this->assertStringContainsString('o', $errorValue);
+    }
+
 
     public function test_parse_words_into_tiles()
     {
