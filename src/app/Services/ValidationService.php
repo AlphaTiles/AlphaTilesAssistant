@@ -16,7 +16,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class ValidationService
 {
-    const NUM_TIMES_KEYS_WANTED_IN_WORDS = 5;
     const NUM_TIMES_TILES_WANTED_IN_WORDS = 5;
 
     protected LanguagePack $languagePack;
@@ -61,7 +60,7 @@ class ValidationService
 
         if(empty($tab)) {
             $errors = $this->checkTileUsage($errors);
-            $errors = $this->checkKeyUsage($errors);
+            $errors = $this->checkKeyExistsInWords($errors);
         }
 
         $groupedErrors = collect($errors)->sortBy('tab')->groupBy('type');
@@ -300,21 +299,21 @@ class ValidationService
         return $errors;
     }
 
-    public function checkKeyUsage(array $errors): array
+    public function checkKeyExistsInWords(array $errors): array
     {
-        $counKeysService = new CountKeysService($this->languagePack);
-        $keyUsage = $counKeysService->handle();
+        $countKeysService = new CountKeysService($this->languagePack);
+        $keyUsage = $countKeysService->handle();
 
         $i = count($errors);
         foreach ($keyUsage as $key => $count) {
-            if ($count < self::NUM_TIMES_KEYS_WANTED_IN_WORDS) {
-                $errors[$i]['value'] = $key . ' (' . $count . ')';
-                $errors[$i]['type'] = ErrorTypeEnum::KEY_USAGE;
-                $errors[$i]['tab'] = ErrorTypeEnum::KEY_USAGE->tab()->name();
+            if ($count === 0) {
+                $errors[$i]['value'] = $key;
+                $errors[$i]['type'] = ErrorTypeEnum::KEY_NOT_USED_IN_WORDS;
+                $errors[$i]['tab'] = ErrorTypeEnum::KEY_NOT_USED_IN_WORDS->tab()->name();
                 $i++;
             }
         }
 
         return $errors;
-    }    
+    }
 }
