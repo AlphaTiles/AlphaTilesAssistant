@@ -96,15 +96,15 @@ class GamesController extends BaseItemController
 
     private function resolveRequiredAssetsFilter(Request $request, bool $showExcludedGames): string
     {
+        $requestedFilter = $request->query('required_assets_filter');
+
         if (!$showExcludedGames) {
-            return 'all';
+            return $requestedFilter ?? 'my_games';
         }
 
-        return $request->query(
-            'required_assets_filter',
-            $request->boolean('show_abs_exclusive') ? 'abs' : 'all'
-        );
+        return $requestedFilter ?? ($request->boolean('show_abs_exclusive') ? 'abs' : 'all');
     }
+
 
     private function resolveValidationErrors(LanguagePack $languagePack, ?string $tile)
     {
