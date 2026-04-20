@@ -6,7 +6,6 @@ use App\Models\Game;
 use App\Models\LanguagePack;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class GameManagementService
 {
@@ -23,12 +22,15 @@ class GameManagementService
         }
 
         $validRequiredAssetsFilters = [
+            'my_games',
             'TA',
             'SB/T',
             'SB/T+SA',
         ];
 
-        if ($requiredAssetsFilter === 'abs') {
+        if ($requiredAssetsFilter === 'my_games') {
+            $gamesQuery->where('include', true);
+        } elseif ($requiredAssetsFilter === 'abs') {
             $gamesQuery->where('abs', true);
         } elseif (
             $requiredAssetsFilter !== 'all'

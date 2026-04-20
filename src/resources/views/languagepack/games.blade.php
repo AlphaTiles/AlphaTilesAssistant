@@ -59,6 +59,7 @@ $tabEnum = TabEnum::GAME;
 			<label class="inline-flex items-center gap-2 text-sm ml-2">
 				<span class="ml-1">Active Games List</span>
 				<select name="required_assets_filter" class="input input-bordered input-sm w-52">
+					<option value="my_games" {{ $requiredAssetsFilter === 'my_games' ? 'selected' : '' }}>My games list</option>
 					<option value="all" {{ $requiredAssetsFilter === 'all' ? 'selected' : '' }}>All games (excluding ABS)</option>
 					<option value="TA" {{ $requiredAssetsFilter === 'TA' ? 'selected' : '' }}>Games requiring tile audio</option>
 					<option value="SB/T" {{ $requiredAssetsFilter === 'SB/T' ? 'selected' : '' }}>Games requiring syllable breaks only</option>
@@ -67,7 +68,10 @@ $tabEnum = TabEnum::GAME;
 				</select>
 			</label>
 
-			<label class="inline-flex items-center gap-2 text-sm">
+			<label
+				id="show-excluded-games-filter"
+				class="inline-flex items-center gap-2 text-sm {{ $requiredAssetsFilter === 'my_games' ? 'hidden' : '' }}"
+			>
 				<input type="hidden" name="show_excluded" value="0" />
 				<input
 					type="checkbox"
@@ -219,30 +223,22 @@ if (gamesFilterForm) {
 	const filterCheckboxes = gamesFilterForm.querySelectorAll('input[type="checkbox"][name]');
 	const requiredAssetsFilterSelect = gamesFilterForm.querySelector('select[name="required_assets_filter"]');
 	const excludedGamesCheckbox = gamesFilterForm.querySelector('input[type="checkbox"][name="show_excluded"]');
+	const excludedGamesFilter = document.getElementById('show-excluded-games-filter');
 
-	function enforceExcludedGamesDependency() {
-		if (!excludedGamesCheckbox) {
+	function syncExcludedGamesVisibility() {
+		if (!requiredAssetsFilterSelect || !excludedGamesFilter) {
 			return;
 		}
 
-		const hasRequiredAssetsFilter = requiredAssetsFilterSelect && requiredAssetsFilterSelect.value !== 'all';
-
-		if (hasRequiredAssetsFilter) {
-			excludedGamesCheckbox.checked = true;
-		}
+		excludedGamesFilter.classList.toggle('hidden', requiredAssetsFilterSelect.value === 'my_games');
 	}
 
-	enforceExcludedGamesDependency();
+	syncExcludedGamesVisibility();
 	syncFilterFallbackInputs();
 	gamesFilterForm.addEventListener('submit', syncFilterFallbackInputs);
 
 	filterCheckboxes.forEach((checkbox) => {
 		checkbox.addEventListener('change', () => {
-			if (checkbox.name === 'show_excluded' && !checkbox.checked && requiredAssetsFilterSelect) {
-				requiredAssetsFilterSelect.value = 'all';
-			}
-
-			enforceExcludedGamesDependency();
 			syncFilterFallbackInputs();
 			if (typeof gamesFilterForm.requestSubmit === 'function') {
 				gamesFilterForm.requestSubmit();
@@ -254,7 +250,11 @@ if (gamesFilterForm) {
 
 	if (requiredAssetsFilterSelect) {
 		requiredAssetsFilterSelect.addEventListener('change', () => {
-			enforceExcludedGamesDependency();
+			if (excludedGamesCheckbox) {
+				excludedGamesCheckbox.checked = requiredAssetsFilterSelect.value !== 'my_games';
+			}
+
+			syncExcludedGamesVisibility();
 			syncFilterFallbackInputs();
 			if (typeof gamesFilterForm.requestSubmit === 'function') {
 				gamesFilterForm.requestSubmit();

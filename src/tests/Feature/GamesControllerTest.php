@@ -54,6 +54,35 @@ class GamesControllerTest extends TestCase
         $response = $this->actingAs($this->user)->get($this->url());
 
         $response->assertOk();
+        $response->assertViewHas('requiredAssetsFilter', 'my_games');
+        $response->assertViewHas('items', function ($items) use ($includedGame, $excludedGame) {
+            $ids = $this->ids($items);
+            return $ids->contains($includedGame->id) && !$ids->contains($excludedGame->id);
+        });
+    }
+
+    /** @test */
+    public function my_games_filter_shows_only_selected_games_and_unsets_show_excluded(): void
+    {
+        $includedGame = Game::factory()->create([
+            'languagepackid' => $this->languagePack->id,
+            'include' => true,
+            'order' => 1,
+        ]);
+        $excludedGame = Game::factory()->create([
+            'languagepackid' => $this->languagePack->id,
+            'include' => false,
+            'order' => 2,
+        ]);
+
+        $response = $this->actingAs($this->user)->get($this->url([
+            'show_excluded' => 0,
+            'required_assets_filter' => 'my_games',
+        ]));
+
+        $response->assertOk();
+        $response->assertViewHas('showExcludedGames', false);
+        $response->assertViewHas('requiredAssetsFilter', 'my_games');
         $response->assertViewHas('items', function ($items) use ($includedGame, $excludedGame) {
             $ids = $this->ids($items);
             return $ids->contains($includedGame->id) && !$ids->contains($excludedGame->id);
@@ -188,30 +217,39 @@ class GamesControllerTest extends TestCase
     }
 
     /** @test */
-    public function required_assets_filter_is_ignored_without_show_excluded(): void
+    public function required_assets_filter_applies_without_show_excluded(): void
     {
-        $taGame = Game::factory()->create([
+        $taIncluded = Game::factory()->create([
             'languagepackid'  => $this->languagePack->id,
-            'basic'           => true,
+            'include'         => true,
             'required_assets' => RequiredAssetsEnum::TA->value,
             'order'           => 1,
         ]);
-        $basicGame = Game::factory()->create([
+        $otherIncluded = Game::factory()->create([
             'languagepackid'  => $this->languagePack->id,
-            'basic'           => true,
+            'include'         => true,
             'required_assets' => null,
             'order'           => 2,
         ]);
+        $taExcluded = Game::factory()->create([
+            'languagepackid'  => $this->languagePack->id,
+            'include'         => false,
+            'required_assets' => RequiredAssetsEnum::TA->value,
+            'order'           => 3,
+        ]);
 
-        // Passing required_assets_filter without show_excluded should be forced to 'all'
+        // TA filter without show_excluded should show only included TA games
         $response = $this->actingAs($this->user)->get($this->url([
             'required_assets_filter' => RequiredAssetsEnum::TA->value,
         ]));
 
         $response->assertOk();
-        $response->assertViewHas('items', function ($items) use ($taGame, $basicGame) {
+        $response->assertViewHas('requiredAssetsFilter', RequiredAssetsEnum::TA->value);
+        $response->assertViewHas('items', function ($items) use ($taIncluded, $otherIncluded, $taExcluded) {
             $ids = $this->ids($items);
-            return $ids->contains($taGame->id) && $ids->contains($basicGame->id);
+            return $ids->contains($taIncluded->id)
+                && !$ids->contains($otherIncluded->id)
+                && !$ids->contains($taExcluded->id);
         });
     }
 
