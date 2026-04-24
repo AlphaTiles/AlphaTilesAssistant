@@ -85,4 +85,35 @@ enum ErrorTypeEnum: string
         };
     }
 
+    public function level(): ErrorLevelEnum
+    {
+        return match ($this) {
+            self::NO_KEYBOARD_KEYS,
+            self::MISSING_WORD_AUDIO_FILE,
+            self::MISSING_WORD_IMAGE_FILE,
+            self::MISSING_SYLLABLE_AUDIO_FILE,
+            self::MISSING_TILE_AUDIO_FILE,
+            self::COLOR_KEY,
+            self::DUPLICATE_SYLLABLE,
+            self::DUPLICATE_TILE,
+            self::DUPLICATE_WORD,
+            self::EMPTY_DISTRACTOR_SYLLABLE,
+            self::EMPTY_DISTRACTOR_TILE,
+            self::EMPTY_TYPE_TILE,
+            self::PARSE_WORD_INTO_TILES => ErrorLevelEnum::CRITICAL,
+
+            self::DUPLICATE_KEY,
+            self::KEY_NOT_USED_IN_WORDS,
+            self::PARSE_WORD_INTO_KEYS,
+            self::MISSING_APP_ID => ErrorLevelEnum::WARNING,
+
+            self::TILE_USAGE => ErrorLevelEnum::RECOMMENDATION,
+        };
+    }
+
+    public function isCritical(): bool
+    {
+        return $this->level() === ErrorLevelEnum::CRITICAL;
+    }
+
 }
