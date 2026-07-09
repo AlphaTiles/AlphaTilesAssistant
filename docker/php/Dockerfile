@@ -1,4 +1,4 @@
-FROM php:8.1.1-fpm-buster
+FROM php:8.1-fpm-bookworm
 
 # Use a better shell syntax
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
