@@ -31,6 +31,8 @@ class LanguagePackController extends Controller
         try {
             $request->validate([
                 'email' => 'required|email|exists:users,email'
+            ], [
+                'email.exists' => 'No user found with this email address.'
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return back()->withErrors($e->validator)->withInput();
