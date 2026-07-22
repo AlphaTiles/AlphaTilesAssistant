@@ -155,8 +155,8 @@ return [
     */
 
     'custom' => [
-        'attribute-name' => [
-            'rule-name' => 'custom-message',
+        'email' => [
+            'exists' => 'No user found with this email address.',
         ],
     ],
 
