@@ -207,7 +207,6 @@ class ValidationService
     public function checkTypes(array $errors, Model $model, ErrorTypeEnum $errorTypeEnum): array{
         $itemsWithMissingType = $model::where('languagepackid', $this->languagePack->id)
             ->whereNull('type')
-            ->whereNotIn('value', ['[space]', '[SPACE]'])
             ->get();
             
         $i = count($errors);

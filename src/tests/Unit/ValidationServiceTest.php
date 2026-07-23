@@ -452,7 +452,7 @@ class ValidationServiceTest extends TestCase
         $this->assertEquals(ErrorTypeEnum::EMPTY_DISTRACTOR_SYLLABLE->tab()->name(), $firstError['tab']);
     }
 
-    public function test_check_types_ignores_space_tile(): void
+    public function test_check_types_requires_type_for_space_tile(): void
     {
         $testLanguagePack = LanguagePack::factory()->create();
         $validationService = new ValidationService($testLanguagePack);
@@ -475,8 +475,10 @@ class ValidationServiceTest extends TestCase
 
         $typeErrors = $result[ErrorTypeEnum::EMPTY_TYPE_TILE->value];
 
-        // Should only flag 'x', not '[space]'
-        $this->assertCount(1, $typeErrors);
-        $this->assertEquals('x', $typeErrors[0]['value']);
+        // Should flag both '[space]' and 'x' because type is required for all tiles
+        $this->assertCount(2, $typeErrors);
+        $errorValues = collect($typeErrors)->pluck('value')->toArray();
+        $this->assertContains('[space]', $errorValues);
+        $this->assertContains('x', $errorValues);
     }
 }
