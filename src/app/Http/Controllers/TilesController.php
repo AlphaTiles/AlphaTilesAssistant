@@ -136,6 +136,10 @@ class TilesController extends BaseItemController
             ]
         );
 
+        if($validator->fails()){
+            return Redirect::back()->withErrors($validator)->withInput();
+        }
+
         DB::transaction(function() use($items, $fileRules, $languagePack) {
             $fileUploadService = app(FileUploadService::class);
 
@@ -176,12 +180,9 @@ class TilesController extends BaseItemController
             }
         });
 
-        if($validator->fails()){
-            return Redirect::back()->withErrors($validator)->withInput();
-        }
-        
         $items = $request->all()['items'];
-        if(Arr::pluck($items, 'delete')) {
+        $deleteFlags = Arr::pluck($items, 'delete');
+        if (!empty(array_filter($deleteFlags))) {
             $itemsCollection = Tile::orderByConfig($languagePack, 'tile_orderby')
                 ->where('languagepackid', $languagePack->id)
                 ->with(['file', 'file2', 'file3'])
@@ -197,10 +198,33 @@ class TilesController extends BaseItemController
             ]);
         }
 
+        $validationService = new ValidationService($languagePack);
+        $validationErrors = $validationService->handle(TabEnum::TILE);
+
+        $itemsCollection = Tile::where('languagepackid', $languagePack->id)
+            ->orderByConfig($languagePack, 'tile_orderby')
+            ->with(['file', 'file2', 'file3'])
+            ->paginate(config('pagination.default'));
+
+        if (!empty($validationErrors)) {
+            session()->flash('validationErrors', $validationErrors);
+            session()->flash('saveMessage', 'Your changes were saved, but there are still tile validation issues to fix.');
+
+            return view('languagepack.tiles', [
+                'completedSteps' => ['lang_info', 'tiles'],
+                'languagePack' => $languagePack,
+                'items' => $itemsCollection,
+                'orderby' => $orderBy,
+                'pagination' => $itemsCollection->links(),
+                'validationErrors' => $validationErrors,
+                'saveMessage' => 'Your changes were saved, but there are still tile validation issues to fix.',
+            ]);
+        }
+
         session()->flash('success', 'Records updated successfully');
 
         return redirect(url('/languagepack/tiles/' . $languagePack->id) . '?' . http_build_query(request()->query()));
-    }        
+    }
 
     public function words(string $languagePack)
     {
