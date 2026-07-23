@@ -118,12 +118,12 @@ class ImportSheetService
 
             if(!empty($row[0])) {
                 $tile['languagepackid'] = $this->languagePack->id;
-                $tile['value'] = $row[0];                
-                $tile['or_1'] = $row[1];
-                $tile['or_2'] = $row[2];
-                $tile['or_3'] = $row[3];
+                $tile['value'] = $row[0] === ' ' ? '[space]' : $row[0];                
+                $tile['or_1'] = isset($row[1]) && $row[1] === ' ' ? '[space]' : ($row[1] ?? null);
+                $tile['or_2'] = isset($row[2]) && $row[2] === ' ' ? '[space]' : ($row[2] ?? null);
+                $tile['or_3'] = isset($row[3]) && $row[3] === ' ' ? '[space]' : ($row[3] ?? null);
                 $tile['type'] = $row[4];
-                $tile['upper'] = $row[6] ?? '';
+                $tile['upper'] = isset($row[6]) && $row[6] === ' ' ? '[space]' : ($row[6] ?? '');
                 $type2 = null;
                 if(isset($row[7])) {    
                     $type2 = trim($row[7]) === 'none' ? null : $row[7];

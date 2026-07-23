@@ -25,10 +25,13 @@ use Google\Service\Sheets\ValueRange;
 use Illuminate\Support\Facades\Storage;
 use App\Repositories\LangInfoRepository;
 use App\Repositories\GameSettingsRepository;
+use App\Services\Traits\FormatSpaceTrait;
 use Google\Service\Sheets\BatchUpdateSpreadsheetRequest;
 
 class ExportSheetService
-{    
+{
+    use FormatSpaceTrait;
+
     protected LogToDatabaseService $logService;
     protected GoogleService $googleService;
     protected Drive $driveService;
@@ -153,14 +156,20 @@ class ExportSheetService
             $stage2 = $tile->stage2 ?? '-';
             $stage3 = $tile->stage3 ?? '-';
 
+            $tileValue = $this->formatSpace($tile->value);
+            $or1 = $this->formatSpace($tile->or_1);
+            $or2 = $this->formatSpace($tile->or_2);
+            $or3 = $this->formatSpace($tile->or_3);
+            $upper = $this->formatSpace($tile->upper);
+
             $values[$i] = [
-                $tile->value,
-                $tile->or_1,
-                $tile->or_2,
-                $tile->or_3,
+                $tileValue,
+                $or1,
+                $or2,
+                $or3,
                 $type1,
                 $fileName1,
-                $tile->upper,
+                $upper,
                 $type2,
                 $fileName2,
                 $type3,
@@ -290,11 +299,16 @@ class ExportSheetService
               
             $fileName1 = str_replace('.mp3', '', $file1);       
 
+            $syllableValue = $this->formatSpace($item->value);
+            $or1 = $this->formatSpace($item->or_1);
+            $or2 = $this->formatSpace($item->or_2);
+            $or3 = $this->formatSpace($item->or_3);
+
             $values[$i] = [
-                $item->value,
-                $item->or_1,
-                $item->or_2,
-                $item->or_3,
+                $syllableValue,
+                $or1,
+                $or2,
+                $or3,
                 $fileName1,
                 "0", 
                 $item->color,
@@ -323,7 +337,7 @@ class ExportSheetService
         $i = 1;
         foreach ($keys as $keyItem) {            
             $values[$i] = [
-                $keyItem->value,
+                $this->formatSpace($keyItem->value),
                 $keyItem->color
             ];
             $i++;
@@ -761,5 +775,5 @@ class ExportSheetService
         $columnCount = count($values[0]);
 
         return chr(64 + $columnCount); // 65 is ASCII for 'A'
-    }   
+    }
 }
