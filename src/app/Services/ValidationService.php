@@ -276,7 +276,9 @@ class ValidationService
 
         $i = count($errors);
         foreach ($parseErrors as $word => $parsedTiles) {
-            $errors[$i]['value'] = sprintf("%s - the tiles parsed (simple parsing) are: %s", $word, implode(", ", $parsedTiles));
+            $formattedTiles = $parseWordsIntoTilesService->formatParsedTilesForDisplay($word, $parsedTiles);
+
+            $errors[$i]['value'] = sprintf("%s - the tiles parsed (simple parsing) are: %s", $word, implode(", ", $formattedTiles));
             $errors[$i]['type'] = ErrorTypeEnum::PARSE_WORD_INTO_TILES;
             $errors[$i]['tab'] = ErrorTypeEnum::PARSE_WORD_INTO_TILES->tab()->name();
             $i++;
@@ -284,6 +286,7 @@ class ValidationService
 
         return $errors;
     }
+
 
     public function checkParsingWordsIntoKeys(array $errors): array
     {

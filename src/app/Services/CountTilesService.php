@@ -55,7 +55,7 @@ class CountTilesService
                 foreach ($tilesInWord as $tileInWord) {
                     if ($tileInWord === null) {
                         $preliminaryTilesInWord = $this->parseWordsIntoTilesService->parseWordIntoTilesPreliminary($word->value, $tileHashMap, $placeholderCharacter, self::MULTITYPE_TILES);
-                        $preliminaryTileStringsInWord = array_filter(array_map(fn($t) => $t->value ?? null, $preliminaryTilesInWord));
+                        $preliminaryTileStringsInWord = array_values(array_filter($this->parseWordsIntoTilesService->formatParsedTilesForDisplay($word->value, $preliminaryTilesInWord)));
         
                         Log::error("The word '{$word->value}' could not be parsed. The tiles parsed (simple parsing) are: " . implode(", ", $preliminaryTileStringsInWord));
                         break;
@@ -70,4 +70,5 @@ class CountTilesService
         return $tileUsage;
                   
     }
+
 }

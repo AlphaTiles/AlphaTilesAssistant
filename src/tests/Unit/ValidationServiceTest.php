@@ -219,6 +219,29 @@ class ValidationServiceTest extends TestCase
     }
 
 
+    public function test_parse_words_into_tiles_formats_space_as_placeholder()
+    {
+        Tile::factory()->create([
+            'value' => ' ',
+            'languagepackid' => $this->languagePack->id,
+        ]);
+
+        Word::factory()->create([
+            'value' => 'a b q',
+            'languagepackid' => $this->languagePack->id,
+        ]);
+
+        $result = $this->validationService->handle();
+
+        $this->assertArrayHasKey(ErrorTypeEnum::PARSE_WORD_INTO_TILES->value, $result);
+
+        $parseErrors = collect($result[ErrorTypeEnum::PARSE_WORD_INTO_TILES->value]);
+        $errorEntry = $parseErrors->first(fn ($entry) => str_contains($entry['value'], 'a b q'));
+        $errorValue = $errorEntry['value'] ?? '';
+
+        $this->assertStringContainsString('[space]', $errorValue);
+    }
+
     public function test_parse_words_into_tiles()
     {
         $result = $this->validationService->handle();

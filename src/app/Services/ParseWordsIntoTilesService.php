@@ -307,7 +307,26 @@ class ParseWordsIntoTilesService
         }
 
         return $wordPreliminaryTileArrayFinal;
-    }      
+    }
+
+    public function formatParsedTilesForDisplay(string $word, array $parsedTiles): array
+    {
+        $formattedTiles = array_values(array_filter(array_map(function ($tile) {
+            $tileValue = $tile instanceof \stdClass ? ($tile->value ?? null) : $tile;
+
+            if ($tileValue === null) {
+                return null;
+            }
+
+            return $tileValue === ' ' ? '[space]' : (string) $tileValue;
+        }, $parsedTiles)));
+
+        if (preg_match('/\s/u', $word)) {
+            $formattedTiles[] = '[space]';
+        }
+
+        return $formattedTiles;
+    }
     
     function getInstanceTypeForMixedTilePreliminary(int $index, array $tilesInWordPreliminary, Word $wordListWord): ?string
     {
