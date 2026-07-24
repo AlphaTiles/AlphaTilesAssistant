@@ -51,17 +51,20 @@ class CountTilesService
         foreach ($wordList as $word) {
             $tilesInWord = $this->parseWordsIntoTilesService->parseWordIntoTiles($word->value, $scriptType, $tileHashMap, $placeholderCharacter);
 
-            foreach ($tileList as $tile) {
-                foreach ($tilesInWord as $tileInWord) {
-                    if ($tileInWord === null) {
-                        $preliminaryTilesInWord = $this->parseWordsIntoTilesService->parseWordIntoTilesPreliminary($word->value, $tileHashMap, $placeholderCharacter, self::MULTITYPE_TILES);
-                        $preliminaryTileStringsInWord = array_values(array_filter($this->parseWordsIntoTilesService->formatParsedTilesForDisplay($word->value, $preliminaryTilesInWord)));
-        
-                        Log::error("The word '{$word->value}' could not be parsed. The tiles parsed (simple parsing) are: " . implode(", ", $preliminaryTileStringsInWord));
-                        break;
-                    }
-                    if (strtolower($tileInWord->value) === strtolower($tile->value)) {
+            foreach ($tilesInWord as $tileInWord) {
+                if ($tileInWord === null) {
+                    $preliminaryTilesInWord = $this->parseWordsIntoTilesService->parseWordIntoTilesPreliminary($word->value, $tileHashMap, $placeholderCharacter, self::MULTITYPE_TILES);
+                    $preliminaryTileStringsInWord = array_values(array_filter($this->parseWordsIntoTilesService->formatParsedTilesForDisplay($word->value, $preliminaryTilesInWord)));
+
+                    Log::error("The word '{$word->value}' could not be parsed. The tiles parsed (simple parsing) are: " . implode(", ", $preliminaryTileStringsInWord));
+                    break;
+                }
+
+                $tileValue = strtolower($tileInWord->value ?? '');
+                foreach ($tileList as $tile) {
+                    if (strtolower($tile->value) === $tileValue) {
                         $tileUsage[$tile->value]++;
+                        break;
                     }
                 }
             }

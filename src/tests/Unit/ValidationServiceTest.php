@@ -10,6 +10,7 @@ use App\Models\Syllable;
 use Illuminate\Support\Arr;
 use App\Enums\ErrorTypeEnum;
 use App\Models\LanguagePack;
+use App\Services\CountTilesService;
 use App\Services\ValidationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -240,6 +241,36 @@ class ValidationServiceTest extends TestCase
         $errorValue = $errorEntry['value'] ?? '';
 
         $this->assertStringContainsString('[space]', $errorValue);
+    }
+
+    public function test_count_tiles_includes_literal_spaces_for_space_tiles()
+    {
+        $testLanguagePack = LanguagePack::factory()->create();
+        $countTilesService = new CountTilesService($testLanguagePack);
+
+        Tile::factory()->create([
+            'value' => '[space]',
+            'languagepackid' => $testLanguagePack->id,
+        ]);
+        Tile::factory()->create([
+            'value' => 'a',
+            'languagepackid' => $testLanguagePack->id,
+        ]);
+        Tile::factory()->create([
+            'value' => 'b',
+            'languagepackid' => $testLanguagePack->id,
+        ]);
+
+        Word::factory()->create([
+            'value' => 'a b',
+            'languagepackid' => $testLanguagePack->id,
+        ]);
+
+        $tileUsage = $countTilesService->handle();
+
+        $this->assertSame(1, $tileUsage['[space]'] ?? 0);
+        $this->assertSame(1, $tileUsage['a'] ?? 0);
+        $this->assertSame(1, $tileUsage['b'] ?? 0);
     }
 
     public function test_parse_words_into_tiles()

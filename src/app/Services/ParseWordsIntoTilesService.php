@@ -279,7 +279,13 @@ class ParseWordsIntoTilesService
         $tileIndex = 0;
 
         $parseWordByInventoryService = new ParseWordByInventoryService();
-        $parseResult = $parseWordByInventoryService->handle($wordString, $tileHashMap, 4, $placeholderCharacter);
+        $tileHashMapWithSpace = $tileHashMap;
+
+        if (isset($tileHashMapWithSpace['[space]']) || isset($tileHashMapWithSpace['[SPACE]']) || isset($tileHashMapWithSpace[' '])) {
+            $tileHashMapWithSpace[' '] = $tileHashMapWithSpace['[space]'] ?? $tileHashMapWithSpace['[SPACE]'] ?? $tileHashMapWithSpace[' '];
+        }
+
+        $parseResult = $parseWordByInventoryService->handle($wordString, $tileHashMapWithSpace, 4, $placeholderCharacter);
         $wordPreliminaryTileArray = $parseResult['items'];
     
         // Process multi-type tiles
