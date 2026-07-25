@@ -250,6 +250,7 @@ class ImportSheetService
         $rows = $this->getWorksheetRows($worksheetName);
 
         $firstRow = true;
+        $data = [];
         $key = 0;
         foreach ($rows as $row) {
             if ($firstRow) {
@@ -260,11 +261,13 @@ class ImportSheetService
             if(!empty($row[0])) {
                 $data[$key]['languagepackid'] = $this->languagePack->id;
                 $data[$key]['value'] = $row[0];
-                $data[$key]['color'] = $row[1];            
+                $data[$key]['color'] = $row[1] ?? null;
                 $key++;
             }
-        }            
+        }
 
-        Key::insert($data);
+        if (!empty($data)) {
+            Key::insert($data);
+        }
     }
 }
