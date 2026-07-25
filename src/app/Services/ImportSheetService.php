@@ -202,14 +202,21 @@ class ImportSheetService
                 continue; 
             }
 
-            if(!empty($row[0])) {
-                $word['languagepackid'] = $this->languagePack->id;
-                $word['value'] = $row[1];                
-                $word['mixed_types'] = $row[3] ?? '';                
+            $wordValue = $row[1] ?? null;
+            if (empty($wordValue)) {
+                continue;
+            }
 
-                $myWord = Word::create($word);
-                $this->uploadWordFile($myWord, $row[0], FileTypeEnum::AUDIO);
-                $this->uploadWordFile($myWord, $row[0], FileTypeEnum::IMAGE);
+            $word['languagepackid'] = $this->languagePack->id;
+            $word['value'] = $wordValue;
+            $word['mixed_types'] = $row[3] ?? '';
+
+            $myWord = Word::create($word);
+
+            $fileBaseName = $row[0] ?? null;
+            if (!empty($fileBaseName)) {
+                $this->uploadWordFile($myWord, $fileBaseName, FileTypeEnum::AUDIO);
+                $this->uploadWordFile($myWord, $fileBaseName, FileTypeEnum::IMAGE);
             }
         }            
     }    
