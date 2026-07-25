@@ -11,6 +11,7 @@ use Illuminate\Support\Arr;
 use App\Enums\ErrorTypeEnum;
 use App\Models\LanguagePack;
 use App\Services\CountTilesService;
+use App\Services\ParseWordsIntoTilesService;
 use App\Services\ValidationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -220,6 +221,17 @@ class ValidationServiceTest extends TestCase
     }
 
 
+    public function test_format_parsed_tiles_does_not_duplicate_space_placeholder_for_words_with_whitespace()
+    {
+        $parseWordsIntoTilesService = new ParseWordsIntoTilesService($this->languagePack);
+
+        $formattedTiles = $parseWordsIntoTilesService->formatParsedTilesForDisplay('Ka tze', [
+            (object) ['value' => ' '],
+        ]);
+
+        $this->assertSame(['[space]'], $formattedTiles);
+    }
+
     public function test_parse_words_into_tiles_formats_space_as_placeholder()
     {
         Tile::factory()->create([
@@ -246,6 +258,7 @@ class ValidationServiceTest extends TestCase
     public function test_count_tiles_includes_literal_spaces_for_space_tiles()
     {
         $testLanguagePack = LanguagePack::factory()->create();
+        $validationService = new ValidationService($testLanguagePack);
         $countTilesService = new CountTilesService($testLanguagePack);
 
         Tile::factory()->create([
@@ -271,6 +284,7 @@ class ValidationServiceTest extends TestCase
         $this->assertSame(1, $tileUsage['[space]'] ?? 0);
         $this->assertSame(1, $tileUsage['a'] ?? 0);
         $this->assertSame(1, $tileUsage['b'] ?? 0);
+        $this->assertCount(3, $tileUsage);
     }
 
     public function test_parse_words_into_tiles()

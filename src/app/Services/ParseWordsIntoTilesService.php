@@ -324,10 +324,14 @@ class ParseWordsIntoTilesService
                 return null;
             }
 
-            return $tileValue === ' ' ? '[space]' : (string) $tileValue;
+            if ($tileValue === ' ') {
+                return '[space]';
+            }
+
+            return (string) $tileValue;
         }, $parsedTiles)));
 
-        if (preg_match('/\s/u', $word)) {
+        if (preg_match('/\s/u', $word) && !in_array('[space]', $formattedTiles, true)) {
             $formattedTiles[] = '[space]';
         }
 
