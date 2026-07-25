@@ -40,7 +40,7 @@ class WordlistController extends BaseItemController
 
         $validationErrors = null;
         if(empty($word)) {
-            $validationService = (new ValidationService($languagePack));
+            $validationService = app(ValidationService::class, ['languagePack' => $languagePack]);
             $validationErrors = $validationService->handle(TabEnum::WORD);    
         }
 
@@ -145,7 +145,7 @@ class WordlistController extends BaseItemController
         }
         
         $items = $request->all()['words'];
-        if(Arr::pluck($items, 'delete')) {
+        if (collect($items)->contains(fn ($item) => !empty($item['delete']))) {
             $itemsCollection = Word::orderByConfig($languagePack, 'word_orderby')
                 ->where('languagepackid', $languagePack->id)
                 ->paginate(config('pagination.default'));
@@ -157,6 +157,28 @@ class WordlistController extends BaseItemController
                 'pagination' => $itemsCollection->links(),
                 'orderby' => $orderBy,
             ]);            
+        }
+
+        $validationService = app(ValidationService::class, ['languagePack' => $languagePack]);
+        $validationErrors = $validationService->handle(TabEnum::WORD);
+
+        $itemsCollection = Word::where('languagepackid', $languagePack->id)
+            ->orderByConfig($languagePack, 'word_orderby')
+            ->paginate(config('pagination.default'));
+
+        if (!empty($validationErrors)) {
+            session()->flash('validationErrors', $validationErrors);
+            session()->flash('saveMessage', 'Your changes were saved, but there are still word validation issues to fix.');
+
+            return view('languagepack.wordlist', [
+                'completedSteps' => ['lang_info', 'tiles', 'wordlist'],
+                'languagePack' => $languagePack,
+                'words' => $itemsCollection,
+                'pagination' => $itemsCollection->links(),
+                'orderby' => $orderBy,
+                'validationErrors' => $validationErrors,
+                'saveMessage' => 'Your changes were saved, but there are still word validation issues to fix.',
+            ]);
         }
 
         session()->flash('success', 'Records updated successfully');

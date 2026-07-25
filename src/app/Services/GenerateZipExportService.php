@@ -19,9 +19,12 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Model;
 use App\Repositories\LangInfoRepository;
 use App\Repositories\GameSettingsRepository;
+use App\Services\Traits\FormatSpaceTrait;
 
 class GenerateZipExportService
 {
+    use FormatSpaceTrait;
+
     protected string $tempDir;
     protected LanguagePack $languagePack;
     public const SEPARATOR = "\t";
@@ -217,13 +220,19 @@ class GenerateZipExportService
             $stage2 = $tile->stage2 ?? '-';
             $stage3 = $tile->stage3 ?? '-';
 
-            $fileContent .= "{$tile->value}" . self::SEPARATOR .
-            "{$tile->or_1}" . self::SEPARATOR .
-            "{$tile->or_2}" . self::SEPARATOR .
-            "{$tile->or_3}" . self::SEPARATOR .
+            $tileValue = $this->formatSpace($tile->value);
+            $or1 = $this->formatSpace($tile->or_1);
+            $or2 = $this->formatSpace($tile->or_2);
+            $or3 = $this->formatSpace($tile->or_3);
+            $upper = $this->formatSpace($tile->upper);
+
+            $fileContent .= "{$tileValue}" . self::SEPARATOR .
+            "{$or1}" . self::SEPARATOR .
+            "{$or2}" . self::SEPARATOR .
+            "{$or3}" . self::SEPARATOR .
             "{$type1}" . self::SEPARATOR .
             "{$file1}" . self::SEPARATOR .
-            "{$tile->upper}" . self::SEPARATOR .
+            "{$upper}" . self::SEPARATOR .
             "{$type2}" . self::SEPARATOR .
             "{$file2}" . self::SEPARATOR .
             "{$type3}" . self::SEPARATOR .
@@ -287,7 +296,8 @@ class GenerateZipExportService
         $fileContent = "keys\ttheme_color\n";
 
         foreach ($keys as $keyItem) {
-            $fileContent .= "{$keyItem->value}" . self::SEPARATOR . "{$keyItem->color}\n";
+            $keyValue = $this->formatSpace($keyItem->value);
+            $fileContent .= "{$keyValue}" . self::SEPARATOR . "{$keyItem->color}\n";
         }
 
         $file = "{$this->tempDir}/{$fileName}";
@@ -309,10 +319,15 @@ class GenerateZipExportService
             $file1 = $item->file ? basename($item->file->file_path) : 'X';
             $file1 = str_replace('.mp3', '', $file1);
 
-            $fileContent .= "{$item->value}" . self::SEPARATOR .
-            "{$item->or_1}" . self::SEPARATOR .
-            "{$item->or_2}" . self::SEPARATOR .
-            "{$item->or_3}" . self::SEPARATOR .
+            $syllableValue = $this->formatSpace($item->value);
+            $or1 = $this->formatSpace($item->or_1);
+            $or2 = $this->formatSpace($item->or_2);
+            $or3 = $this->formatSpace($item->or_3);
+
+            $fileContent .= "{$syllableValue}" . self::SEPARATOR .
+            "{$or1}" . self::SEPARATOR .
+            "{$or2}" . self::SEPARATOR .
+            "{$or3}" . self::SEPARATOR .
             "{$file1}" . self::SEPARATOR .
             "0" . self::SEPARATOR .
             "{$item->color}" . self::SEPARATOR . "\n";
@@ -537,4 +552,5 @@ public function generateGamesFile(string $fileName, ZipArchive $zip, string $zip
             }
         }
     }   
+
 }

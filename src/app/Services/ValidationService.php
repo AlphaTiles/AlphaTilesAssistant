@@ -184,9 +184,12 @@ class ValidationService
     public function checkDistractors(array $errors, Model $model, ErrorTypeEnum $errorTypeEnum): array{
         $itemsWithMissingDistractors = $model::where('languagepackid', $this->languagePack->id)
             ->where(function ($query) {
-            $query->whereNull('or_1')
-                ->orWhereNull('or_2')
-                ->orWhereNull('or_3');
+                $query->whereNull('or_1')
+                    ->orWhere('or_1', '')
+                    ->orWhereNull('or_2')
+                    ->orWhere('or_2', '')
+                    ->orWhereNull('or_3')
+                    ->orWhere('or_3', '');
             })
             ->get();
             
@@ -206,7 +209,10 @@ class ValidationService
 
     public function checkTypes(array $errors, Model $model, ErrorTypeEnum $errorTypeEnum): array{
         $itemsWithMissingType = $model::where('languagepackid', $this->languagePack->id)
-            ->whereNull('type')
+            ->where(function ($query) {
+                $query->whereNull('type')
+                    ->orWhere('type', '');
+            })
             ->get();
             
         $i = count($errors);
@@ -270,7 +276,9 @@ class ValidationService
 
         $i = count($errors);
         foreach ($parseErrors as $word => $parsedTiles) {
-            $errors[$i]['value'] = sprintf("%s - the tiles parsed (simple parsing) are: %s", $word, implode(", ", $parsedTiles));
+            $formattedTiles = $parseWordsIntoTilesService->formatParsedTilesForDisplay($word, $parsedTiles);
+
+            $errors[$i]['value'] = sprintf("%s - the tiles parsed (simple parsing) are: %s", $word, implode(", ", $formattedTiles));
             $errors[$i]['type'] = ErrorTypeEnum::PARSE_WORD_INTO_TILES;
             $errors[$i]['tab'] = ErrorTypeEnum::PARSE_WORD_INTO_TILES->tab()->name();
             $i++;
@@ -278,6 +286,7 @@ class ValidationService
 
         return $errors;
     }
+
 
     public function checkParsingWordsIntoKeys(array $errors): array
     {

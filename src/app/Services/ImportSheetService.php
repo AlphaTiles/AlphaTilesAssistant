@@ -118,12 +118,12 @@ class ImportSheetService
 
             if(!empty($row[0])) {
                 $tile['languagepackid'] = $this->languagePack->id;
-                $tile['value'] = $row[0];                
-                $tile['or_1'] = $row[1];
-                $tile['or_2'] = $row[2];
-                $tile['or_3'] = $row[3];
+                $tile['value'] = $row[0] === ' ' ? '[space]' : $row[0];                
+                $tile['or_1'] = isset($row[1]) && $row[1] === ' ' ? '[space]' : ($row[1] ?? null);
+                $tile['or_2'] = isset($row[2]) && $row[2] === ' ' ? '[space]' : ($row[2] ?? null);
+                $tile['or_3'] = isset($row[3]) && $row[3] === ' ' ? '[space]' : ($row[3] ?? null);
                 $tile['type'] = $row[4];
-                $tile['upper'] = $row[6] ?? '';
+                $tile['upper'] = isset($row[6]) && $row[6] === ' ' ? '[space]' : ($row[6] ?? '');
                 $type2 = null;
                 if(isset($row[7])) {    
                     $type2 = trim($row[7]) === 'none' ? null : $row[7];
@@ -202,14 +202,21 @@ class ImportSheetService
                 continue; 
             }
 
-            if(!empty($row[0])) {
-                $word['languagepackid'] = $this->languagePack->id;
-                $word['value'] = $row[1];                
-                $word['mixed_types'] = $row[3] ?? '';                
+            $wordValue = $row[1] ?? null;
+            if (empty($wordValue)) {
+                continue;
+            }
 
-                $myWord = Word::create($word);
-                $this->uploadWordFile($myWord, $row[0], FileTypeEnum::AUDIO);
-                $this->uploadWordFile($myWord, $row[0], FileTypeEnum::IMAGE);
+            $word['languagepackid'] = $this->languagePack->id;
+            $word['value'] = $wordValue;
+            $word['mixed_types'] = $row[3] ?? '';
+
+            $myWord = Word::create($word);
+
+            $fileBaseName = $row[0] ?? null;
+            if (!empty($fileBaseName)) {
+                $this->uploadWordFile($myWord, $fileBaseName, FileTypeEnum::AUDIO);
+                $this->uploadWordFile($myWord, $fileBaseName, FileTypeEnum::IMAGE);
             }
         }            
     }    
@@ -250,6 +257,7 @@ class ImportSheetService
         $rows = $this->getWorksheetRows($worksheetName);
 
         $firstRow = true;
+        $data = [];
         $key = 0;
         foreach ($rows as $row) {
             if ($firstRow) {
@@ -260,11 +268,13 @@ class ImportSheetService
             if(!empty($row[0])) {
                 $data[$key]['languagepackid'] = $this->languagePack->id;
                 $data[$key]['value'] = $row[0];
-                $data[$key]['color'] = $row[1];            
+                $data[$key]['color'] = $row[1] ?? null;
                 $key++;
             }
-        }            
+        }
 
-        Key::insert($data);
+        if (!empty($data)) {
+            Key::insert($data);
+        }
     }
 }

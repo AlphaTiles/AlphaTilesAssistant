@@ -279,7 +279,13 @@ class ParseWordsIntoTilesService
         $tileIndex = 0;
 
         $parseWordByInventoryService = new ParseWordByInventoryService();
-        $parseResult = $parseWordByInventoryService->handle($wordString, $tileHashMap, 4, $placeholderCharacter);
+        $tileHashMapWithSpace = $tileHashMap;
+
+        if (isset($tileHashMapWithSpace['[space]']) || isset($tileHashMapWithSpace['[SPACE]']) || isset($tileHashMapWithSpace[' '])) {
+            $tileHashMapWithSpace[' '] = $tileHashMapWithSpace['[space]'] ?? $tileHashMapWithSpace['[SPACE]'] ?? $tileHashMapWithSpace[' '];
+        }
+
+        $parseResult = $parseWordByInventoryService->handle($wordString, $tileHashMapWithSpace, 4, $placeholderCharacter);
         $wordPreliminaryTileArray = $parseResult['items'];
     
         // Process multi-type tiles
@@ -307,7 +313,30 @@ class ParseWordsIntoTilesService
         }
 
         return $wordPreliminaryTileArrayFinal;
-    }      
+    }
+
+    public function formatParsedTilesForDisplay(string $word, array $parsedTiles): array
+    {
+        $formattedTiles = array_values(array_filter(array_map(function ($tile) {
+            $tileValue = $tile instanceof \stdClass ? ($tile->value ?? null) : $tile;
+
+            if ($tileValue === null) {
+                return null;
+            }
+
+            if ($tileValue === ' ') {
+                return '[space]';
+            }
+
+            return (string) $tileValue;
+        }, $parsedTiles)));
+
+        if (preg_match('/\s/u', $word) && !in_array('[space]', $formattedTiles, true)) {
+            $formattedTiles[] = '[space]';
+        }
+
+        return $formattedTiles;
+    }
     
     function getInstanceTypeForMixedTilePreliminary(int $index, array $tilesInWordPreliminary, Word $wordListWord): ?string
     {

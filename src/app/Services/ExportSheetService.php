@@ -21,14 +21,18 @@ use App\Enums\GameSettingEnum;
 use App\Models\LanguageSetting;
 use Google\Service\Drive\DriveFile;
 use Illuminate\Support\Facades\Log;
+use Google\Service\Sheets\ClearValuesRequest;
 use Google\Service\Sheets\ValueRange;
 use Illuminate\Support\Facades\Storage;
 use App\Repositories\LangInfoRepository;
 use App\Repositories\GameSettingsRepository;
+use App\Services\Traits\FormatSpaceTrait;
 use Google\Service\Sheets\BatchUpdateSpreadsheetRequest;
 
 class ExportSheetService
-{    
+{
+    use FormatSpaceTrait;
+
     protected LogToDatabaseService $logService;
     protected GoogleService $googleService;
     protected Drive $driveService;
@@ -81,7 +85,7 @@ class ExportSheetService
         
         $sheetAndRange = $this->getSheetAndRange($sheetName, $values, count($values));
 
-        $this->addValuesToSheet($spreadsheetId, $sheetAndRange, $values);
+        $this->clearAndAddValuesToSheet($spreadsheetId, $sheetAndRange, $values);
     }
 
     private function langInfoSheet(string $spreadsheetId): void
@@ -103,7 +107,7 @@ class ExportSheetService
             $i++;
         }
 
-        $this->addValuesToSheet($spreadsheetId, $sheetAndRange, $values);
+        $this->clearAndAddValuesToSheet($spreadsheetId, $sheetAndRange, $values);
     }
 
     private function tilesSheet(string $spreadsheetId): void
@@ -153,14 +157,20 @@ class ExportSheetService
             $stage2 = $tile->stage2 ?? '-';
             $stage3 = $tile->stage3 ?? '-';
 
+            $tileValue = $this->formatSpace($tile->value);
+            $or1 = $this->formatSpace($tile->or_1);
+            $or2 = $this->formatSpace($tile->or_2);
+            $or3 = $this->formatSpace($tile->or_3);
+            $upper = $this->formatSpace($tile->upper);
+
             $values[$i] = [
-                $tile->value,
-                $tile->or_1,
-                $tile->or_2,
-                $tile->or_3,
+                $tileValue,
+                $or1,
+                $or2,
+                $or3,
                 $type1,
                 $fileName1,
-                $tile->upper,
+                $upper,
                 $type2,
                 $fileName2,
                 $type3,
@@ -178,7 +188,7 @@ class ExportSheetService
             $i++;
         }        
 
-        $this->addValuesToSheet($spreadsheetId, $sheetAndRange, $values);
+        $this->clearAndAddValuesToSheet($spreadsheetId, $sheetAndRange, $values);
     }
 
     private function wordlistSheet(string $spreadsheetId): void
@@ -254,7 +264,7 @@ class ExportSheetService
             $i++;
         }
 
-        $this->addValuesToSheet($spreadsheetId, $sheetAndRange, $values);
+        $this->clearAndAddValuesToSheet($spreadsheetId, $sheetAndRange, $values);
         Log::info('export of words completed');
     }
 
@@ -290,11 +300,16 @@ class ExportSheetService
               
             $fileName1 = str_replace('.mp3', '', $file1);       
 
+            $syllableValue = $this->formatSpace($item->value);
+            $or1 = $this->formatSpace($item->or_1);
+            $or2 = $this->formatSpace($item->or_2);
+            $or3 = $this->formatSpace($item->or_3);
+
             $values[$i] = [
-                $item->value,
-                $item->or_1,
-                $item->or_2,
-                $item->or_3,
+                $syllableValue,
+                $or1,
+                $or2,
+                $or3,
                 $fileName1,
                 "0", 
                 $item->color,
@@ -302,7 +317,7 @@ class ExportSheetService
             $i++;
         }        
 
-        $this->addValuesToSheet($spreadsheetId, $sheetAndRange, $values);
+        $this->clearAndAddValuesToSheet($spreadsheetId, $sheetAndRange, $values);
         Log::error('export of syllables completed');        
     }    
 
@@ -323,13 +338,13 @@ class ExportSheetService
         $i = 1;
         foreach ($keys as $keyItem) {            
             $values[$i] = [
-                $keyItem->value,
+                $this->formatSpace($keyItem->value),
                 $keyItem->color
             ];
             $i++;
         }
 
-        $this->addValuesToSheet($spreadsheetId, $sheetAndRange, $values);
+        $this->clearAndAddValuesToSheet($spreadsheetId, $sheetAndRange, $values);
         Log::info('export of keyboard completed');
     }      
 
@@ -371,7 +386,7 @@ class ExportSheetService
         }        
 
 
-        $this->addValuesToSheet($spreadsheetId, $sheetAndRange, $values);
+        $this->clearAndAddValuesToSheet($spreadsheetId, $sheetAndRange, $values);
         Log::info('export of resources completed');
     }       
 
@@ -401,7 +416,7 @@ class ExportSheetService
             $i++;
         }
 
-        $this->addValuesToSheet($spreadsheetId, $sheetAndRange, $values);
+$this->clearAndAddValuesToSheet($spreadsheetId, $sheetAndRange, $values);
 
         Log::info('export of settings completed');
         
@@ -451,7 +466,7 @@ class ExportSheetService
             }
         }
 
-        $this->addValuesToSheet($spreadsheetId, $sheetAndRange, $values);
+        $this->clearAndAddValuesToSheet($spreadsheetId, $sheetAndRange, $values);
         Log::info('export of share link completed');
     }      
 
@@ -465,7 +480,7 @@ class ExportSheetService
         ];
 
         $sheetAndRange = $this->getSheetAndRange($sheetName, $values, count($values));           
-        $this->addValuesToSheet($spreadsheetId, $sheetAndRange, $values);
+        $this->clearAndAddValuesToSheet($spreadsheetId, $sheetAndRange, $values);
         Log::info('export of names completed');
     }  
 
@@ -520,7 +535,7 @@ class ExportSheetService
             $i++;
         }        
 
-        $this->addValuesToSheet($spreadsheetId, $sheetAndRange, $values);
+        $this->clearAndAddValuesToSheet($spreadsheetId, $sheetAndRange, $values);
         Log::info('export of games completed');
     }   
 
@@ -544,7 +559,7 @@ class ExportSheetService
             $i++;
         }
 
-        $this->addValuesToSheet($spreadsheetId, $sheetAndRange, $values);
+        $this->clearAndAddValuesToSheet($spreadsheetId, $sheetAndRange, $values);
         Log::info('export of colors completed');
     }      
     
@@ -644,29 +659,39 @@ class ExportSheetService
         $this->googleSheet->spreadsheets->batchUpdate($spreadsheetId, $request);
     }
 
-    private function addValuesToSheet(string $spreadsheetId, string $sheetAndRange, array $values): void
+    private function clearAndAddValuesToSheet(string $spreadsheetId, string $sheetAndRange, array $values): void
     {
+        $sheetId = explode('!', $sheetAndRange)[0];
+
+        // Clear existing sheet values before writing new data
+        try {
+            $clearRequest = new ClearValuesRequest();
+            $this->googleSheet->spreadsheets_values->clear($spreadsheetId, $sheetId, $clearRequest);
+        } catch (Exception $e) {
+            Log::error('Failed to clear sheet ' . $sheetId . ': ' . $e->getMessage());
+            $this->logService->handle('Failed to clear sheet ' . $sheetId . ': ' . $e->getMessage(), ExportStatus::FAILED);
+        }
+
         // Replace null values with empty strings in $values
         array_walk_recursive($values, function (&$value) {
             if (is_null($value)) {
-            $value = '';
+                $value = '';
             }
         });
 
-        try{
+        try {
             $body = new ValueRange([
                 'values' => $values
             ]);
             $params = [
                 'valueInputOption' => 'RAW'
             ];
-            $this->googleSheet->spreadsheets_values->update($spreadsheetId, $sheetAndRange, $body, $params);            
+            $this->googleSheet->spreadsheets_values->update($spreadsheetId, $sheetAndRange, $body, $params);
             return;
-        }
-        catch(Exception $e) {
+        } catch (Exception $e) {
             Log::error($e->getMessage());
             $this->logService->handle($e->getMessage(), ExportStatus::FAILED);
-        }            
+        }
     }
 
     function sheetExists(string $spreadsheetId, string $sheetName) {
@@ -761,5 +786,5 @@ class ExportSheetService
         $columnCount = count($values[0]);
 
         return chr(64 + $columnCount); // 65 is ASCII for 'A'
-    }   
+    }
 }

@@ -10,6 +10,8 @@ use App\Models\Syllable;
 use Illuminate\Support\Arr;
 use App\Enums\ErrorTypeEnum;
 use App\Models\LanguagePack;
+use App\Services\CountTilesService;
+use App\Services\ParseWordsIntoTilesService;
 use App\Services\ValidationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -218,6 +220,72 @@ class ValidationServiceTest extends TestCase
         $this->assertStringContainsString('o', $errorValue);
     }
 
+
+    public function test_format_parsed_tiles_does_not_duplicate_space_placeholder_for_words_with_whitespace()
+    {
+        $parseWordsIntoTilesService = new ParseWordsIntoTilesService($this->languagePack);
+
+        $formattedTiles = $parseWordsIntoTilesService->formatParsedTilesForDisplay('Ka tze', [
+            (object) ['value' => ' '],
+        ]);
+
+        $this->assertSame(['[space]'], $formattedTiles);
+    }
+
+    public function test_parse_words_into_tiles_formats_space_as_placeholder()
+    {
+        Tile::factory()->create([
+            'value' => ' ',
+            'languagepackid' => $this->languagePack->id,
+        ]);
+
+        Word::factory()->create([
+            'value' => 'a b q',
+            'languagepackid' => $this->languagePack->id,
+        ]);
+
+        $result = $this->validationService->handle();
+
+        $this->assertArrayHasKey(ErrorTypeEnum::PARSE_WORD_INTO_TILES->value, $result);
+
+        $parseErrors = collect($result[ErrorTypeEnum::PARSE_WORD_INTO_TILES->value]);
+        $errorEntry = $parseErrors->first(fn ($entry) => str_contains($entry['value'], 'a b q'));
+        $errorValue = $errorEntry['value'] ?? '';
+
+        $this->assertStringContainsString('[space]', $errorValue);
+    }
+
+    public function test_count_tiles_includes_literal_spaces_for_space_tiles()
+    {
+        $testLanguagePack = LanguagePack::factory()->create();
+        $validationService = new ValidationService($testLanguagePack);
+        $countTilesService = new CountTilesService($testLanguagePack);
+
+        Tile::factory()->create([
+            'value' => '[space]',
+            'languagepackid' => $testLanguagePack->id,
+        ]);
+        Tile::factory()->create([
+            'value' => 'a',
+            'languagepackid' => $testLanguagePack->id,
+        ]);
+        Tile::factory()->create([
+            'value' => 'b',
+            'languagepackid' => $testLanguagePack->id,
+        ]);
+
+        Word::factory()->create([
+            'value' => 'a b',
+            'languagepackid' => $testLanguagePack->id,
+        ]);
+
+        $tileUsage = $countTilesService->handle();
+
+        $this->assertSame(1, $tileUsage['[space]'] ?? 0);
+        $this->assertSame(1, $tileUsage['a'] ?? 0);
+        $this->assertSame(1, $tileUsage['b'] ?? 0);
+        $this->assertCount(3, $tileUsage);
+    }
 
     public function test_parse_words_into_tiles()
     {
@@ -450,5 +518,35 @@ class ValidationServiceTest extends TestCase
         $firstError = $syllableErrors[0];
         $this->assertEquals(ErrorTypeEnum::EMPTY_DISTRACTOR_SYLLABLE, $firstError['type']);
         $this->assertEquals(ErrorTypeEnum::EMPTY_DISTRACTOR_SYLLABLE->tab()->name(), $firstError['tab']);
-    }    
+    }
+
+    public function test_check_types_requires_type_for_space_tile(): void
+    {
+        $testLanguagePack = LanguagePack::factory()->create();
+        $validationService = new ValidationService($testLanguagePack);
+
+        // Tile with null type and value [space]
+        Tile::factory()->create([
+            'value' => '[space]',
+            'type' => null,
+            'languagepackid' => $testLanguagePack->id
+        ]);
+
+        // Normal tile with null type
+        Tile::factory()->create([
+            'value' => 'x',
+            'type' => null,
+            'languagepackid' => $testLanguagePack->id
+        ]);
+
+        $result = $validationService->handle();
+
+        $typeErrors = $result[ErrorTypeEnum::EMPTY_TYPE_TILE->value];
+
+        // Should flag both '[space]' and 'x' because type is required for all tiles
+        $this->assertCount(2, $typeErrors);
+        $errorValues = collect($typeErrors)->pluck('value')->toArray();
+        $this->assertContains('[space]', $errorValues);
+        $this->assertContains('x', $errorValues);
+    }
 }
