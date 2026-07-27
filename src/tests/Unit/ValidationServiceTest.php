@@ -255,6 +255,28 @@ class ValidationServiceTest extends TestCase
         $this->assertStringContainsString('[space]', $errorValue);
     }
 
+    public function test_check_parsing_words_into_tiles_does_not_error_when_space_tile_covers_word()
+    {
+        $testLanguagePack = LanguagePack::factory()->create();
+        $validationService = new ValidationService($testLanguagePack);
+
+        foreach (['k', 'a', 't', 'z', 'e', '[space]'] as $tileValue) {
+            Tile::factory()->create([
+                'value' => $tileValue,
+                'languagepackid' => $testLanguagePack->id,
+            ]);
+        }
+
+        Word::factory()->create([
+            'value' => 'Ka tze',
+            'languagepackid' => $testLanguagePack->id,
+        ]);
+
+        $errors = $validationService->checkParsingWordsIntoTiles([]);
+
+        $this->assertSame([], $errors);
+    }
+
     public function test_count_tiles_includes_literal_spaces_for_space_tiles()
     {
         $testLanguagePack = LanguagePack::factory()->create();
