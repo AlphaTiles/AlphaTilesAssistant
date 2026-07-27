@@ -52,7 +52,8 @@ class ParseWordsIntoTilesService
             
             foreach ($preliminaryTilesInWord as $tile) {
                 if ($tile !== null) {
-                    $coveredLength += mb_strlen($tile->value);
+                    $tileValue = $tile->value ?? '';
+                    $coveredLength += mb_strlen($this->normalizeTileValueForLength($tileValue));
                 }
             }
             
@@ -82,6 +83,15 @@ class ParseWordsIntoTilesService
         
         return $parseErrors;
                   
+    }
+
+    private function normalizeTileValueForLength(string $tileValue): string
+    {
+        if ($tileValue === ' ' || strcasecmp($tileValue, '[space]') === 0) {
+            return ' ';
+        }
+
+        return $tileValue;
     }
 
     public function parseWordIntoTiles($wordListWord, $scriptType, $tileHashMap, $placeholderCharacter)
