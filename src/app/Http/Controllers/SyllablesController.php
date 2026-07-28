@@ -133,17 +133,29 @@ class SyllablesController extends BaseItemController
         if($validator->fails()){
             return Redirect::back()->withErrors($validator)->withInput();
         }
-        
-        session()->flash('success', 'Records updated successfully');
+
+        $validationService = new ValidationService($languagePack);
+        $validationErrors = $validationService->handle(TabEnum::SYLLABLE);
 
         $syllablesCollection = Syllable::where('languagepackid', $languagePack->id)->with(['file'])->paginate(config('pagination.default'));
 
-        return view('languagepack.syllables', [
-            'completedSteps' => ['lang_info', 'tiles', 'wordlist', 'keyboard', 'syllables'],
-            'languagePack' => $languagePack,
-            'syllables' => $syllablesCollection,
-            'pagination' => $syllablesCollection->links()
-        ]);
+        if (!empty($validationErrors)) {
+            session()->flash('validationErrors', $validationErrors);
+            session()->flash('saveMessage', 'Your changes were saved, but there are still syllable validation issues to fix.');
+
+            return view('languagepack.syllables', [
+                'completedSteps' => ['lang_info', 'tiles', 'wordlist', 'keyboard', 'syllables'],
+                'languagePack' => $languagePack,
+                'syllables' => $syllablesCollection,
+                'pagination' => $syllablesCollection->links(),
+                'validationErrors' => $validationErrors,
+                'saveMessage' => 'Your changes were saved, but there are still syllable validation issues to fix.',
+            ]);
+        }
+        
+        session()->flash('success', 'Records updated successfully');
+
+        return redirect(url('/languagepack/syllables/' . $languagePack->id) . '?' . http_build_query(request()->query()));
 
     }
 }
