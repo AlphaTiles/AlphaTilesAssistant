@@ -300,10 +300,10 @@ class ImportSheetService
 
             $syllable = Syllable::create([
                 'languagepackid' => $this->languagePack->id,
-                'value' => $this->normalizeSpacePlaceholderForStorage($row[0] ?? null),
-                'or_1' => $this->normalizeSpacePlaceholderForStorage($row[1] ?? null),
-                'or_2' => $this->normalizeSpacePlaceholderForStorage($row[2] ?? null),
-                'or_3' => $this->normalizeSpacePlaceholderForStorage($row[3] ?? null),
+                'value' => $this->normalizeEmbeddedSpacesForStorage($row[0] ?? null),
+                'or_1' => $this->normalizeEmbeddedSpacesForStorage($row[1] ?? null),
+                'or_2' => $this->normalizeEmbeddedSpacesForStorage($row[2] ?? null),
+                'or_3' => $this->normalizeEmbeddedSpacesForStorage($row[3] ?? null),
                 'color' => $row[6] ?? null,
             ]);
 

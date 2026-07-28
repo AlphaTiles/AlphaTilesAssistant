@@ -52,6 +52,19 @@ trait FormatSpaceTrait
         return $value;
     }
 
+    protected function normalizeEmbeddedSpacesForStorage(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        if ($this->isSpacePlaceholder($value)) {
+            return $this->spacePlaceholder();
+        }
+
+        return str_replace(' ', $this->spacePlaceholder(), $value);
+    }
+
     protected function addLiteralSpaceAlias(array $inventory): array
     {
         if (array_key_exists(' ', $inventory)) {
