@@ -10,6 +10,6 @@ trait FormatSpaceTrait
             return null;
         }
 
-        return strtolower($value) === '[space]' ? ' ' : $value;
+        return str_ireplace('[space]', ' ', $value);
     }
 }

@@ -8,6 +8,7 @@ use App\Models\Key;
 use App\Models\File;
 use App\Models\Tile;
 use App\Models\Word;
+use App\Models\Syllable;
 use App\Enums\FileTypeEnum;
 use App\Enums\ImportStatus;
 use App\Enums\LangInfoEnum;
@@ -53,6 +54,7 @@ class ImportSheetService
             $this->saveTiles('gametiles');
             $this->saveWords('wordlist');    
             $this->saveKeyboard('keyboard');
+            $this->saveSyllables('syllables');
 
             $this->languagePack->import_status = ImportStatus::SUCCESS->value;
             Log::error("import complete");
@@ -118,12 +120,12 @@ class ImportSheetService
 
             if(!empty($row[0])) {
                 $tile['languagepackid'] = $this->languagePack->id;
-                $tile['value'] = $row[0] === ' ' ? '[space]' : $row[0];                
-                $tile['or_1'] = isset($row[1]) && $row[1] === ' ' ? '[space]' : ($row[1] ?? null);
-                $tile['or_2'] = isset($row[2]) && $row[2] === ' ' ? '[space]' : ($row[2] ?? null);
-                $tile['or_3'] = isset($row[3]) && $row[3] === ' ' ? '[space]' : ($row[3] ?? null);
+                $tile['value'] = $this->normalizeSpacePlaceholderForStorage($row[0] ?? null);
+                $tile['or_1'] = $this->normalizeSpacePlaceholderForStorage($row[1] ?? null);
+                $tile['or_2'] = $this->normalizeSpacePlaceholderForStorage($row[2] ?? null);
+                $tile['or_3'] = $this->normalizeSpacePlaceholderForStorage($row[3] ?? null);
                 $tile['type'] = $row[4];
-                $tile['upper'] = isset($row[6]) && $row[6] === ' ' ? '[space]' : ($row[6] ?? '');
+                $tile['upper'] = $this->normalizeSpacePlaceholderForStorage($row[6] ?? '');
                 $type2 = null;
                 if(isset($row[7])) {    
                     $type2 = trim($row[7]) === 'none' ? null : $row[7];
@@ -267,7 +269,7 @@ class ImportSheetService
 
             if(!empty($row[0])) {
                 $data[$key]['languagepackid'] = $this->languagePack->id;
-                $data[$key]['value'] = $row[0];
+                $data[$key]['value'] = $this->normalizeSpacePlaceholderForStorage($row[0] ?? null);
                 $data[$key]['color'] = $row[1] ?? null;
                 $key++;
             }
@@ -276,5 +278,72 @@ class ImportSheetService
         if (!empty($data)) {
             Key::insert($data);
         }
+    }
+
+    private function saveSyllables(string $worksheetName): void
+    {
+        $rows = $this->getWorksheetRows($worksheetName);
+
+        $firstRow = true;
+        foreach ($rows as $row) {
+            if ($firstRow) {
+                $firstRow = false;
+                continue;
+            }
+
+            if (empty($row[0])) {
+                continue;
+            }
+
+            $syllable = Syllable::create([
+                'languagepackid' => $this->languagePack->id,
+                'value' => $this->normalizeSpacePlaceholderForStorage($row[0] ?? null),
+                'or_1' => $this->normalizeSpacePlaceholderForStorage($row[1] ?? null),
+                'or_2' => $this->normalizeSpacePlaceholderForStorage($row[2] ?? null),
+                'or_3' => $this->normalizeSpacePlaceholderForStorage($row[3] ?? null),
+                'color' => $row[6] ?? null,
+            ]);
+
+            $this->uploadSyllableFile($syllable, $row[4] ?? null);
+        }
+    }
+
+    private function uploadSyllableFile(Syllable $syllable, ?string $fileName): void
+    {
+        if (empty($fileName) || strtolower($fileName) === 'x') {
+            return;
+        }
+
+        $file = $fileName . '.mp3';
+        $driveFileId = $this->googleService->getFileIdByFileName($file, 'audio_syllables_optional', $this->folderId);
+
+        if (empty($driveFileId)) {
+            return;
+        }
+
+        $path = "public/languagepacks/{$this->languagePack->id}/res/raw/";
+        $newFileName = 'syllable_' . str_pad($syllable->id, 3, '0', STR_PAD_LEFT) . '.mp3';
+        $this->googleService->saveFile($path, $driveFileId, $newFileName);
+
+        $fileModel = new File();
+        $fileModel->name = $file;
+        $fileModel->file_path = '/storage' . str_replace('public', '', $path) . $newFileName;
+        $fileModel->save();
+
+        $syllable->file_id = $fileModel->id;
+        $syllable->save();
+    }
+
+    private function normalizeSpacePlaceholderForStorage(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        if ($value === ' ' || strcasecmp(trim($value), '[space]') === 0) {
+            return '[space]';
+        }
+
+        return $value;
     }
 }

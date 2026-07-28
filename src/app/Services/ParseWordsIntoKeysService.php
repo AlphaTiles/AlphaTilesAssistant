@@ -26,7 +26,8 @@ class ParseWordsIntoKeysService
         $keys = Key::where('languagepackid', $this->languagePack->id)
             ->pluck('value')
             ->filter(fn ($value) => !empty($value))
-            ->map(fn ($value) => $this->normalize(mb_strtolower($value)))
+            ->map(fn ($value) => $this->normalizeKeyForParsing((string) $value))
+            ->filter(fn ($value) => $value !== '')
             ->unique()
             ->values()
             ->all();
@@ -75,6 +76,15 @@ class ParseWordsIntoKeysService
         }
 
         return $value;
+    }
+
+    private function normalizeKeyForParsing(string $value): string
+    {
+        if (strcasecmp(trim($value), '[space]') === 0 || $value === ' ') {
+            return ' ';
+        }
+
+        return $this->normalize(mb_strtolower($value));
     }
 
     /**

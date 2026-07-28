@@ -198,4 +198,23 @@ class ParseWordsIntoKeysServiceTest extends TestCase
         $this->assertEquals(['a', 'b'], $result['abc']['parsed_keys']);
         $this->assertEquals(['c'], $result['abc']['missing_characters']);
     }
+
+    public function test_space_placeholder_key_parses_words_with_whitespace()
+    {
+        foreach (['a', 'b', '[space]'] as $keyValue) {
+            Key::factory()->create([
+                'value' => $keyValue,
+                'languagepackid' => $this->languagePack->id,
+            ]);
+        }
+
+        Word::factory()->create([
+            'value' => 'a b',
+            'languagepackid' => $this->languagePack->id,
+        ]);
+
+        $result = $this->service->handle();
+
+        $this->assertEmpty($result);
+    }
 }
