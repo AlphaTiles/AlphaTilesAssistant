@@ -70,7 +70,7 @@ class SyllablesController extends BaseItemController
         foreach($items as $key => $item) {
             if(!empty($item)) {
                 $insert[$key]['languagepackid'] = $languagePack->id;
-                $insert[$key]['value'] = $item;
+                $insert[$key]['value'] = $this->normalizeSpacePlaceholderForStorage($item);
             }
         }
 
@@ -114,9 +114,9 @@ class SyllablesController extends BaseItemController
                 $fileModel1 = $fileUploadService->handle($syllable, 'syllable', 1, $fileRules, 'mp3');
                 
                 $updateData = [
-                    'or_1' => $syllable['or_1'],
-                    'or_2' => $syllable['or_2'],
-                    'or_3' => $syllable['or_3'],
+                    'or_1' => $this->normalizeSpacePlaceholderForStorage($syllable['or_1'] ?? null),
+                    'or_2' => $this->normalizeSpacePlaceholderForStorage($syllable['or_2'] ?? null),
+                    'or_3' => $this->normalizeSpacePlaceholderForStorage($syllable['or_3'] ?? null),
                     'file_id' => $syllable['file_id'] ?? null,
                     'color' => $syllable['color'],
                 ];                
@@ -133,17 +133,29 @@ class SyllablesController extends BaseItemController
         if($validator->fails()){
             return Redirect::back()->withErrors($validator)->withInput();
         }
-        
-        session()->flash('success', 'Records updated successfully');
+
+        $validationService = new ValidationService($languagePack);
+        $validationErrors = $validationService->handle(TabEnum::SYLLABLE);
 
         $syllablesCollection = Syllable::where('languagepackid', $languagePack->id)->with(['file'])->paginate(config('pagination.default'));
 
-        return view('languagepack.syllables', [
-            'completedSteps' => ['lang_info', 'tiles', 'wordlist', 'keyboard', 'syllables'],
-            'languagePack' => $languagePack,
-            'syllables' => $syllablesCollection,
-            'pagination' => $syllablesCollection->links()
-        ]);
+        if (!empty($validationErrors)) {
+            session()->flash('validationErrors', $validationErrors);
+            session()->flash('saveMessage', 'Your changes were saved, but there are still syllable validation issues to fix.');
+
+            return view('languagepack.syllables', [
+                'completedSteps' => ['lang_info', 'tiles', 'wordlist', 'keyboard', 'syllables'],
+                'languagePack' => $languagePack,
+                'syllables' => $syllablesCollection,
+                'pagination' => $syllablesCollection->links(),
+                'validationErrors' => $validationErrors,
+                'saveMessage' => 'Your changes were saved, but there are still syllable validation issues to fix.',
+            ]);
+        }
+        
+        session()->flash('success', 'Records updated successfully');
+
+        return redirect(url('/languagepack/syllables/' . $languagePack->id) . '?' . http_build_query(request()->query()));
 
     }
 }

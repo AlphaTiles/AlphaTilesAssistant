@@ -52,6 +52,17 @@ $tabEnum = TabEnum::KEY;
 		</form>						
 		@endif
 
+	@php
+		$validationErrors = $validationErrors ?? session('validationErrors');
+		$saveMessage = $saveMessage ?? session('saveMessage');
+	@endphp
+
+	@if(!empty($saveMessage))
+	<div class="p-3 mb-3 text-blue-700 bg-blue-100 rounded">
+		{{ $saveMessage }}
+	</div>
+	@endif
+
 	@if(!empty($validationErrors))
 	<x-validation-errors
 		:languagePack="$languagePack"

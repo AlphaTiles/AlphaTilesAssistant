@@ -5,10 +5,12 @@ namespace App\Services;
 use App\Models\Key;
 use App\Models\Word;
 use App\Models\LanguagePack;
-use Illuminate\Support\Facades\Log;
+use App\Services\Traits\FormatSpaceTrait;
 
 class CountKeysService
 {
+    use FormatSpaceTrait;
+
     protected LanguagePack $languagePack;
 
     public function __construct(LanguagePack $languagePack)
@@ -25,12 +27,6 @@ class CountKeysService
     {
         $wordList = Word::where('languagepackid', $this->languagePack->id)->get();
         $keyList = Key::where('languagepackid', $this->languagePack->id)->get();
-        
-        // Convert key list to a hash map for quick lookup
-        $keyHashMap = [];
-        foreach ($keyList as $keyItem) {
-            $keyHashMap[$keyItem->value] = $keyItem;
-        }
                 
         // Initialize key usage counter
         $keyUsage = [];
@@ -40,16 +36,23 @@ class CountKeysService
         
         // Count the usage of each key in the word list
         foreach ($wordList as $word) {
-            $wordValue = strtolower($word->value);
+            $wordValue = mb_strtolower($word->value);
             foreach ($keyList as $keyItem) {
-                $keyValue = strtolower($keyItem->value);
-                if(str_contains($wordValue, $keyValue)) {
-                    $keyUsage[$keyValue]++;
-                }                                      
+                $keyValue = $this->normalizeKeyValueForMatching($keyItem->value ?? '');
+                if ($keyValue !== '' && str_contains($wordValue, $keyValue)) {
+                    $keyUsage[$keyItem->value]++;
+                }
             }
         }
 
         return $keyUsage;
                   
+    }
+
+    private function normalizeKeyValueForMatching(string $keyValue): string
+    {
+        $normalizedValue = $this->normalizeSpaceTokenForComparison($keyValue);
+
+        return mb_strtolower($normalizedValue);
     }
 }

@@ -220,6 +220,28 @@ class ValidationServiceTest extends TestCase
         $this->assertStringContainsString('o', $errorValue);
     }
 
+    public function test_space_placeholder_key_is_counted_as_used_in_words_with_spaces()
+    {
+        $testLanguagePack = LanguagePack::factory()->create();
+        $validationService = new ValidationService($testLanguagePack);
+
+        foreach (['a', 'b', '[space]'] as $keyValue) {
+            Key::factory()->create([
+                'value' => $keyValue,
+                'languagepackid' => $testLanguagePack->id,
+            ]);
+        }
+
+        Word::factory()->create([
+            'value' => 'a b',
+            'languagepackid' => $testLanguagePack->id,
+        ]);
+
+        $errors = $validationService->checkKeyExistsInWords([]);
+
+        $this->assertSame([], $errors);
+    }
+
 
     public function test_format_parsed_tiles_does_not_duplicate_space_placeholder_for_words_with_whitespace()
     {

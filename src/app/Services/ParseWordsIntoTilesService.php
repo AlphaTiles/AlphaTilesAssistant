@@ -6,10 +6,13 @@ use App\Enums\LangInfoEnum;
 use App\Models\Tile;
 use App\Models\Word;
 use App\Models\LanguagePack;
+use App\Services\Traits\FormatSpaceTrait;
 use Illuminate\Support\Facades\Log;
 
 class ParseWordsIntoTilesService
 {
+    use FormatSpaceTrait;
+
     protected LanguagePack $languagePack;
     // Define valid multi-type tiles (this probably should be dynamic)
     const MULTITYPE_TILES = ["C", "PC", "V", "X", "T", "-", "SAD", "LV", "AV", "BV", "FV", "D", "AD"]; 
@@ -53,7 +56,7 @@ class ParseWordsIntoTilesService
             foreach ($preliminaryTilesInWord as $tile) {
                 if ($tile !== null) {
                     $tileValue = $tile->value ?? '';
-                    $coveredLength += mb_strlen($this->normalizeTileValueForLength($tileValue));
+                    $coveredLength += mb_strlen($this->formatSpace($tileValue) ?? '');
                 }
             }
             
@@ -83,15 +86,6 @@ class ParseWordsIntoTilesService
         
         return $parseErrors;
                   
-    }
-
-    private function normalizeTileValueForLength(string $tileValue): string
-    {
-        if ($tileValue === ' ' || strcasecmp($tileValue, '[space]') === 0) {
-            return ' ';
-        }
-
-        return $tileValue;
     }
 
     public function parseWordIntoTiles($wordListWord, $scriptType, $tileHashMap, $placeholderCharacter)
@@ -290,10 +284,7 @@ class ParseWordsIntoTilesService
 
         $parseWordByInventoryService = new ParseWordByInventoryService();
         $tileHashMapWithSpace = $tileHashMap;
-
-        if (isset($tileHashMapWithSpace['[space]']) || isset($tileHashMapWithSpace['[SPACE]']) || isset($tileHashMapWithSpace[' '])) {
-            $tileHashMapWithSpace[' '] = $tileHashMapWithSpace['[space]'] ?? $tileHashMapWithSpace['[SPACE]'] ?? $tileHashMapWithSpace[' '];
-        }
+        $tileHashMapWithSpace = $this->addLiteralSpaceAlias($tileHashMapWithSpace);
 
         $parseResult = $parseWordByInventoryService->handle($wordString, $tileHashMapWithSpace, 4, $placeholderCharacter);
         $wordPreliminaryTileArray = $parseResult['items'];
@@ -334,11 +325,7 @@ class ParseWordsIntoTilesService
                 return null;
             }
 
-            if ($tileValue === ' ') {
-                return '[space]';
-            }
-
-            return (string) $tileValue;
+            return (string) $this->formatSpacePlaceholderForDisplay((string) $tileValue);
         }, $parsedTiles)));
 
         if (preg_match('/\s/u', $word) && !in_array('[space]', $formattedTiles, true)) {

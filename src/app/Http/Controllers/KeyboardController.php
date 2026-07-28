@@ -71,9 +71,10 @@ class KeyboardController extends BaseItemController
 
         foreach($keys as $i => $key) {
             if(!empty($key)) {
+                $normalizedKeyValue = $this->normalizeSpacePlaceholderForStorage($key);
                 $keyRecord = Key::withTrashed()->where([
                     'languagepackid' => $languagePack->id,
-                    'value' => $key
+                    'value' => $normalizedKeyValue
                 ])->first();
                 
                 if ($keyRecord) {
@@ -84,7 +85,7 @@ class KeyboardController extends BaseItemController
                 } else {
                     $keyRecord = Key::create([
                         'languagepackid' => $languagePack->id,
-                        'value' => $key
+                        'value' => $normalizedKeyValue
                     ]);
                 }               
             }
@@ -123,7 +124,7 @@ class KeyboardController extends BaseItemController
                 }
 
                 $updateData = [
-                    'value' => $key['value'],
+                    'value' => $this->normalizeSpacePlaceholderForStorage($key['value'] ?? null),
                     'color' => $key['color'],
                 ];                
                 
@@ -135,15 +136,28 @@ class KeyboardController extends BaseItemController
         if($validator->fails()){
             return Redirect::back()->withErrors($validator)->withInput();
         }
-        
-        session()->flash('success', 'Records updated successfully');        
+
+        $validationService = new ValidationService($languagePack);
+        $validationErrors = $validationService->handle(TabEnum::KEY);
+
         $keysCollection = Key::where('languagepackid', $languagePack->id)->get();
 
-        return view('languagepack.keyboard', [
-            'completedSteps' => ['lang_info', 'tiles', 'wordlist', 'keyboard'],
-            'languagePack' => $languagePack,
-            'keys' => $keysCollection,
-            'defaultKeys' => ''
-        ]);
+        if (!empty($validationErrors)) {
+            session()->flash('validationErrors', $validationErrors);
+            session()->flash('saveMessage', 'Your changes were saved, but there are still keyboard validation issues to fix.');
+
+            return view('languagepack.keyboard', [
+                'completedSteps' => ['lang_info', 'tiles', 'wordlist', 'keyboard'],
+                'languagePack' => $languagePack,
+                'keys' => $keysCollection,
+                'defaultKeys' => '',
+                'validationErrors' => $validationErrors,
+                'saveMessage' => 'Your changes were saved, but there are still keyboard validation issues to fix.',
+            ]);
+        }
+        
+        session()->flash('success', 'Records updated successfully');
+
+        return redirect(url('/languagepack/keyboard/' . $languagePack->id) . '?' . http_build_query(request()->query()));
     }
 }

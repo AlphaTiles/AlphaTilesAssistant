@@ -74,9 +74,10 @@ class TilesController extends BaseItemController
         $insert = [];
         foreach($tiles as $key => $tile) {
             if(!empty($tile)) {
+                $normalizedTileValue = $this->normalizeSpacePlaceholderForStorage($tile);
                 $insert[$key]['languagepackid'] = $languagePack->id;
-                $insert[$key]['value'] = $tile;
-                $insert[$key]['upper'] = strtoupper($tile);
+                $insert[$key]['value'] = $normalizedTileValue;
+                $insert[$key]['upper'] = $this->normalizeSpacePlaceholderForStorage(strtoupper($tile));
             }
         }
 
@@ -150,12 +151,12 @@ class TilesController extends BaseItemController
                 $fileModel3 = $fileUploadService->handle($tile, 'tile', 3, $fileRules, 'mp3');
                 
                 $updateData = [
-                    'upper' => $tile['upper'],
+                    'upper' => $this->normalizeSpacePlaceholderForStorage($tile['upper'] ?? null),
                     'type' => $tile['type'],
                     'stage' => $tile['stage'] ?? null,
-                    'or_1' => $tile['or_1'],
-                    'or_2' => $tile['or_2'],
-                    'or_3' => $tile['or_3'],
+                    'or_1' => $this->normalizeSpacePlaceholderForStorage($tile['or_1'] ?? null),
+                    'or_2' => $this->normalizeSpacePlaceholderForStorage($tile['or_2'] ?? null),
+                    'or_3' => $this->normalizeSpacePlaceholderForStorage($tile['or_3'] ?? null),
                     'file_id' => $tile['file_id'] ?? null,
                     'type2' => $tile['type2'],
                     'file2_id' => $tile['file2_id'] ?? null,
