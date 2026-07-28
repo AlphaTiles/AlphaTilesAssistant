@@ -71,9 +71,10 @@ class KeyboardController extends BaseItemController
 
         foreach($keys as $i => $key) {
             if(!empty($key)) {
+                $normalizedKeyValue = $this->normalizeSpacePlaceholderForStorage($key);
                 $keyRecord = Key::withTrashed()->where([
                     'languagepackid' => $languagePack->id,
-                    'value' => $key
+                    'value' => $normalizedKeyValue
                 ])->first();
                 
                 if ($keyRecord) {
@@ -84,7 +85,7 @@ class KeyboardController extends BaseItemController
                 } else {
                     $keyRecord = Key::create([
                         'languagepackid' => $languagePack->id,
-                        'value' => $key
+                        'value' => $normalizedKeyValue
                     ]);
                 }               
             }
@@ -123,7 +124,7 @@ class KeyboardController extends BaseItemController
                 }
 
                 $updateData = [
-                    'value' => $key['value'],
+                    'value' => $this->normalizeSpacePlaceholderForStorage($key['value'] ?? null),
                     'color' => $key['color'],
                 ];                
                 

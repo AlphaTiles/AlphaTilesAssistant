@@ -14,6 +14,7 @@ use App\Enums\ImportStatus;
 use App\Enums\LangInfoEnum;
 use App\Models\LanguagePack;
 use App\Models\LanguageSetting;
+use App\Services\Traits\FormatSpaceTrait;
 use Google\Service\Sheets;
 use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -21,6 +22,8 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 class ImportSheetService
 {    
+    use FormatSpaceTrait;
+
     protected GoogleService $googleService;
     protected Sheets $googleSheet;
     protected LanguagePack $languagePack;
@@ -334,16 +337,4 @@ class ImportSheetService
         $syllable->save();
     }
 
-    private function normalizeSpacePlaceholderForStorage(?string $value): ?string
-    {
-        if ($value === null) {
-            return null;
-        }
-
-        if ($value === ' ' || strcasecmp(trim($value), '[space]') === 0) {
-            return '[space]';
-        }
-
-        return $value;
-    }
 }

@@ -5,9 +5,12 @@ namespace App\Services;
 use App\Models\Key;
 use App\Models\Word;
 use App\Models\LanguagePack;
+use App\Services\Traits\FormatSpaceTrait;
 
 class ParseWordsIntoKeysService
 {
+    use FormatSpaceTrait;
+
     protected LanguagePack $languagePack;
 
     public function __construct(LanguagePack $languagePack)
@@ -80,11 +83,13 @@ class ParseWordsIntoKeysService
 
     private function normalizeKeyForParsing(string $value): string
     {
-        if (strcasecmp(trim($value), '[space]') === 0 || $value === ' ') {
+        $normalizedValue = $this->normalizeSpaceTokenForComparison($value);
+
+        if ($normalizedValue === ' ') {
             return ' ';
         }
 
-        return $this->normalize(mb_strtolower($value));
+        return $this->normalize(mb_strtolower($normalizedValue));
     }
 
     /**

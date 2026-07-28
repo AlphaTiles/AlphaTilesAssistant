@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\File;
 use App\Models\LanguagePack;
+use App\Services\Traits\FormatSpaceTrait;
 use Illuminate\Http\Request;
 use App\Models\LanguagepackConfig;
 use Illuminate\Database\Eloquent\Model;
@@ -11,6 +12,8 @@ use Illuminate\Support\Facades\Storage;
 
 class BaseItemController extends Controller
 {
+    use FormatSpaceTrait;
+
     public Model $model;
     public string $fileKeyname;
     public string $route;

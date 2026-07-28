@@ -5,9 +5,12 @@ namespace App\Services;
 use App\Models\Key;
 use App\Models\Word;
 use App\Models\LanguagePack;
+use App\Services\Traits\FormatSpaceTrait;
 
 class CountKeysService
 {
+    use FormatSpaceTrait;
+
     protected LanguagePack $languagePack;
 
     public function __construct(LanguagePack $languagePack)
@@ -48,10 +51,8 @@ class CountKeysService
 
     private function normalizeKeyValueForMatching(string $keyValue): string
     {
-        if (strcasecmp(trim($keyValue), '[space]') === 0 || $keyValue === ' ') {
-            return ' ';
-        }
+        $normalizedValue = $this->normalizeSpaceTokenForComparison($keyValue);
 
-        return mb_strtolower($keyValue);
+        return mb_strtolower($normalizedValue);
     }
 }
