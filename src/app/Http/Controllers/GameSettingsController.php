@@ -5,19 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\File;
 use App\Models\GameSetting;
 use App\Models\LanguagePack;
-use Illuminate\Http\Request;
+use App\Models\User;
 use App\Enums\GameSettingEnum;
 use App\Enums\LangInfoEnum;
-use App\Services\FileUploadService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 use App\Repositories\GameSettingsRepository;
 use App\Http\Requests\StoreGameSettingsRequest;
 use App\Models\LanguageSetting;
-use Carbon\Language;
 
 class GameSettingsController extends Controller
 {
@@ -68,6 +65,10 @@ class GameSettingsController extends Controller
         }
 
         foreach ($request->settings as $key => $value) {
+            if ($this->isNonAdminAppIdOverride($key)) {
+                continue;
+            }
+
             if ($this->isGoogleServicesFileRemoval($key)) {
                 $this->removeGoogleServicesFile($languagePack);
                 continue;
@@ -89,6 +90,17 @@ class GameSettingsController extends Controller
                 );
             }
         }
+    }
+
+    /**
+     * Prevent non-admin users from manually overriding APP_ID.
+     */
+    private function isNonAdminAppIdOverride(string $key): bool
+    {
+        $user = Auth::user();
+        $isAdmin = $user instanceof User && $user->isAdmin();
+
+        return $key === GameSettingEnum::APP_ID->value && !$isAdmin;
     }
 
     /**

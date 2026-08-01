@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Testing\Fluent\Concerns\Has;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\DB;
 use jeremykenedy\LaravelRoles\Traits\HasRoleAndPermission;
 
 class User extends Authenticatable
@@ -17,4 +17,13 @@ class User extends Authenticatable
         'email',
         'password',
     ];
+
+    public function isAdmin(): bool
+    {
+        return DB::table(config('roles.roleUserTable', 'role_user') . ' as ru')
+            ->join(config('roles.rolesTable', 'roles') . ' as r', 'r.id', '=', 'ru.role_id')
+            ->where('ru.user_id', $this->id)
+            ->where('r.slug', 'admin')
+            ->exists();
+    }
 }

@@ -2,7 +2,8 @@
 
 namespace App\Enums;
 
-use Google\Service\CloudHealthcare\Field;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 enum GameSettingEnum: string
 {
@@ -132,7 +133,8 @@ enum GameSettingEnum: string
 
     public function type(): FieldTypeEnum
     {
-        $isAdmin = !empty(session('masterpw'));
+        $user = Auth::user();
+        $isAdmin = $user instanceof User && $user->isAdmin();
         
         return match($this) {
             self::SCAN_SETTING  => FieldTypeEnum::DROPDOWN,
