@@ -4,8 +4,8 @@ namespace App\Http\Requests;
 
 use App\Enums\FieldTypeEnum;
 use App\Enums\GameSettingEnum;
+use App\Models\User;
 use App\Rules\GoogleServicesJson;
-use App\Rules\ValidAppId;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreGameSettingsRequest extends FormRequest
@@ -14,6 +14,8 @@ class StoreGameSettingsRequest extends FormRequest
     {
         $requiredSettings = [];
         $hasGoogleServicesUpload = $this->hasFile('settings.' . GameSettingEnum::GOOGLE_SERVICES_JSON->value);
+        $user = $this->user();
+        $isAdmin = $user instanceof User && $user->isAdmin();
 
         foreach(GameSettingEnum::cases() as $gameSetting) {
             $required = 'sometimes';
@@ -29,9 +31,9 @@ class StoreGameSettingsRequest extends FormRequest
             $requiredSettings['settings.' . $gameSetting->value] = $required;
         }
 
-        $appIdRules = ['sometimes', 'nullable', 'string'];
-        if (!$hasGoogleServicesUpload) {
-            $appIdRules[] = new ValidAppId;
+        $appIdRules = ['prohibited'];
+        if ($isAdmin) {
+            $appIdRules = ['sometimes', 'nullable', 'string'];
         }
 
         return [
@@ -48,6 +50,8 @@ class StoreGameSettingsRequest extends FormRequest
 
     public function attributes()
     {
+        $attributes = [];
+
         foreach(GameSettingEnum::cases() as $gameSetting) {
             $attributes['settings.' . $gameSetting->value] = $gameSetting->label(); 
         }
