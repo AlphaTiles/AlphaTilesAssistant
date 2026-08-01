@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Exception;
 use Google\Client;
+use App\Models\File;
 use App\Models\Key;
 use App\Models\Game;
 use App\Models\Tile;
@@ -27,11 +28,13 @@ use Illuminate\Support\Facades\Storage;
 use App\Repositories\LangInfoRepository;
 use App\Repositories\GameSettingsRepository;
 use App\Services\Traits\FormatSpaceTrait;
+use App\Services\Traits\ResolvesGoogleServicesFile;
 use Google\Service\Sheets\BatchUpdateSpreadsheetRequest;
 
 class ExportSheetService
 {
     use FormatSpaceTrait;
+    use ResolvesGoogleServicesFile;
 
     protected LogToDatabaseService $logService;
     protected GoogleService $googleService;
@@ -71,6 +74,7 @@ class ExportSheetService
         $this->namesSheet($spreadsheetId);
         $this->gamesSheet($spreadsheetId);
         $this->colorsSheet($spreadsheetId);
+        $this->uploadGoogleServicesFileToDriveRoot();
         $this->createFontFolder();
         $this->logService->handle('Export Job completed', ExportStatus::SUCCESS);
     }
@@ -419,18 +423,30 @@ class ExportSheetService
 $this->clearAndAddValuesToSheet($spreadsheetId, $sheetAndRange, $values);
 
         Log::info('export of settings completed');
-        
-        // add google-services.json file to Google Drive root of the export folder if it exists
-        $filePath = storage_path("app/public/languagepacks/{$this->languagePack->id}/res/raw/google-services.json");
-        if (!file_exists($filePath)) {
+    }      
+
+    private function uploadGoogleServicesFileToDriveRoot(): void
+    {
+        $relativeFilePath = $this->getGoogleServicesRelativePath();
+        if (!$relativeFilePath) {
             Log::info('No google-services.json file to export');
             return;
         }
+
+        if (!Storage::disk('public')->exists($relativeFilePath)) {
+            Log::warning('Google Services file record exists but storage file is missing', [
+                'path' => $relativeFilePath,
+            ]);
+            return;
+        }
+
         try {
-            $content = file_get_contents($filePath);
+            $this->deleteExistingGoogleServicesFilesFromDriveRoot();
+
+            $content = Storage::disk('public')->get($relativeFilePath);
             $fileMetadata = new DriveFile([
                 'name' => 'google-services.json',
-                'parents' => [ $this->exportFolderId ],
+                'parents' => [$this->exportFolderId],
             ]);
 
             $this->driveService->files->create($fileMetadata, [
@@ -447,7 +463,24 @@ $this->clearAndAddValuesToSheet($spreadsheetId, $sheetAndRange, $values);
             Log::error('Failed to upload google-services.json: ' . $e->getMessage());
             $this->logService->handle('Failed to upload google-services.json: ' . $e->getMessage(), ExportStatus::FAILED);
         }
-    }      
+    }
+
+    private function deleteExistingGoogleServicesFilesFromDriveRoot(): void
+    {
+        $existingFiles = $this->driveService->files->listFiles([
+            'q' => sprintf("name='google-services.json' and '%s' in parents and trashed=false", $this->exportFolderId),
+            'spaces' => 'drive',
+            'fields' => 'files(id)',
+            'includeItemsFromAllDrives' => true,
+            'supportsAllDrives' => true,
+        ]);
+
+        foreach ($existingFiles->files ?? [] as $existingFile) {
+            $this->driveService->files->delete($existingFile->id, [
+                'supportsAllDrives' => true,
+            ]);
+        }
+    }
 
     private function shareSheet(string $spreadsheetId): void
     {
