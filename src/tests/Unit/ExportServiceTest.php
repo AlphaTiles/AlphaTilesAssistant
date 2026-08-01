@@ -5,13 +5,21 @@ namespace Tests\Unit;
 use ZipArchive;
 use App\Models\Key;
 use Tests\TestCase;
+use App\Models\File;
 use App\Models\Tile;
 use App\Models\Syllable;
+use Google\Service\Drive;
+use App\Models\GameSetting;
 use App\Models\LanguagePack;
 use App\Models\LanguageSetting;
+use App\Enums\ExportStatus;
 use App\Enums\LangInfoEnum;
+use App\Enums\GameSettingEnum;
+use App\Services\LogToDatabaseService;
 use App\Services\GenerateZipExportService;
+use App\Services\ExportSheetService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 
 class ExportServiceTest extends TestCase
 {
@@ -162,5 +170,131 @@ class ExportServiceTest extends TestCase
 
         $this->assertEquals(' ', $columns[0]);
         $this->assertEquals('4', $columns[1]);
+    }
+
+    public function test_google_services_file_is_uploaded_to_drive_root(): void
+    {
+        Storage::disk('public')->put("languagepacks/{$this->languagePack->id}/res/raw/google_services.json", '{"project_info":{}}');
+
+        $file = File::create([
+            'name' => 'google_services.json',
+            'file_path' => "/storage/languagepacks/{$this->languagePack->id}/res/raw/google_services.json",
+        ]);
+
+        GameSetting::create([
+            'languagepackid' => $this->languagePack->id,
+            'name' => GameSettingEnum::GOOGLE_SERVICES_JSON->value,
+            'value' => (string) $file->id,
+        ]);
+
+        $exportService = new ExportSheetService($this->languagePack, 'token', 'drive-root-folder');
+
+        $fakeFilesApi = new class {
+            public array $calls = [];
+            public array $deleted = [];
+
+            public function create($metadata, array $options)
+            {
+                $this->calls[] = [
+                    'metadata' => $metadata,
+                    'options' => $options,
+                ];
+
+                return (object) ['id' => 'uploaded-file-id'];
+            }
+
+            public function listFiles(array $options)
+            {
+                return (object) [
+                    'files' => [
+                        (object) ['id' => 'old-google-services-id'],
+                    ],
+                ];
+            }
+
+            public function delete(string $id, array $options)
+            {
+                $this->deleted[] = [
+                    'id' => $id,
+                    'options' => $options,
+                ];
+            }
+        };
+
+        $fakeDriveService = new class($fakeFilesApi) extends Drive {
+            public function __construct(private object $fakeFilesApi)
+            {
+                $this->files = $this->fakeFilesApi;
+            }
+        };
+
+        $this->setProtectedProperty($exportService, 'driveService', $fakeDriveService);
+        $this->setProtectedProperty($exportService, 'logService', new class extends LogToDatabaseService {
+            public array $calls = [];
+
+            public function __construct()
+            {
+            }
+
+            public function handle(string $message, ExportStatus $status): void
+            {
+                $this->calls[] = compact('message', 'status');
+            }
+        });
+
+        $method = new \ReflectionMethod(ExportSheetService::class, 'uploadGoogleServicesFileToDriveRoot');
+        $method->setAccessible(true);
+        $method->invoke($exportService);
+
+        $calls = $fakeFilesApi->calls;
+        $deleted = $fakeFilesApi->deleted;
+
+        $this->assertCount(1, $deleted);
+        $this->assertSame('old-google-services-id', $deleted[0]['id']);
+        $this->assertCount(1, $calls);
+        $this->assertSame('google-services.json', $calls[0]['metadata']->name);
+        $this->assertSame(['drive-root-folder'], $calls[0]['metadata']->parents);
+        $this->assertSame('application/json', $calls[0]['options']['mimeType']);
+        $this->assertSame('{"project_info":{}}', $calls[0]['options']['data']);
+    }
+
+    public function test_google_services_file_is_added_to_zip_root(): void
+    {
+        Storage::disk('public')->put("languagepacks/{$this->languagePack->id}/res/raw/custom_google_services.json", '{"project_info":{"project_id":"demo"}}');
+
+        $file = File::create([
+            'name' => 'custom_google_services.json',
+            'file_path' => "/storage/languagepacks/{$this->languagePack->id}/res/raw/custom_google_services.json",
+        ]);
+
+        GameSetting::create([
+            'languagepackid' => $this->languagePack->id,
+            'name' => GameSettingEnum::GOOGLE_SERVICES_JSON->value,
+            'value' => (string) $file->id,
+        ]);
+
+        GameSetting::create([
+            'languagepackid' => $this->languagePack->id,
+            'name' => GameSettingEnum::APP_ID->value,
+            'value' => 'testapp',
+        ]);
+
+        $zipPath = (new GenerateZipExportService($this->languagePack))->handle();
+
+        $zip = new ZipArchive();
+        $zip->open($zipPath);
+
+        $this->assertNotFalse($zip->locateName('testapp/google-services.json'));
+        $this->assertSame('{"project_info":{"project_id":"demo"}}', $zip->getFromName('testapp/google-services.json'));
+
+        $zip->close();
+    }
+
+    private function setProtectedProperty(object $object, string $property, mixed $value): void
+    {
+        $reflection = new \ReflectionObject($object);
+        $property = $reflection->getProperty($property);
+        $property->setAccessible(true);
+        $property->setValue($object, $value);
     }
 }

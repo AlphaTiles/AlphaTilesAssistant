@@ -20,10 +20,12 @@ use Illuminate\Database\Eloquent\Model;
 use App\Repositories\LangInfoRepository;
 use App\Repositories\GameSettingsRepository;
 use App\Services\Traits\FormatSpaceTrait;
+use App\Services\Traits\ResolvesGoogleServicesFile;
 
 class GenerateZipExportService
 {
     use FormatSpaceTrait;
+    use ResolvesGoogleServicesFile;
 
     protected string $tempDir;
     protected LanguagePack $languagePack;
@@ -85,10 +87,9 @@ class GenerateZipExportService
         $gamesFile = $this->generateGamesFile($gamesFileName, $zip, $zipFileName);
         $zip->addFile($gamesFile, "{$zipFileName}/res/raw/{$gamesFileName}");
 
-        // add google_services.json file to /res/raw and to the root of the zip folder if it exists
-        $publicGoogleServices = storage_path("app/public/languagepacks/{$this->languagePack->id}/res/raw/google_services.json");
-        if (file_exists($publicGoogleServices)) {
-            //$zip->addFile($publicGoogleServices, "{$zipFileName}/res/raw/google-services.json");
+        // add google-services.json to the zip root if it exists for this language pack
+        $publicGoogleServices = $this->getGoogleServicesAbsolutePath();
+        if (!empty($publicGoogleServices) && file_exists($publicGoogleServices)) {
             $zip->addFile($publicGoogleServices, "{$zipFileName}/google-services.json");
         }
 
