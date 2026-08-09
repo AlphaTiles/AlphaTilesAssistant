@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Exception;
 use Google\Client;
+use App\Models\Game;
 use App\Models\Key;
 use App\Models\File;
 use App\Models\Tile;
@@ -56,6 +57,7 @@ class ImportSheetService
             $this->saveLanginfo('langinfo');
             $this->saveTiles('gametiles');
             $this->saveWords('wordlist');    
+            $this->saveGames('games');
             $this->saveKeyboard('keyboard');
             $this->saveSyllables('syllables');
 
@@ -96,6 +98,7 @@ class ImportSheetService
         }
 
         $key = 0;
+        $settings = [];
         foreach ($rows as $row) {
             $langInfoEnumKey = array_search($row[0], $langInfoExportLabels);
 
@@ -106,8 +109,10 @@ class ImportSheetService
                 $key++;
             }
         }     
-        
-        LanguageSetting::insert($settings);
+
+        if (!empty($settings)) {
+            LanguageSetting::insert($settings);
+        }
     }
 
     private function saveTiles(string $worksheetName)
@@ -281,6 +286,99 @@ class ImportSheetService
         if (!empty($data)) {
             Key::insert($data);
         }
+    }
+
+    private function saveGames(string $worksheetName): void
+    {
+        try {
+            $rows = $this->getWorksheetRows($worksheetName);
+        } catch (\Throwable $throwable) {
+            Log::info("Skipping missing games worksheet: {$worksheetName}");
+            return;
+        }
+
+        $order = 1;
+        foreach ($rows as $rowIndex => $row) {
+            if ($rowIndex === 0 || empty($row[1])) {
+                continue;
+            }
+
+            $game = Game::create([
+                'languagepackid' => $this->languagePack->id,
+                'include' => true,
+                'basic' => true,
+                'door' => $this->resolveDoorValue($row[0] ?? null, $order),
+                'order' => $order,
+                'country' => trim((string) ($row[1] ?? '')),
+                'level' => (int) ($row[2] ?? 0),
+                'color' => (int) ($row[3] ?? 0),
+                'audio_duration' => $this->nullableTrimmedValue($row[5] ?? null),
+                'syll_or_tile' => trim((string) ($row[6] ?? '')),
+                'stages_included' => $this->resolveStagesIncluded($row[7] ?? null),
+                'friendly_name' => $this->nullableTrimmedValue($row[8] ?? null),
+                'file_id' => null,
+                'required_assets' => null,
+                'abs' => false,
+            ]);
+
+            $this->uploadGameFile($game, $row[4] ?? null);
+            $order++;
+        }
+    }
+
+    private function uploadGameFile(Game $game, ?string $fileName): void
+    {
+        if (empty($fileName) || strtolower($fileName) === 'x') {
+            return;
+        }
+
+        $file = $fileName . '.mp3';
+        $driveFileId = $this->googleService->getFileIdByFileName($file, 'audio_instructions_optional', $this->folderId);
+
+        if (empty($driveFileId)) {
+            return;
+        }
+
+        $path = "public/languagepacks/{$this->languagePack->id}/res/raw/";
+        $newFileName = 'game_' . str_pad($game->id, 3, '0', STR_PAD_LEFT) . '.mp3';
+        $this->googleService->saveFile($path, $driveFileId, $newFileName);
+
+        $fileModel = new File();
+        $fileModel->name = $file;
+        $fileModel->file_path = '/storage' . str_replace('public', '', $path) . $newFileName;
+        $fileModel->save();
+
+        $game->file_id = $fileModel->id;
+        $game->save();
+    }
+
+    private function resolveDoorValue(mixed $doorValue, int $defaultDoor): int
+    {
+        $door = $this->nullableTrimmedValue($doorValue);
+
+        return is_numeric($door) ? (int) $door : $defaultDoor;
+    }
+
+    private function resolveStagesIncluded(mixed $stagesIncluded): ?int
+    {
+        $value = $this->nullableTrimmedValue($stagesIncluded);
+
+        if ($value === null || $value === '-') {
+            return null;
+        }
+
+        return (int) $value;
+    }
+
+    private function nullableTrimmedValue(mixed $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $trimmedValue = trim((string) $value);
+
+        return $trimmedValue === '' ? null : $trimmedValue;
     }
 
     private function saveSyllables(string $worksheetName): void

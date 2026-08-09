@@ -2,7 +2,7 @@
 
 namespace Tests\Unit;
 
-use App\Models\Key;
+use App\Models\Game;
 use App\Models\Syllable;
 use App\Models\LanguagePack;
 use App\Services\ImportSheetService;
@@ -149,6 +149,75 @@ class ImportSheetServiceTest extends TestCase
             'or_3' => 'a[space]b',
             'color' => 3,
         ]);
+    }
+
+    public function test_save_games_imports_games_for_my_games_list(): void
+    {
+        $languagePack = LanguagePack::factory()->create();
+        $service = new ImportSheetService($languagePack, 'token', 'folder');
+
+        $sheet = new class([
+            ['Door', 'Country', 'ChallengeLevel', 'Color', 'InstructionAudio', 'AudioDuration', 'SyllOrTile', 'StagesIncluded', 'Friendly Name'],
+            ['1', 'US', '2', '4', 'X', '15', 'tile', '3', 'First Imported Game'],
+            ['2', 'CA', '5', '8', 'X', '', 'syllable', '-', 'Second Imported Game'],
+        ]) {
+            public function __construct(private array $rows)
+            {
+            }
+
+            public function toArray(): array
+            {
+                return $this->rows;
+            }
+        };
+
+        $spreadsheet = new class($sheet) {
+            public function __construct(private $sheet)
+            {
+            }
+
+            public function getSheetByName(string $sheetName)
+            {
+                return $this->sheet;
+            }
+        };
+
+        $this->setProtectedProperty($service, 'sheetType', 'xlsx');
+        $this->setProtectedProperty($service, 'spreadsheet', $spreadsheet);
+
+        $method = new ReflectionMethod(ImportSheetService::class, 'saveGames');
+        $method->setAccessible(true);
+        $method->invoke($service, 'games');
+
+        $this->assertDatabaseHas('games', [
+            'languagepackid' => $languagePack->id,
+            'order' => 1,
+            'door' => 1,
+            'include' => true,
+            'country' => 'US',
+            'level' => 2,
+            'color' => 4,
+            'audio_duration' => '15',
+            'syll_or_tile' => 'tile',
+            'stages_included' => 3,
+            'friendly_name' => 'First Imported Game',
+        ]);
+
+        $this->assertDatabaseHas('games', [
+            'languagepackid' => $languagePack->id,
+            'order' => 2,
+            'door' => 2,
+            'include' => true,
+            'country' => 'CA',
+            'level' => 5,
+            'color' => 8,
+            'audio_duration' => null,
+            'syll_or_tile' => 'syllable',
+            'stages_included' => null,
+            'friendly_name' => 'Second Imported Game',
+        ]);
+
+        $this->assertSame(2, Game::where('languagepackid', $languagePack->id)->count());
     }
 
     private function setProtectedProperty(object $object, string $property, mixed $value): void
