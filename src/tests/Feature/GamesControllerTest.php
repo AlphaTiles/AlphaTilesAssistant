@@ -217,6 +217,32 @@ class GamesControllerTest extends TestCase
     }
 
     /** @test */
+    public function all_filter_excludes_abs_games(): void
+    {
+        $absGame = Game::factory()->create([
+            'languagepackid' => $this->languagePack->id,
+            'abs'            => true,
+            'order'          => 1,
+        ]);
+        $normalGame = Game::factory()->create([
+            'languagepackid' => $this->languagePack->id,
+            'abs'            => false,
+            'order'          => 2,
+        ]);
+
+        $response = $this->actingAs($this->user)->get($this->url([
+            'show_excluded'          => 1,
+            'required_assets_filter' => 'all',
+        ]));
+
+        $response->assertOk();
+        $response->assertViewHas('items', function ($items) use ($absGame, $normalGame) {
+            $ids = $this->ids($items);
+            return !$ids->contains($absGame->id) && $ids->contains($normalGame->id);
+        });
+    }
+
+    /** @test */
     public function required_assets_filter_applies_without_show_excluded(): void
     {
         $taIncluded = Game::factory()->create([
