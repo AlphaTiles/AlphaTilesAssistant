@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Exception;
 use Google\Client;
+use App\Services\SeededGameCatalog;
 use App\Models\Game;
 use App\Models\Key;
 use App\Models\File;
@@ -56,7 +57,8 @@ class ImportSheetService
         try {
             $this->saveLanginfo('langinfo');
             $this->saveTiles('gametiles');
-            $this->saveWords('wordlist');    
+            $this->saveWords('wordlist');
+            app(GameSeeder::class)->seedIfEmpty($this->languagePack->id);
             $this->saveGames('games');
             $this->saveKeyboard('keyboard');
             $this->saveSyllables('syllables');
@@ -297,13 +299,24 @@ class ImportSheetService
             return;
         }
 
-        $order = 1;
+        $seededGameCatalog = app(SeededGameCatalog::class);
+        $seededSignatures = $seededGameCatalog->getSeededGameSignatures();
+
+        Game::where('languagepackid', $this->languagePack->id)
+            ->where('include', true)
+            ->update(['include' => false]);
+
+        $order = ((int) Game::where('languagepackid', $this->languagePack->id)->max('order')) + 1;
+        if ($order <= 0) {
+            $order = 1;
+        }
+
         foreach ($rows as $rowIndex => $row) {
             if ($rowIndex === 0 || empty($row[1])) {
                 continue;
             }
 
-            $game = Game::create([
+            $gameData = [
                 'languagepackid' => $this->languagePack->id,
                 'include' => true,
                 'basic' => true,
@@ -319,10 +332,46 @@ class ImportSheetService
                 'file_id' => null,
                 'required_assets' => null,
                 'abs' => false,
-            ]);
+            ];
+
+            $signature = $seededGameCatalog->buildSeededSignature(
+                $gameData['country'],
+                $gameData['level'],
+                $gameData['color'],
+                $gameData['syll_or_tile'],
+                $gameData['friendly_name'],
+                $gameData['abs']
+            );
+            if (isset($seededSignatures[$signature])) {
+                $this->markExistingSeededGameAsIncluded($gameData);
+                continue;
+            }
+
+            $game = Game::create($gameData);
 
             $this->uploadGameFile($game, $row[4] ?? null);
             $order++;
+        }
+    }
+
+    private function markExistingSeededGameAsIncluded(array $gameData): void
+    {
+        $query = Game::where('languagepackid', $this->languagePack->id)
+            ->where('country', $gameData['country'])
+            ->where('level', $gameData['level'])
+            ->where('color', $gameData['color'])
+            ->where('syll_or_tile', $gameData['syll_or_tile'])
+            ->where('abs', $gameData['abs']);
+
+        if ($gameData['friendly_name'] === null) {
+            $query->whereNull('friendly_name');
+        } else {
+            $query->where('friendly_name', $gameData['friendly_name']);
+        }
+
+        $seededGame = $query->first();
+        if ($seededGame) {
+            $seededGame->update(['include' => true]);
         }
     }
 

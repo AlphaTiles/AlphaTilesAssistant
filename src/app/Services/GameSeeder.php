@@ -14,6 +14,8 @@ class GameSeeder
      */
     public function seedIfEmpty(int $languagePackId): void
     {
+        $seededGameCatalog = app(SeededGameCatalog::class);
+
         $hasAnyGames = Game::where('languagepackid', $languagePackId)->exists();
         $hasAbsGames = Game::where('languagepackid', $languagePackId)
             ->where('abs', true)
@@ -34,29 +36,26 @@ class GameSeeder
             $door = 1;
         }
 
-        $defaultGames = [];
-        if (!$hasAnyGames) {
-            $defaultGames = $this->loadGamesFromCsv(
-                database_path('seeders/games.csv'),
-                $languagePackId,
-                false,
-                $order,
-                $door
+        foreach ($seededGameCatalog->getSeedSourceFiles() as [$csvPath, $isAbs]) {
+            if (!$isAbs && $hasAnyGames) {
+                continue;
+            }
+
+            if ($isAbs && $hasAbsGames) {
+                continue;
+            }
+
+            $games = array_merge(
+                $games,
+                $this->loadGamesFromCsv(
+                    $csvPath,
+                    $languagePackId,
+                    $isAbs,
+                    $order,
+                    $door
+                )
             );
         }
-
-        $absGames = [];
-        if (!$hasAbsGames) {
-            $absGames = $this->loadGamesFromCsv(
-                database_path('seeders/abs_games.csv'),
-                $languagePackId,
-                true,
-                $order,
-                $door
-            );
-        }
-
-        $games = array_merge($defaultGames, $absGames);
 
         if (!empty($games)) {
             Game::insert($games);
