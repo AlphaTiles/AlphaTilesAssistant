@@ -30,6 +30,8 @@ class GameManagementService
 
         if ($requiredAssetsFilter === 'my_games') {
             $gamesQuery->where('include', true);
+        } elseif ($requiredAssetsFilter === 'all') {
+            $gamesQuery->where('abs', false);
         } elseif ($requiredAssetsFilter === 'abs') {
             $gamesQuery->where('abs', true);
         } elseif (
