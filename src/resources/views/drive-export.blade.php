@@ -2,19 +2,19 @@
 
 @section('content')
 <div class="prose">
-    <h1>Export Language Pack to Google Drive</h1>
+    <h1>{{ __('Export Language Pack to Google Drive') }}</h1>
     <div class="mt-5 mb-5" id="exportprogress">
-          The export is in progress. You will find your exported files in your Google Drive shortly.
+          {{ __('The export is in progress. You will find your exported files in your Google Drive shortly.') }}
           <br>
-          <a href="https://drive.google.com/drive/folders/{{$driveRootFolderId}}?usp=drive_link" target="_blank">Go to Google Drive Folder</a>
+          <a href="https://drive.google.com/drive/folders/{{$driveRootFolderId}}?usp=drive_link" target="_blank">{{ __('Go to Google Drive Folder') }}</a>
     </div>
 
-    <h3>Export status: <span id="exportStatus">Loading...</span></h3>
+    <h3>{{ __('Export status:') }} <span id="exportStatus">{{ __('Loading...') }}</span></h3>
     <textarea id="logMessages" class="w-full" rows="10">
-        Loading...
+        {{ __('Loading...') }}
     </textarea>
     <div class="mt-5">
-        <a href="/dashboard">Back to Dashboard</a>
+        <a href="/dashboard">{{ __('Back to Dashboard') }}</a>
     </div>
 </div>
 
@@ -30,7 +30,7 @@ function updateLogMessages() {
             if (data.messages && data.messages.length > 0) {
                 messages = data.messages;
                 if(data.status === 'failed') {
-                    messages += '\nExport failed.';
+                    messages += "\n{{ __('Export failed.') }}";
                 }
                 logDiv.value = messages;
                 // Scroll to bottom of textarea
@@ -43,7 +43,7 @@ function updateLogMessages() {
                     console.log('Export completed with status:', data.status);
                 }
             } else {
-                logDiv.value = 'No messages yet...';
+                logDiv.value = "{{ __('No messages yet...') }}";
             }
         });
 }

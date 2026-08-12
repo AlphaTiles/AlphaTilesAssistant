@@ -12,7 +12,7 @@ $tabEnum = TabEnum::TILE;
 
 <div class="prose">
 
-    <h1>Tiles</h1>
+    <h1>{{ __('Tiles') }}</h1>
 	
 	<div>
 		<div x-data="{ showMessage: true }" x-show="showMessage" x-init="setTimeout(() => showMessage = false, 3000)">
@@ -33,7 +33,7 @@ $tabEnum = TabEnum::TILE;
 		@method('DELETE')
 		<div class="alert mb-3">  				
 			<div class="block p-2">
-				<h3 class="mt-0">Are you sure want to delete the following items?</h3>
+				<h3 class="mt-0">{{ __('Are you sure want to delete the following items?') }}</h3>
 				<?php $tileDeleteIds = []; ?>
 				@foreach ($items as $key => $tile)					
 					@if(isset($deleteValues[$key]))
@@ -43,8 +43,8 @@ $tabEnum = TabEnum::TILE;
 				@endforeach					
 				<div class="mt-2">
 					<input type="hidden" name="deleteIds" value="{{ implode(',', $tileDeleteIds); }}" />
-					<button name="btnCancel" value="cancel" class="btn btn-sm">Cancel</button>
-					<button name="btnDelete" value="delete" class="btn btn-sm btn-primary">Yes</button>
+					<button name="btnCancel" value="cancel" class="btn btn-sm">{{ __('Cancel') }}</button>
+					<button name="btnDelete" value="delete" class="btn btn-sm btn-primary">{{ __('Yes') }}</button>
 				</div>
 			</div>
 		</div>	
@@ -89,8 +89,8 @@ $tabEnum = TabEnum::TILE;
 	@method('PATCH')
 	@if(count($items) > 0)
 		<p>
-			<input type="radio" name="orderBy" value="value" {{ $orderby == 'value' ? 'checked' : '' }} onChange="this.form.submit();"> Order by Tile
-			<input type="radio" name="orderBy" value="id" {{ $orderby == 'id' ? 'checked' : '' }} onChange="this.form.submit();"> Added Order
+			<input type="radio" name="orderBy" value="value" {{ $orderby == 'value' ? 'checked' : '' }} onChange="this.form.submit();"> {{ __('Order by Tile') }}
+			<input type="radio" name="orderBy" value="id" {{ $orderby == 'id' ? 'checked' : '' }} onChange="this.form.submit();"> {{ __('Added Order') }}
 		</p>
 		<div>
 			<table class="table table-compact w-full">
@@ -105,13 +105,13 @@ $tabEnum = TabEnum::TILE;
 				</colgroup>                        
 				<thead>
 				<tr>
-					<th>Tile</th> 
-					<th>Uppercase</th> 
-					<th>Type</th>
-					<th>Distractors <a href="#" onClick="openAlert('Distractors', 'The three columns (Or1, Or2, Or3) contain “distractors”. They are used to provide alternative (incorrect) answers. For example, in the word-builder game to the right, the player has compared the two purple items and has correctly selected |r| and not |i|. The game tile |i| appears as an option because in the gameitems tab, the letter “i” is listed to the right of the row for the letter “r”. You should only select distractors from the items found in the first column of the gameitems tab.', '/images/help/distractors.png');"><i class="fa-solid fa-circle-info"></i></a></th>                             
-					<th>Audio instructions</th>
-					<th>Stage <a href="#" onClick="openAlert('First Stage', 'Define in which stage the tile should first appear');"><i class="fa-solid fa-circle-info"></i></a></th>
-					<th><input type="checkbox" onClick="checkAll(this, 'items')" /> Delete</th>
+					<th>{{ __('Tile') }}</th> 
+					<th>{{ __('Uppercase') }}</th> 
+					<th>{{ __('Type') }}</th>
+					<th>{{ __('Distractors') }} <a href="#" onClick="openAlert('{{ __('Distractors') }}', '{{ __('The three columns (Or1, Or2, Or3) contain “distractors”. They are used to provide alternative (incorrect) answers. For example, in the word-builder game to the right, the player has compared the two purple items and has correctly selected |r| and not |i|. The game tile |i| appears as an option because in the gameitems tab, the letter “i” is listed to the right of the row for the letter “r”. You should only select distractors from the items found in the first column of the gameitems tab.') }}', '/images/help/distractors.png');"><i class="fa-solid fa-circle-info"></i></a></th>                             
+					<th>{{ __('Audio instructions') }}</th>
+					<th>{{ __('Stage') }} <a href="#" onClick="openAlert('{{ __('First Stage') }}', '{{ __('Define in which stage the tile should first appear') }}');"><i class="fa-solid fa-circle-info"></i></a></th>
+					<th><input type="checkbox" onClick="checkAll(this, 'items')" /> {{ __('Delete') }}</th>
 				</tr>
 				</thead> 
 				<tbody>
@@ -208,37 +208,37 @@ $tabEnum = TabEnum::TILE;
 			{!! $pagination !!}
 		</div>
 
-		<p class="p-3 bg-blue-200 rounded">To delete an item, first select the check box(es) in the Delete column, then click on "Save".</p>
+		<p class="p-3 bg-blue-200 rounded">{{ __('To delete an item, first select the check box(es) in the Delete column, then click on "Save".') }}</p>
 		<p>
-			<input type="submit" name="btnHiddenSave" id="saveButton" value="Save" class="hidden" />
-			<input type="submit" name="btnSave" value="Save" class="btn-sm btn-primary ml-1" onClick='handleSaveReset();' />
+			<input type="submit" name="btnHiddenSave" id="saveButton" value="{{ __('Save') }}" class="hidden" />
+			<input type="submit" name="btnSave" value="{{ __('Save') }}" class="btn-sm btn-primary ml-1" onClick='handleSaveReset();' />
 		</p>			
 	@endif
 
 		</div>
 	</form>
 
-	<form id="formAddItems" method="post" action="/languagepack/tiles/{{ $languagePack->id }}" data-add-items-message="Make sure you only include a single column of data that has the tiles.">
+	<form id="formAddItems" method="post" action="/languagepack/tiles/{{ $languagePack->id }}" data-add-items-message="{{ __('Make sure you only include a single column of data that has the tiles.') }}">
 		@csrf
 		<div>
-			<label for="add_items">Add items (one tile per line):</label><br>
+			<label for="add_items">{{ __('Add items (one tile per line):') }}</label><br>
 			<textarea id="txtAddItems" name="add_items" rows=7 cols=40 class="leading-tight">{{ old('add_items') }}</textarea>
 		</div>
 
 		<div class="mt-3 w-9/12">		
 			<input type="hidden" name="id" value="{{ $languagePack->id }}" />
-			<input type="submit" name="btnAdd" value="Add items" class="btn-sm btn-primary ml-1" />
+			<input type="submit" name="btnAdd" value="{{ __('Add items') }}" class="btn-sm btn-primary ml-1" />
 		</div>
 	</form>
 	<div class="mt-6 w-9/12">	
-		<a href="#" onClick='autoSavePage("/languagepack/edit/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-secondary pt-0.5 font-normal">Back</a>
+		<a href="#" onClick='autoSavePage("/languagepack/edit/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-secondary pt-0.5 font-normal">{{ __('Back') }}</a>
 		@if($languagePack->tiles->count() > 0)
-			<a href="#" onClick='autoSavePage("/languagepack/wordlist/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">Next</a>		
+			<a href="#" onClick='autoSavePage("/languagepack/wordlist/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">{{ __('Next') }}</a>		
 		@endif
 	</div>
 
 	<div class="mt-4">
-		<a href="/dashboard">Back to Dashboard</a>
+		<a href="/dashboard">{{ __('Back to Dashboard') }}</a>
 	</div>
 </div>
 
@@ -276,18 +276,18 @@ function showTileInfo(languagePackId, tileId) {
 		.then(words => {
 			const wordList = words.map(word => `<li>${word}</li>`).join('');			
 			Swal.fire({
-				title: 'Words in which tile is used',
+				title: "{{ __('Words in which tile is used') }}",
 				html: `<ul>${wordList}</ul>`,
 				confirmButtonColor: 'blue',
-				confirmButtonText: 'Close'
+				confirmButtonText: "{{ __('Close') }}"
 			});
 		})
 		.catch(error => {
 			console.error('Error fetching words:', error);
 			Swal.fire({
-				title: 'Error',
-				text: 'Could not fetch words for the selected tile.',
-				confirmButtonText: 'Close'
+				title: "{{ __('Error') }}",
+				text: "{{ __('Could not fetch words for the selected tile.') }}",
+				confirmButtonText: "{{ __('Close') }}"
 			});
 		});
 }

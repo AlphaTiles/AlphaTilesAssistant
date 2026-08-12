@@ -42,19 +42,19 @@ enum ColorEnum: int
     public function label(): string
     {
         return match ($this) {
-            self::THEME_PURPLE      => 'theme purple',
-            self::THEME_BLUE             => 'theme blue',
-            self::THEME_ORANGE    => 'theme orange',
-            self::THEME_GREEN   => 'theme green',
-            self::THEME_RED => 'theme red',
-            self::YELLOW => 'yellow',
-            self::BLACK => 'black',
-            self::DARK_GREEN => 'dark green',
-            self::GRAY => 'gray',
-            self::BROWN => 'brown',
-            self::RED => 'red',
-            self::MAGENTA => 'magenta',
-            self::BLUE => 'blue',
+            self::THEME_PURPLE      => __('theme purple'),
+            self::THEME_BLUE             => __('theme blue'),
+            self::THEME_ORANGE    => __('theme orange'),
+            self::THEME_GREEN   => __('theme green'),
+            self::THEME_RED => __('theme red'),
+            self::YELLOW => __('yellow'),
+            self::BLACK => __('black'),
+            self::DARK_GREEN => __('dark green'),
+            self::GRAY => __('gray'),
+            self::BROWN => __('brown'),
+            self::RED => __('red'),
+            self::MAGENTA => __('magenta'),
+            self::BLUE => __('blue'),
         };        
     }
 }

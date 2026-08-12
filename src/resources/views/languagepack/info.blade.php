@@ -17,10 +17,10 @@ if(isset($languagePack->langInfo) &&  $languagePack->langInfo->count() > 0) {
 
 <div class="prose">
 
-    <h1>Language Info</h1>
+    <h1>{{ __('Language Info') }}</h1>
 
 	@if(isset($languagePack) && $languagePack->import_status === ImportStatus::IMPORTING->value)
-		<span class="text-blue-700 ml-4">Import in progress</span>
+		<span class="text-blue-700 ml-4">{{ __('Import in progress') }}</span>
 	
 	@else
 	<x-edit-settings 
@@ -37,15 +37,15 @@ if(isset($languagePack->langInfo) &&  $languagePack->langInfo->count() > 0) {
 	@if($languagePack)
 	<div class="mt-5">
 		@if($languagePack->user_id == Auth::id())
-			<input type="button" value="Delete" onClick="confirmDelete();" class="ml-1 inline-block no-underline btn-sm btn-error font-normal cursor-pointer" />
+			<input type="button" value="{{ __('Delete') }}" onClick="confirmDelete();" class="ml-1 inline-block no-underline btn-sm btn-error font-normal cursor-pointer" />
 		@else
-			<input type="button" value="Leave Project" onClick="confirmRemoveCollaboration();" class="ml-1 inline-block no-underline btn-sm btn-error font-normal cursor-pointer /">
+			<input type="button" value="{{ __('Leave Project') }}" onClick="confirmRemoveCollaboration();" class="ml-1 inline-block no-underline btn-sm btn-error font-normal cursor-pointer /">
 		@endif
 	</div>
 	@endif
 	
 	<div class="mt-4">
-		<a href="/dashboard">Back to Dashboard</a>
+		<a href="/dashboard">{{ __('Back to Dashboard') }}</a>
 	</div>
 </div>
 
@@ -55,13 +55,13 @@ if(isset($languagePack->langInfo) &&  $languagePack->langInfo->count() > 0) {
 <script>
 	function confirmDelete() {
 	Swal.fire({
-				title: 'Confirm Deletion',
-				html: 'Please confirm that you want to delete this language pack and any words, files, etc. that you added to it.',
+				title: "{{ __('Confirm Deletion') }}",
+				html: "{{ __('Please confirm that you want to delete this language pack and any words, files, etc. that you added to it.') }}",
 				showCancelButton: true,
-				cancelButtonText: 'Cancel',
+				cancelButtonText: "{{ __('Cancel') }}",
 				cancelButtonColor: 'grey',
 				confirmButtonColor: 'red',
-				confirmButtonText: 'Delete',
+				confirmButtonText: "{{ __('Delete') }}",
 				allowOutsideClick: false,
 			})
 			.then((result) => {				
@@ -77,14 +77,14 @@ if(isset($languagePack->langInfo) &&  $languagePack->langInfo->count() > 0) {
 					.then(response => {
 						if (response.ok) {
 							// Handle success response
-							Swal.fire("The language pack has been deleted!", {
+							Swal.fire("{{ __('The language pack has been deleted!') }}", {
 								icon: "success",
 							}).then((confirmed) => {
 								window.location.href = "/dashboard";
 							});							
 						} else {
 							// Handle error response
-							Swal.fire("Oops! Something went wrong!", {
+							Swal.fire("{{ __('Oops! Something went wrong!') }}", {
 								icon: "error",
 							});
 						}
@@ -92,7 +92,7 @@ if(isset($languagePack->langInfo) &&  $languagePack->langInfo->count() > 0) {
 					.catch(error => {
 						// Handle fetch error
 						console.error(error);
-						swal("Oops! Something went wrong!", {
+						swal("{{ __('Oops! Something went wrong!') }}", {
 							icon: "error",
 						});
 					});
@@ -102,13 +102,13 @@ if(isset($languagePack->langInfo) &&  $languagePack->langInfo->count() > 0) {
 
 	function confirmRemoveCollaboration() {
 	Swal.fire({
-				title: 'Confirm removal',
-				html: 'Please confirm that you want to be removed as collaborator from this project.',
+				title: "{{ __('Confirm removal') }}",
+				html: "{{ __('Please confirm that you want to be removed as collaborator from this project.') }}",
 				showCancelButton: true,
-				cancelButtonText: 'Cancel',
+				cancelButtonText: "{{ __('Cancel') }}",
 				cancelButtonColor: 'grey',
 				confirmButtonColor: 'red',
-				confirmButtonText: 'Leave project',
+				confirmButtonText: "{{ __('Leave project') }}",
 				allowOutsideClick: false,
 			})
 			.then((result) => {

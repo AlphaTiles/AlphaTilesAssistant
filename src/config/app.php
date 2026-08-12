@@ -99,6 +99,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Available Locales
+    |--------------------------------------------------------------------------
+    |
+    | Locales that users may switch the application to, keyed by locale code
+    | and mapped to their display name shown in the language switcher.
+    |
+    */
+
+    'available_locales' => [
+        'en' => 'English',
+        'es' => 'Español',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Faker Locale
     |--------------------------------------------------------------------------
     |

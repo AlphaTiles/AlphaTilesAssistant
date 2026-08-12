@@ -28,18 +28,18 @@
         @endif    
     </div>
 
-    <h1 class="text-2xl font-bold mb-6">Manage Users for {{ $languagepack->name }}</h1>
+    <h1 class="text-2xl font-bold mb-6">{{ __('Manage Users for :name', ['name' => $languagepack->name]) }}</h1>
 
     <div class="mb-4">
-        <h2 class="text-xl mb-4">Add Collaborator</h2>
+        <h2 class="text-xl mb-4">{{ __('Add Collaborator') }}</h2>
         <form action="{{ route('languagepack.addUser', $languagepack) }}" method="POST" class="flex gap-4">
             @csrf
             <input type="email" 
                    name="email" 
-                   placeholder="Enter user email" 
+                   placeholder="{{ __('Enter user email') }}" 
                    class="form-input flex-1"
                    required>
-            <button type="submit" class="btn btn-primary">Add User</button>
+            <button type="submit" class="btn btn-primary">{{ __('Add User') }}</button>
         </form>
     </div>
 
@@ -47,24 +47,24 @@
         <table class="table w-full">
             <thead>
                 <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Actions</th>
+                    <th>{{ __('Name') }}</th>
+                    <th>{{ __('Email') }}</th>
+                    <th>{{ __('Role') }}</th>
+                    <th>{{ __('Actions') }}</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
                     <td>{{ $languagepack->owner->name }}</td>
                     <td>{{ $languagepack->owner->email }}</td>
-                    <td>Owner</td>
+                    <td>{{ __('Owner') }}</td>
                     <td>-</td>
                 </tr>
                 @foreach($collaborators as $collaborator)
                 <tr>
                     <td>{{ $collaborator->user->name }}</td>
                     <td>{{ $collaborator->user->email }}</td>
-                    <td>Collaborator</td>
+                    <td>{{ __('Collaborator') }}</td>
                     <td>
                         <form action="{{ route('languagepack.removeUser', [$languagepack, $collaborator->user]) }}" 
                               method="POST" 
@@ -73,8 +73,8 @@
                             @method('DELETE')
                             <button type="submit" 
                                     class="btn btn-danger btn-sm"
-                                    onclick="return confirm('Are you sure you want to remove this user?')">
-                                Remove
+                                    onclick="return confirm('{{ __("Are you sure you want to remove this user?") }}')">
+                                {{ __('Remove') }}
                             </button>
                         </form>
                     </td>
@@ -85,7 +85,7 @@
     </div>
 
     <div class="mt-4">
-		<a href="/dashboard">Back to Dashboard</a>
+		<a href="/dashboard">{{ __('Back to Dashboard') }}</a>
 	</div>
 
 </div>

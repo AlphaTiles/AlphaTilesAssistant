@@ -11,8 +11,8 @@ use Illuminate\Support\Facades\Log;
 
 <div class="prose">
 
-    <h1>Resources</h1>
-	<div>Use the resources tab to promote web sites related to the language.</div>
+    <h1>{{ __('Resources') }}</h1>
+	<div>{{ __('Use the resources tab to promote web sites related to the language.') }}</div>
 
 	<div>
 		<div x-data="{ showMessage: true }" x-show="showMessage" x-init="setTimeout(() => showMessage = false, 3000)">
@@ -32,7 +32,7 @@ use Illuminate\Support\Facades\Log;
 		@method('DELETE')
 		<div class="alert mb-3">  				
 			<div class="block p-2">
-				<h3 class="mt-0">Are you sure want to delete the following resources?</h3>
+				<h3 class="mt-0">{{ __('Are you sure want to delete the following resources?') }}</h3>
 				<?php $itemDeleteIds = []; ?>
 				@foreach ($items as $key => $item)					
 					@if(isset($deleteValues[$key]))
@@ -42,8 +42,8 @@ use Illuminate\Support\Facades\Log;
 				@endforeach					
 				<div class="mt-2">
 					<input type="hidden" name="deleteIds" value="{{ implode(',', $itemDeleteIds); }}" />
-					<button name="btnCancel" value="cancel" class="btn btn-sm">Cancel</button>
-					<button name="btnDelete" value="delete" class="btn btn-sm btn-primary">Yes</button>
+					<button name="btnCancel" value="cancel" class="btn btn-sm">{{ __('Cancel') }}</button>
+					<button name="btnDelete" value="delete" class="btn btn-sm btn-primary">{{ __('Yes') }}</button>
 				</div>
 			</div>
 		</div>	
@@ -78,10 +78,10 @@ use Illuminate\Support\Facades\Log;
 				</colgroup>                        
 				<thead>
 				<tr>
-					<th>Name</th> 
-					<th>Link</th> 
-					<th>Image</th>
-					<th><input type="checkbox" onClick="checkAll(this, 'items')" /> Delete</th>
+					<th>{{ __('Name') }}</th> 
+					<th>{{ __('Link') }}</th> 
+					<th>{{ __('Image') }}</th>
+					<th><input type="checkbox" onClick="checkAll(this, 'items')" /> {{ __('Delete') }}</th>
 				</tr>
 				</thead> 
 				<tbody>
@@ -123,8 +123,8 @@ use Illuminate\Support\Facades\Log;
 		</div>
 
 		<p>
-			<input type="submit" name="btnHiddenSave" id="saveButton" value="Save" class="hidden" />
-			<input type="submit" name="btnSave" value="Save" class="btn-sm btn-primary ml-1" onClick='handleSaveReset();' />
+			<input type="submit" name="btnHiddenSave" id="saveButton" value="{{ __('Save') }}" class="hidden" />
+			<input type="submit" name="btnSave" value="{{ __('Save') }}" class="btn-sm btn-primary ml-1" onClick='handleSaveReset();' />
 		</p>			
 	@endif
 
@@ -134,23 +134,23 @@ use Illuminate\Support\Facades\Log;
 	<form method="post" action="/languagepack/resources/{{ $languagePack->id }}">
 		@csrf
 		<div>
-			<label for="add_resources">Add resource links (one link per line):</label><br>
+			<label for="add_resources">{{ __('Add resource links (one link per line):') }}</label><br>
 
 			<textarea name="add_resources" rows=7 cols=40 class="leading-tight"></textarea>
 		</div>
 
 		<div class="mt-3 w-9/12">		
 			<input type="hidden" name="id" value="{{ $languagePack->id }}" />
-			<input type="submit" name="btnAdd" value="Add resources" class="btn-sm btn-primary ml-1" />
+			<input type="submit" name="btnAdd" value="{{ __('Add resources') }}" class="btn-sm btn-primary ml-1" />
 		</div>
 	</form>
 	<div class="mt-6 w-9/12">	
-		<a href="#" onClick='autoSavePage("/languagepack/syllables/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-secondary pt-0.5 font-normal">Back</a>
-		<a href="#" onClick='autoSavePage("/languagepack/game_settings/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">Next</a>		
+		<a href="#" onClick='autoSavePage("/languagepack/syllables/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-secondary pt-0.5 font-normal">{{ __('Back') }}</a>
+		<a href="#" onClick='autoSavePage("/languagepack/game_settings/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">{{ __('Next') }}</a>		
 	</div>
 
 	<div class="mt-4">
-		<a href="/dashboard">Back to Dashboard</a>
+		<a href="/dashboard">{{ __('Back to Dashboard') }}</a>
 	</div>
 </div>
 

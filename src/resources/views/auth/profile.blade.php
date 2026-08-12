@@ -50,7 +50,7 @@
                     <div class="input-group mb-4">
                         <?php $subscribed = $user->newsletter ? 'checked="checked"' : ''; ?>
                         <input type="checkbox" name="newsletter" value="1" {{ $subscribed }} />
-                        <div class="ml-1">Subscribe to the newsletter</div>
+                        <div class="ml-1">{{ __('Subscribe to the newsletter') }}</div>
                     </div>                    
 
                     <div class="flex flex-wrap">

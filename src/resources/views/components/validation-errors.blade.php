@@ -4,7 +4,7 @@ use App\Enums\ErrorTypeEnum;
 use App\Enums\ErrorLevelEnum;
 ?>
 @if (count($errors) > 0)
-	<h2 class="text-2xl mt-2 mb-2 text-red-500">Validation Errors</h2>
+	<h2 class="text-2xl mt-2 mb-2 text-red-500">{{ __('Validation Errors') }}</h2>
 	@php
 		$previousTabName = null;
 	@endphp
@@ -25,13 +25,13 @@ use App\Enums\ErrorLevelEnum;
 		};
 	@endphp
 	@if ($currentTabName !== $previousTabName && empty($tab))
-		<h3 class="text-xl mt-1 mb-1">{{ Str::plural($currentTabName) }}</h3>
+		<h3 class="text-xl mt-1 mb-1">{{ __(Str::plural($currentTabName)) }}</h3>
 	@endif
     <div class="collapse collapse-arrow border border-base-300 bg-base-100 rounded-box">
         <input type="checkbox" class="peer" />
         <div class="collapse-title text-xl font-medium {{ $titleColorClasses }} flex items-center gap-3">
             <span class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold tracking-wide uppercase {{ $levelTagClasses }}">
-                {{ $level->value }}
+                {{ __($level->value) }}
             </span>
             <span>{{ $typeEnum->label() }}</span>
         </div>
@@ -47,7 +47,7 @@ use App\Enums\ErrorLevelEnum;
                             {{ $error['value'] }}
                         @endif
                     @else
-                        <span class="italic text-sm text-base-content/70">No row-specific value for this message.</span>
+                        <span class="italic text-sm text-base-content/70">{{ __('No row-specific value for this message.') }}</span>
                     @endif
                 </div>
             @endforeach

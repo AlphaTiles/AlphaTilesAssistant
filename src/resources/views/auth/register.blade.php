@@ -72,7 +72,7 @@
 
                     <div class="input-group mb-4">
                         <input type="checkbox" name="newsletter" value="1" checked />
-                        &nbsp; Subscribe to the newsletter
+                        &nbsp; {{ __('Subscribe to the newsletter') }}
                     </div>                    
 
                     <div>
@@ -92,7 +92,7 @@
                         </button>
 
                         <p class="w-full text-xs text-center text-gray-700 my-6 sm:text-sm sm:my-8">
-                            By clicking ‘Sign up’, you agree to our <a href="/terms">Terms & Privacy Policy</a>.
+                            {{ __("By clicking 'Sign up', you agree to our") }} <a href="/terms">{{ __('Terms & Privacy Policy') }}</a>.
                             <br><br>
                             {{ __('Already have an account?') }}
                             <a href="{{ route('login') }}">

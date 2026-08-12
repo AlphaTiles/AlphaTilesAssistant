@@ -14,10 +14,10 @@
                 <form class="w-full px-6 space-y-6 sm:px-10 sm:space-y-8" method="POST"
                     action="{{ route('profile.delete') }}">
                     @csrf
-                    <h3 class="text-lg mb-3">Are you sure that you want to delete your account?
-                        <br>All the data related to your account will be deleted.</h3>
+                    <h3 class="text-lg mb-3">{{ __('Are you sure that you want to delete your account?') }}
+                        <br>{{ __('All the data related to your account will be deleted.') }}</h3>
                    
-                    <div>Please let us know why you are deleting your account, so that the product can be improved:</div>
+                    <div>{{ __('Please let us know why you are deleting your account, so that the product can be improved:') }}</div>
                     <textarea name="message" rows=3 cols=40></textarea>
                     <br>
                     <div class="flex flex-wrap">

@@ -1,14 +1,14 @@
 <?php 
 $sections = [
-  'lang_info' => ['label' => 'Lang Info', 'attribute' => 'langInfo', 'route' => 'edit'],
-  'tiles' => ['label' => 'Tiles', 'attribute' => 'tiles', 'route' => 'tiles'],
-  'wordlist' => ['label' => 'Wordlist', 'attribute' => 'words', 'route' => 'wordlist'],
-  'keyboard' => ['label' => 'Keyboard', 'attribute' => 'keys', 'route' => 'keyboard'],
-  'syllables' => ['label' => 'Syllables', 'attribute' => 'syllables', 'route' => 'syllables'],
-  'resources' => ['label' => 'Resources', 'attribute' => 'resources', 'route' => 'resources'],
-  'game_settings' => ['label' => 'Settings', 'attribute' => 'gameSettings', 'route' => 'game_settings'],
-  'games' => ['label' => 'Games', 'attribute' => 'games', 'route' => 'games', 'games'],
-  'export' => ['label' => 'Export', 'attribute' => 'keys', 'route' => 'export'],
+  'lang_info' => ['label' => __('Lang Info'), 'attribute' => 'langInfo', 'route' => 'edit'],
+  'tiles' => ['label' => __('Tiles'), 'attribute' => 'tiles', 'route' => 'tiles'],
+  'wordlist' => ['label' => __('Wordlist'), 'attribute' => 'words', 'route' => 'wordlist'],
+  'keyboard' => ['label' => __('Keyboard'), 'attribute' => 'keys', 'route' => 'keyboard'],
+  'syllables' => ['label' => __('Syllables'), 'attribute' => 'syllables', 'route' => 'syllables'],
+  'resources' => ['label' => __('Resources'), 'attribute' => 'resources', 'route' => 'resources'],
+  'game_settings' => ['label' => __('Settings'), 'attribute' => 'gameSettings', 'route' => 'game_settings'],
+  'games' => ['label' => __('Games'), 'attribute' => 'games', 'route' => 'games', 'games'],
+  'export' => ['label' => __('Export'), 'attribute' => 'keys', 'route' => 'export'],
 ];
 
 $links = [];

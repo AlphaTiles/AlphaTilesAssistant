@@ -32,6 +32,14 @@ Route::get('/', function () {
     return view('welcome');
 })->middleware('guest');
 
+Route::get('/locale/{locale}', function (string $locale) {
+    if (array_key_exists($locale, config('app.available_locales'))) {
+        session(['locale' => $locale]);
+    }
+
+    return redirect()->back();
+})->name('locale.switch');
+
 Route::middleware(['auth', 'authorize.languagepack'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');    
     
