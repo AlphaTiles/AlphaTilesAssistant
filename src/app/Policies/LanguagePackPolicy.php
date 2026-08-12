@@ -22,16 +22,16 @@ class LanguagePackPolicy
 
     public function view(User $user, LanguagePack $languagePack)
     {
-        return $user->id === $languagePack->user_id;
+        return $user->isAdmin() || $user->id === $languagePack->user_id;
     }    
 
     public function update(User $user, LanguagePack $languagePack)
     {
-        return $user->id === $languagePack->user_id;
+        return $user->isAdmin() || $user->id === $languagePack->user_id;
     }    
 
     public function delete(User $user, LanguagePack $languagePack)
     {
-        return $user->id === $languagePack->user_id;
+        return $user->isAdmin() || $user->id === $languagePack->user_id;
     }    
 }

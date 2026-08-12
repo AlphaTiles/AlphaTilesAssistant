@@ -36,7 +36,7 @@ if(isset($languagePack->langInfo) &&  $languagePack->langInfo->count() > 0) {
 
 	@if($languagePack)
 	<div class="mt-5">
-		@if($languagePack->user_id == Auth::id())
+		@if($languagePack->user_id == Auth::id() || Auth::user()->isAdmin())
 			<input type="button" value="{{ __('Delete') }}" onClick="confirmDelete();" class="ml-1 inline-block no-underline btn-sm btn-error font-normal cursor-pointer" />
 		@else
 			<input type="button" value="{{ __('Leave Project') }}" onClick="confirmRemoveCollaboration();" class="ml-1 inline-block no-underline btn-sm btn-error font-normal cursor-pointer /">

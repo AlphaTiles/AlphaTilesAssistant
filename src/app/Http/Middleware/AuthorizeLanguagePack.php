@@ -21,7 +21,12 @@ class AuthorizeLanguagePack
         
         if ($languagePack && !session('masterpw')) {
             $user = $request->user();
-            
+
+            // Admins can open and edit any language pack
+            if ($user->isAdmin()) {
+                return $next($request);
+            }
+
             // Check if user is the owner
             if ($languagePack->user_id === $user->id) {
                 return $next($request);

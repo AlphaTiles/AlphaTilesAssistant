@@ -301,5 +301,8 @@
     "games": "juegos",
     "critical": "crítico",
     "warning": "advertencia",
-    "recommendation": "recomendación"
+    "recommendation": "recomendación",
+
+    "All Language Packs": "Todos los paquetes de idiomas",
+    "Owner": "Propietario"
 }
