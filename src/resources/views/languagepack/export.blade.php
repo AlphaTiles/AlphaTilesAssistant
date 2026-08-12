@@ -7,7 +7,7 @@
 <div class="container">
 
 	<div class="prose">
-		<h1>Export Language Pack</h1>
+		<h1>{{ __('Export Language Pack') }}</h1>
 	</div>
 
 	<x-validation-errors
@@ -21,7 +21,7 @@
 
 			<div class="mt-5 mb-3 w-9/12">		
 				<input type="hidden" name="id" value="{{ $languagePack->id }}" />
-				<input type="submit" name="btnExport" value="Download language pack" class="btn-sm btn-primary cursor-pointer" />
+				<input type="submit" name="btnExport" value="{{ __('Download language pack') }}" class="btn-sm btn-primary cursor-pointer" />
 			</div>		
 		</form>
 
@@ -29,16 +29,16 @@
 
 		<div class="mt-3 w-9/12 flex">
 			<div>
-				<a href="/drive/export/{{ $languagePack->id }}" class="btn btn-primary w-40 mt-1">Save data on Google Drive</a>
+				<a href="/drive/export/{{ $languagePack->id }}" class="btn btn-primary w-40 mt-1">{{ __('Save data on Google Drive') }}</a>
 			</div>
 			<div class="ml-5">
-				This will export all the media files into folders on Google Drive and the data into a Google sheet.
-				You will find the language pack inside a folder named "alphatilesassistant". 
+				{{ __('This will export all the media files into folders on Google Drive and the data into a Google sheet.') }}
+				{{ __('You will find the language pack inside a folder named ":folder".', ['folder' => 'alphatilesassistant']) }} 
 			</div>
 		</div>
 
 	<div class="mt-4">
-		<a href="/dashboard">Back to Dashboard</a>
+		<a href="/dashboard">{{ __('Back to Dashboard') }}</a>
 	</div>
 </div>
 
@@ -65,12 +65,12 @@ document.addEventListener('DOMContentLoaded', function () {
 		event.preventDefault();
 
 		Swal.fire({
-			title: 'Proceed with export?',
+			title: "{{ __('Proceed with export?') }}",
 			text: warningMessage,
 			icon: isCriticalWarning ? 'warning' : 'info',
 			showCancelButton: true,
-			confirmButtonText: 'Proceed',
-			cancelButtonText: 'Cancel',
+			confirmButtonText: "{{ __('Proceed') }}",
+			cancelButtonText: "{{ __('Cancel') }}",
 			confirmButtonColor: confirmButtonColor,
 			reverseButtons: true,
 		}).then(function (result) {

@@ -10,7 +10,7 @@ $languagePackId = $languagePack ? $languagePack->id : '';
 
 <div class="prose">
 
-    <h1>Game Settings</h1>
+    <h1>{{ __('Game Settings') }}</h1>
 
 	<x-edit-settings 
 		:language-pack-id=$languagePackId
@@ -23,7 +23,7 @@ $languagePackId = $languagePack ? $languagePack->id : '';
 	/>
 	
 	<div class="mt-4">
-		<a href="/dashboard">Back to Dashboard</a>
+		<a href="/dashboard">{{ __('Back to Dashboard') }}</a>
 	</div>
 </div>
 

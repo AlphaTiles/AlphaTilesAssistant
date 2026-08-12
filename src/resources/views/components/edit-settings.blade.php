@@ -71,7 +71,7 @@ use App\Models\File;
 
 										<label class="ml-2 inline-flex items-center">
 											<input type="checkbox" name="settings[{{ $setting['name'] }}_remove]" value="1" class="ml-1">
-											<span class="ml-1 text-sm">Remove file</span>
+											<span class="ml-1 text-sm">{{ __('Remove file') }}</span>
 										</label>
 									</div>
 								@endif
@@ -93,16 +93,16 @@ use App\Models\File;
 
 			<div class="mt-3 w-9/12">		
 			<input type="hidden" name="id" value="{{ $languagePackId }}" />
-			<input type="submit" name="btnHiddenSave" id="saveButton" value="Save" class="hidden" />
-			<input type="submit" name="btnSave" value="Save" class="btn-sm btn-primary ml-1 cursor-pointer" onClick='handleSaveReset();' />											
+<input type="submit" name="btnHiddenSave" id="saveButton" value="{{ __('Save') }}" class="hidden" />
+			<input type="submit" name="btnSave" value="{{ __('Save') }}" class="btn-sm btn-primary ml-1 cursor-pointer" onClick='handleSaveReset();' />							
 			@if($showNext && empty($backPath))
-				<a href="#" onClick='autoSavePage("/languagepack/{{ $nextPath }}/{{ $languagePackId }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">Next</a>		
+				<a href="#" onClick='autoSavePage("/languagepack/{{ $nextPath }}/{{ $languagePackId }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">{{ __('Next') }}</a>		
 			@endif
 		</div>
 		@if(!empty($backPath))
 		<div class="mt-6 w-9/12">	
-			<a href="#" onClick='autoSavePage("/languagepack/{{ $backPath }}/{{ $languagePackId }}");' class="inline-block no-underline btn-sm btn-secondary pt-0.5 font-normal">Back</a>
-			<a href="#" onClick='autoSavePage("/languagepack/{{ $nextPath }}/{{ $languagePackId }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">Next</a>		
+			<a href="#" onClick='autoSavePage("/languagepack/{{ $backPath }}/{{ $languagePackId }}");' class="inline-block no-underline btn-sm btn-secondary pt-0.5 font-normal">{{ __('Back') }}</a>
+			<a href="#" onClick='autoSavePage("/languagepack/{{ $nextPath }}/{{ $languagePackId }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">{{ __('Next') }}</a>		
 		</div>
 		@endif
 	</form>		

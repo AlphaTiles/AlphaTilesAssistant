@@ -11,7 +11,7 @@ $tabEnum = TabEnum::GAME;
 
 <div class="prose">
 
-    <h1>Games</h1>
+    <h1>{{ __('Games') }}</h1>
 	
 	<div>
 		<div x-data="{ showMessage: true }" x-show="showMessage" x-init="setTimeout(() => showMessage = false, 3000)">
@@ -57,14 +57,14 @@ $tabEnum = TabEnum::GAME;
 		@endforeach
 		<div class="flex flex-wrap gap-x-6 gap-y-1">
 			<label class="inline-flex items-center gap-2 text-sm ml-2">
-				<span class="ml-1">Active Games List</span>
+				<span class="ml-1">{{ __('Active Games List') }}</span>
 				<select name="required_assets_filter" class="input input-bordered input-sm w-52">
-					<option value="my_games" {{ $requiredAssetsFilter === 'my_games' ? 'selected' : '' }}>My games list</option>
-					<option value="all" {{ $requiredAssetsFilter === 'all' ? 'selected' : '' }}>All games (excluding ABS)</option>
-					<option value="TA" {{ $requiredAssetsFilter === 'TA' ? 'selected' : '' }}>Games requiring tile audio</option>
-					<option value="SB/T" {{ $requiredAssetsFilter === 'SB/T' ? 'selected' : '' }}>Games requiring syllable breaks only</option>
-					<option value="SB/T+SA" {{ $requiredAssetsFilter === 'SB/T+SA' ? 'selected' : '' }}>Games requiring syllable breaks and syllable audio</option>
-					<option value="abs" {{ $requiredAssetsFilter === 'abs' ? 'selected' : '' }}>Games requiring Arabic Based Script (ABS) setup</option>
+					<option value="my_games" {{ $requiredAssetsFilter === 'my_games' ? 'selected' : '' }}>{{ __('My games list') }}</option>
+					<option value="all" {{ $requiredAssetsFilter === 'all' ? 'selected' : '' }}>{{ __('All games (excluding ABS)') }}</option>
+					<option value="TA" {{ $requiredAssetsFilter === 'TA' ? 'selected' : '' }}>{{ __('Games requiring tile audio') }}</option>
+					<option value="SB/T" {{ $requiredAssetsFilter === 'SB/T' ? 'selected' : '' }}>{{ __('Games requiring syllable breaks only') }}</option>
+					<option value="SB/T+SA" {{ $requiredAssetsFilter === 'SB/T+SA' ? 'selected' : '' }}>{{ __('Games requiring syllable breaks and syllable audio') }}</option>
+					<option value="abs" {{ $requiredAssetsFilter === 'abs' ? 'selected' : '' }}>{{ __('Games requiring Arabic Based Script (ABS) setup') }}</option>
 				</select>
 			</label>
 
@@ -79,7 +79,7 @@ $tabEnum = TabEnum::GAME;
 					value="1"
 					{{ $showExcludedGames ? 'checked' : '' }}
 				/>
-				<span class="ml-1">Show excluded games</span>
+				<span class="ml-1">{{ __('Show excluded games') }}</span>
 			</label>
 		</div>
 	</form>
@@ -101,15 +101,15 @@ $tabEnum = TabEnum::GAME;
 				</colgroup>                        
 				<thead>
 				<tr>
-					<th>Include</th> 
-					<th>Door</th> 
-					<th>Friendly Name</th>					
-					<th>Country</th> 
-					<th>Level</th>
-					<th>Color</th>                             
-					<th>Audio instructions</th>
-					<th>Syllable Or Tile</th>
-					<th><span class="mr-2">Stages Included</span></th>
+					<th>{{ __('Include') }}</th> 
+					<th>{{ __('Door') }}</th> 
+					<th>{{ __('Friendly Name') }}</th>					
+					<th>{{ __('Country') }}</th> 
+					<th>{{ __('Level') }}</th>
+					<th>{{ __('Color') }}</th>                             
+					<th>{{ __('Audio instructions') }}</th>
+					<th>{{ __('Syllable Or Tile') }}</th>
+					<th><span class="mr-2">{{ __('Stages Included') }}</span></th>
 				</tr>
 				</thead> 
 				<tbody>
@@ -122,8 +122,8 @@ $tabEnum = TabEnum::GAME;
 						<input type="checkbox" name="items[{{ $key }}][include]" {{ $item->include ? 'checked' : '' }} />
 
 						<div class="ml-2 inline-block">
-							<button type="button" class="move-game-btn" data-game-id="{{ $item->id }}" data-direction="up" data-language-pack-id="{{ $languagePack->id }}" title="Move up" style="padding: 2px 6px; font-size: 12px; background-color: #e5e7eb; color: #4b5563; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer;">↑</button>
-							<button type="button" class="move-game-btn" data-game-id="{{ $item->id }}" data-direction="down" data-language-pack-id="{{ $languagePack->id }}" title="Move down" style="padding: 2px 6px; font-size: 12px; background-color: #e5e7eb; color: #4b5563; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer;">↓</button>
+							<button type="button" class="move-game-btn" data-game-id="{{ $item->id }}" data-direction="up" data-language-pack-id="{{ $languagePack->id }}" title="{{ __('Move up') }}" style="padding: 2px 6px; font-size: 12px; background-color: #e5e7eb; color: #4b5563; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer;">↑</button>
+							<button type="button" class="move-game-btn" data-game-id="{{ $item->id }}" data-direction="down" data-language-pack-id="{{ $languagePack->id }}" title="{{ __('Move down') }}" style="padding: 2px 6px; font-size: 12px; background-color: #e5e7eb; color: #4b5563; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer;">↓</button>
 						</div>
 					</td> 
 					<td>
@@ -170,20 +170,20 @@ $tabEnum = TabEnum::GAME;
 		</div>
 
 		<p>
-			<input type="submit" name="btnHiddenSave" id="saveButton" value="Save" class="hidden" />
-			<input type="submit" name="btnSave" value="Save" class="btn-sm btn-primary ml-1" onClick='handleSaveReset();' />
+			<input type="submit" name="btnHiddenSave" id="saveButton" value="{{ __('Save') }}" class="hidden" />
+			<input type="submit" name="btnSave" value="{{ __('Save') }}" class="btn-sm btn-primary ml-1" onClick='handleSaveReset();' />
 		</p>			
 	@endif
 
 	</form>
 
 	<div class="mt-6 w-9/12">	
-		<a href="#" onClick='autoSavePage("/languagepack/game_settings/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-secondary pt-0.5 font-normal">Back</a>
-		<a href="#" onClick='autoSavePage("/languagepack/export/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">Next</a>		
+		<a href="#" onClick='autoSavePage("/languagepack/game_settings/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-secondary pt-0.5 font-normal">{{ __('Back') }}</a>
+		<a href="#" onClick='autoSavePage("/languagepack/export/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">{{ __('Next') }}</a>		
 	</div>
 
 	<div class="mt-4">
-		<a href="/dashboard">Back to Dashboard</a>
+		<a href="/dashboard">{{ __('Back to Dashboard') }}</a>
 	</div>
 </div>
 
@@ -333,7 +333,7 @@ document.querySelectorAll('.move-game-btn').forEach(btn => {
 		})
 		.catch(error => {
 			console.error('Error moving game:', error);
-			alert('Failed to move game');
+			alert("{{ __('Failed to move game') }}");
 			// Re-enable buttons on error
 			document.querySelectorAll('.move-game-btn').forEach(b => b.disabled = false);
 		});

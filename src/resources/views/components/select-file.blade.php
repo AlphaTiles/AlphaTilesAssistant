@@ -21,7 +21,7 @@ if(empty($item->{$typeField}) && $nr > 1) {
     <input type="file" name="items[{{ $key }}][{{ $fileField }}]" class="custom-file-input" id="chooseFile" value="{{ $previousFileValue }}">
     </div>   
     @if($errors->has('items.' . $key . '.' . $fileField))
-        <div class="error">The file upload failed.</div>
+        <div class="error">{{ __('The file upload failed.') }}</div>
     @else
         <div>
         @if($item->{$fileRelation} || !empty($item->{$fileIdKey}))
@@ -33,7 +33,7 @@ if(empty($item->{$typeField}) && $nr > 1) {
             @if($extension === 'mp3')
                 <audio controls style="width: 200px; height: 30px; margin-top: 5px;">
                     <source src="/languagepack/items/{{ $item->languagepackid }}/download/{{ $prefix }}_{{ $storedFileNumber }}_{{ $nr }}.mp3?{{ time() }}" type="audio/mpeg">
-                    Your browser does not support the audio element.
+                    {{ __('Your browser does not support the audio element.') }}
                 </audio> 								
             @else
                 <img width="30" src="/languagepack/items/{{ $item->languagepackid }}/download/{{ $prefix }}_{{ $storedFileNumber }}_{{ $nr }}.png?{{ time() }}" />

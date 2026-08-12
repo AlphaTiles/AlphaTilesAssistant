@@ -13,7 +13,7 @@ $tabEnum = TabEnum::KEY;
 
 <div class="prose">
 
-    <h1>Keyboard</h1>
+    <h1>{{ __('Keyboard') }}</h1>
 	
 	<div>
 		<div x-data="{ showMessage: true }" x-show="showMessage" x-init="setTimeout(() => showMessage = false, 3000)">
@@ -34,7 +34,7 @@ $tabEnum = TabEnum::KEY;
 		@method('DELETE')
 		<div class="alert mb-3">  				
 			<div class="block p-2">
-				<h3 class="mt-0">Are you sure want to delete the following keys?</h3>
+				<h3 class="mt-0">{{ __('Are you sure want to delete the following keys?') }}</h3>
 				<?php $keyDeleteIds = []; ?>
 				@foreach ($keys as $key => $keyItem)					
 					@if(isset($deleteValues[$key]))
@@ -44,8 +44,8 @@ $tabEnum = TabEnum::KEY;
 				@endforeach									
 				<div class="mt-2">
 					<input type="hidden" name="deleteIds" value="{{ implode(',', $keyDeleteIds); }}" />
-					<button name="btnCancel" value="cancel" class="btn btn-sm">Cancel</button>
-					<button name="btnDelete" value="delete" class="btn btn-sm btn-primary">Yes</button>
+					<button name="btnCancel" value="cancel" class="btn btn-sm">{{ __('Cancel') }}</button>
+					<button name="btnDelete" value="delete" class="btn btn-sm btn-primary">{{ __('Yes') }}</button>
 				</div>
 			</div>
 		</div>	
@@ -99,9 +99,9 @@ $tabEnum = TabEnum::KEY;
 				</colgroup>                        
 				<thead>
 				<tr>
-					<th>Key</th> 
-					<th>Color <a href="#" onClick="openAlert('Keyboard colors', 'Group keys by color, e.g. consonants vs vocals.')"><i class="fa-solid fa-circle-info"></i></a></th> 
-					<th><input type="checkbox" onClick="checkAll(this, 'items')" /> Delete</th>
+					<th>{{ __('Key') }}</th> 
+					<th>{{ __('Color') }} <a href="#" onClick="openAlert('{{ __('Keyboard colors') }}', '{{ __('Group keys by color, e.g. consonants vs vocals.') }}')"><i class="fa-solid fa-circle-info"></i></a></th> 
+					<th><input type="checkbox" onClick="checkAll(this, 'items')" /> {{ __('Delete') }}</th>
 				</tr>
 				</thead> 
 				<tbody>
@@ -129,8 +129,8 @@ $tabEnum = TabEnum::KEY;
 		</div>
 
 		<p>
-			<input type="submit" name="btnHiddenSave" id="saveButton" value="Save" class="hidden" />
-			<input type="submit" name="btnSave" value="Save" class="btn-sm btn-primary ml-1" onClick='handleSaveReset();' />
+			<input type="submit" name="btnHiddenSave" id="saveButton" value="{{ __('Save') }}" class="hidden" />
+			<input type="submit" name="btnSave" value="{{ __('Save') }}" class="btn-sm btn-primary ml-1" onClick='handleSaveReset();' />
 		</p>			
 	@endif
 
@@ -141,25 +141,25 @@ $tabEnum = TabEnum::KEY;
 		<form method="post" action="/languagepack/keyboard/{{ $languagePack->id }}">
 			@csrf
 			<div>
-				<label for="add_items">Add keys (one key per line):</label> <a href="#" onClick="openAlert('Keyboard instructions', 'The order in which the keys are listed in the keyboard tab will be the order in which the keyboard is created in the game.<br><br>Remember to include space, dash or any other characters that form words in the language. The keyboard-based games in Alpha Tiles are meant to mimic typing on an Android keyboard, so there is no need to include digraphs, but only each individual character that is used to form words in the language.')"><i class="fa-solid fa-circle-info"></i></a><br>
+				<label for="add_items">{{ __('Add keys (one key per line):') }}</label> <a href="#" onClick="openAlert('{{ __('Keyboard instructions') }}', '{{ __('The order in which the keys are listed in the keyboard tab will be the order in which the keyboard is created in the game.<br><br>Remember to include space, dash or any other characters that form words in the language. The keyboard-based games in Alpha Tiles are meant to mimic typing on an Android keyboard, so there is no need to include digraphs, but only each individual character that is used to form words in the language.') }}')"><i class="fa-solid fa-circle-info"></i></a><br>
 				<textarea name="add_items" rows=10 cols=15 class="leading-tight">{{ old('add_items', $defaultKeys) }}</textarea>
 			</div>
 
 			<div class="mt-3 w-9/12">		
 				<input type="hidden" name="id" value="{{ $languagePack->id }}" />
-				<input type="submit" name="btnAdd" value="Add keys" class="btn-sm btn-primary ml-1" />
+				<input type="submit" name="btnAdd" value="{{ __('Add keys') }}" class="btn-sm btn-primary ml-1" />
 			</div>
 		</form>
 		<div class="mt-6 w-9/12">	
-			<a href="#" onClick='autoSavePage("/languagepack/wordlist/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-secondary pt-0.5 font-normal">Back</a>
+			<a href="#" onClick='autoSavePage("/languagepack/wordlist/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-secondary pt-0.5 font-normal">{{ __('Back') }}</a>
 			@if($languagePack->keys->count() > 0)
-				<a href="#" onClick='autoSavePage("/languagepack/syllables/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">Next</a>		
+				<a href="#" onClick='autoSavePage("/languagepack/syllables/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">{{ __('Next') }}</a>		
 			@endif
 		</div>
 	</div>
 
 	<div class="mt-4">
-		<a href="/dashboard">Back to Dashboard</a>
+		<a href="/dashboard">{{ __('Back to Dashboard') }}</a>
 	</div>
 </div>
 

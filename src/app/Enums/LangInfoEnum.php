@@ -32,20 +32,20 @@ enum LangInfoEnum: string
     public function label(): string
     {
         return match ($this) {
-            self::LANG_NAME_LOCAL       => 'Language Name (in local language)',
-            self::LANG_NAME_ENGLISH     => 'Language Name (English)',
-            self::LANG_NAME_REGIONAL    => 'Lang Name (in regional/national language)',
-            self::ETHNOLOGUE_CODE       => 'Ethnologue code',
-            self::COUNTRY               => 'Country',
-            self::VARIANT_INFO          => 'Variant info',
-            self::GAME_NAME             => 'Game Name (In Local Lang)',
-            self::SCRIPT_DIRECTION      => 'Script direction',
-            self::MEDIA_CREDITS         => 'Audio and image credits',
-            self::NAME_LOCAL_LANGUAGE   => 'Word NAME in local language',
-            self::SCRIPT_TYPE           => 'Script type',
-            self::EMAIL                 => 'Email',
-            self::PRIVACY_POLICY        => 'Privacy Policy',
-            self::MEDIA_CREDITS2        => 'Audio and image credits (lang 2)'
+            self::LANG_NAME_LOCAL       => __('Language Name (in local language)'),
+            self::LANG_NAME_ENGLISH     => __('Language Name (English)'),
+            self::LANG_NAME_REGIONAL    => __('Lang Name (in regional/national language)'),
+            self::ETHNOLOGUE_CODE       => __('Ethnologue code'),
+            self::COUNTRY               => __('Country'),
+            self::VARIANT_INFO          => __('Variant info'),
+            self::GAME_NAME             => __('Game Name (In Local Lang)'),
+            self::SCRIPT_DIRECTION      => __('Script direction'),
+            self::MEDIA_CREDITS         => __('Audio and image credits'),
+            self::NAME_LOCAL_LANGUAGE   => __('Word NAME in local language'),
+            self::SCRIPT_TYPE           => __('Script type'),
+            self::EMAIL                 => __('Email'),
+            self::PRIVACY_POLICY        => __('Privacy Policy'),
+            self::MEDIA_CREDITS2        => __('Audio and image credits (lang 2)')
         };
     }
 
@@ -59,8 +59,8 @@ enum LangInfoEnum: string
     public function helpText(): ?string
     {
         return match($this) {
-            self::VARIANT_INFO => 'List variant or dialect information, if required. If not required, leave ‘1’ as the default.',
-            self::MEDIA_CREDITS => 'If using Flaticon images and the SIL Global logo is retained, no acknowledgement is required, but it is recommended to state ‘Flaticon images used under a premium license held by SIL Global.’',
+            self::VARIANT_INFO => __('List variant or dialect information, if required. If not required, leave ‘1’ as the default.'),
+            self::MEDIA_CREDITS => __('If using Flaticon images and the SIL Global logo is retained, no acknowledgement is required, but it is recommended to state ‘Flaticon images used under a premium license held by SIL Global.’'),
             default => null
         };
     }

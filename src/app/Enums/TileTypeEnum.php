@@ -19,17 +19,17 @@ enum TileTypeEnum: string
     public function label(): string
     {
         return match ($this) {
-            self::CONSONANT => 'consonant',
-            self::VOWEL     => 'vowel',
-            self::TONE_MARKER   => 'tone diacritic',
-            self::SPACE_AND_DASH => 'space and dash',
-            self::OTHER     => 'other',
-            self::LEADING_VOWEL => 'leading vowel',
-            self::BELOW_VOWEL => 'below vowel', 
-            self::ABOVE_VOWEL => 'above vowel',
-            self::FOLLOWING_VOWEL => 'following vowel',
-            self::ABOVE_DIACRITIC => 'above diacritic',
-            self::DIACRITIC => 'diacritic',
+            self::CONSONANT => __('consonant'),
+            self::VOWEL     => __('vowel'),
+            self::TONE_MARKER   => __('tone diacritic'),
+            self::SPACE_AND_DASH => __('space and dash'),
+            self::OTHER     => __('other'),
+            self::LEADING_VOWEL => __('leading vowel'),
+            self::BELOW_VOWEL => __('below vowel'), 
+            self::ABOVE_VOWEL => __('above vowel'),
+            self::FOLLOWING_VOWEL => __('following vowel'),
+            self::ABOVE_DIACRITIC => __('above diacritic'),
+            self::DIACRITIC => __('diacritic'),
         };
     }
 }

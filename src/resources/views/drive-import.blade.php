@@ -2,21 +2,21 @@
 
 @section('content')
 <div class="prose">
-    <h1>Import Language Pack from Google Drive</h1>
+    <h1>{{ __('Import Language Pack from Google Drive') }}</h1>
     <div class="mt-5">
-          This is for importing all data including the media for creating a language pack. At the very least you will need to have a Google sheet in the root folder.
+          {{ __('This is for importing all data including the media for creating a language pack. At the very least you will need to have a Google sheet in the root folder.') }}
     </div>
     <div class="mt-5">
-          <a href="#" id="authorize_button" class="btn btn-primary w-40 mt-1 pt-0.5 text-white font-normal no-underline" onclick="connectGoogleDrive()">Select Google Drive Folder</a>
+          <a href="#" id="authorize_button" class="btn btn-primary w-40 mt-1 pt-0.5 text-white font-normal no-underline" onclick="connectGoogleDrive()">{{ __('Select Google Drive Folder') }}</a>
     </div>
     <div class="mt-5" id="result" style="visibility: hidden;">
-      <div><span class="font-bold">Selected folder:</span> <span id="folderName"></span></div>
+      <div><span class="font-bold">{{ __('Selected folder:') }}</span> <span id="folderName"></span></div>
       <div class="mt-5 text-blue-700" id="selectionSuccess" style="visibility: hidden;">        
-        Import in progress. You will find the imported language pack listed on the dashboard. You may close this page now.
+        {{ __('Import in progress. You will find the imported language pack listed on the dashboard. You may close this page now.') }}
       </div>
-      <div class="mt-5 text-red-700" id="selectionError" style="visibility: hidden;">Error: No Google Sheet or XLSX file found in the selected folder.</div>
+      <div class="mt-5 text-red-700" id="selectionError" style="visibility: hidden;">{{ __('Error: No Google Sheet or XLSX file found in the selected folder.') }}</div>
       <div class="mt-5">
-        <a href="/dashboard">Back to Dashboard</a>
+        <a href="/dashboard">{{ __('Back to Dashboard') }}</a>
       </div>
     </div>
 </div>
@@ -119,7 +119,7 @@
         .setDeveloperKey(API_KEY)
         .setAppId(APP_ID)
         .setOAuthToken(accessToken)
-        .setTitle("Select a folder") 
+        .setTitle("{{ __('Select a folder') }}") 
         .addView(docsView)
         .addView(new google.picker.DocsUploadView())
         .setCallback(pickerCallback)

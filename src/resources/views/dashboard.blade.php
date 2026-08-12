@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Auth;
                 <div class="card-title">{{ __('Welcome') }} {{ Auth::user()->name }}</div>
 
                 <div class="mt-5">
-                    <a href="/languagepack/create" class="btn btn-primary w-40 mt-1">Create Language Pack</a>
+                    <a href="/languagepack/create" class="btn btn-primary w-40 mt-1">{{ __('Create Language Pack') }}</a>
                 </div>
 
                 @if(count($languagepacks) > 0)
@@ -35,10 +35,10 @@ use Illuminate\Support\Facades\Auth;
                         </colgroup>                        
                         <thead>
                         <tr>
-                            <th>Edit</th> 
-                            <th>Users</th>
-                            <th>Name</th> 
-                            <th>Date Created</th> 
+                            <th>{{ __('Edit') }}</th> 
+                            <th>{{ __('Users') }}</th>
+                            <th>{{ __('Name') }}</th> 
+                            <th>{{ __('Date Created') }}</th> 
                         </tr>
                         </thead> 
                         <tbody>
@@ -68,10 +68,10 @@ use Illuminate\Support\Facades\Auth;
                                     @endif
                                 </a>
                                 @if($languagepack->import_status === ImportStatus::IMPORTING->value)
-                                    <span class="text-blue-700 ml-4">Import in progress</span>
+                                    <span class="text-blue-700 ml-4">{{ __('Import in progress') }}</span>
                                 @endif
                                 @if($languagepack->import_status === ImportStatus::FAILED->value)
-                                    <span class="text-red-500 ml-4">Import failed</span>
+                                    <span class="text-red-500 ml-4">{{ __('Import failed') }}</span>
                                 @endif
                             </td> 
                             <td>{{  $languagepack->created_at->format("d/m/Y") }}</td> 
@@ -93,13 +93,13 @@ use Illuminate\Support\Facades\Auth;
 
 function confirmRemoveCollaboration(languagepackId) {
 	Swal.fire({
-				title: 'Confirm removal',
-				html: 'Please confirm that you want to be removed as collaborator from this project.',
+				title: "{{ __('Confirm removal') }}",
+				html: "{{ __('Please confirm that you want to be removed as collaborator from this project.') }}",
 				showCancelButton: true,
-				cancelButtonText: 'Cancel',
+				cancelButtonText: "{{ __('Cancel') }}",
 				cancelButtonColor: 'grey',
 				confirmButtonColor: 'red',
-				confirmButtonText: 'Leave project',
+				confirmButtonText: "{{ __('Leave project') }}",
 				allowOutsideClick: false,
 			})
 			.then((result) => {

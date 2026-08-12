@@ -37,9 +37,21 @@
             @yield('content')
         </main>
 
-        <div class="my-5 border-t-2 text-center">
-            <ul id="footer">
-                <li><a href="https://give.sil.org/give/483433#!/donation/checkout" target="_blank">Donate</a></li>
+        <div class="my-5 border-t-2">
+            <ul id="footer" class="flex items-center justify-between px-4">
+                <li><a href="https://give.sil.org/give/483433#!/donation/checkout" target="_blank">{{ __('Donate') }}</a></li>
+                <li class="text-right">
+                    @foreach(config('app.available_locales') as $localeCode => $localeName)
+                        @if(!$loop->first)
+                            <span class="mx-1">|</span>
+                        @endif
+                        @if(app()->getLocale() === $localeCode)
+                            <span>{{ $localeName }}</span>
+                        @else
+                            <a href="{{ route('locale.switch', $localeCode) }}">{{ $localeName }}</a>
+                        @endif
+                    @endforeach
+                </li>
             </ul>                                
         </div>
     </div>

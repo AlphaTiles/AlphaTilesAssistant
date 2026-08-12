@@ -18,7 +18,7 @@ $tabEnum = TabEnum::WORD;
 
 <div class="prose">
 
-    <h1>Wordlist</h1>
+    <h1>{{ __('Wordlist') }}</h1>
 	
 	<div>
 		<div x-data="{ showMessage: true }" x-show="showMessage" x-init="setTimeout(() => showMessage = false, 3000)">
@@ -39,7 +39,7 @@ $tabEnum = TabEnum::WORD;
 		@method('DELETE')
 		<div class="alert mb-3">  				
 			<div class="block p-2">
-				<h3 class="mt-0">Are you sure want to delete the following words?</h3>
+				<h3 class="mt-0">{{ __('Are you sure want to delete the following words?') }}</h3>
 				<?php $wordDeleteIds = []; ?>
 				@foreach ($words as $key => $word)	
 					@if(isset($deleteValues[$key]))
@@ -49,8 +49,8 @@ $tabEnum = TabEnum::WORD;
 				@endforeach					
 				<div class="mt-2">
 					<input type="hidden" name="wordIds" value="{{ implode(',', $wordDeleteIds); }}" />
-					<button name="btnCancel" value="cancel" class="btn btn-sm">Cancel</button>
-					<button name="btnDelete" value="delete" class="btn btn-sm btn-primary">Yes</button>
+					<button name="btnCancel" value="cancel" class="btn btn-sm">{{ __('Cancel') }}</button>
+					<button name="btnDelete" value="delete" class="btn btn-sm btn-primary">{{ __('Yes') }}</button>
 				</div>
 			</div>
 		</div>	
@@ -97,8 +97,8 @@ $tabEnum = TabEnum::WORD;
 	@if(count($words) > 0)
 
 		<p>
-			<input type="radio" name="orderBy" value="value" {{ $orderby == 'value' ? 'checked' : '' }} onChange="this.form.submit();"> Order by Word
-			<input type="radio" name="orderBy" value="id" {{ $orderby == 'id' ? 'checked' : '' }} onChange="this.form.submit();"> Added Order
+			<input type="radio" name="orderBy" value="value" {{ $orderby == 'value' ? 'checked' : '' }} onChange="this.form.submit();"> {{ __('Order by Word') }}
+			<input type="radio" name="orderBy" value="id" {{ $orderby == 'id' ? 'checked' : '' }} onChange="this.form.submit();"> {{ __('Added Order') }}
 		</p>
 
 		<div>
@@ -113,12 +113,12 @@ $tabEnum = TabEnum::WORD;
 				</colgroup>                        
 				<thead>
 				<tr>
-					<th>Word in {{ $langName }} <a href="#" onClick="openAlert('Words with Syllables', 'If you want to use syllable-based games, you must put periods between syllables in each word. If your words have spaces or dashes, you must put periods around the spaces or dashes. Example: o.pen.-.source');"><i class="fa-solid fa-circle-info"></i></a></th> 					
-					<th>Mixed Types <a href="#" onClick="openAlert('Mixed Types', 'Not used by most languages. Watch this YouTube <a href=\'https://www.youtube.com/watch?v=s-HAUAc6tAg\' target=\'_blank\'>video</a> to learn more.');"><i class="fa-solid fa-circle-info"></i></a></th>
-					<th>Audio</th>
-					<th>Image</th>
-					<th>Stage <a href="#" onClick="openAlert('First appears in stage (overrule default)', 'If you are defining stages for each tile, exceptions can be defined for individual words.');"><i class="fa-solid fa-circle-info"></i></a></th>
-					<th><input type="checkbox" onClick="checkAll(this, 'words')" /> Delete</th>
+					<th>{{ __('Word in :lang', ['lang' => $langName]) }} <a href="#" onClick="openAlert('{{ __('Words with Syllables') }}', '{{ __('If you want to use syllable-based games, you must put periods between syllables in each word. If your words have spaces or dashes, you must put periods around the spaces or dashes. Example: o.pen.-.source') }}');"><i class="fa-solid fa-circle-info"></i></a></th> 					
+					<th>{{ __('Mixed Types') }} <a href="#" onClick="openAlert('{{ __('Mixed Types') }}', '{{ __('Not used by most languages. Watch this YouTube <a href=\'https://www.youtube.com/watch?v=s-HAUAc6tAg\' target=\'_blank\'>video</a> to learn more.') }}');"><i class="fa-solid fa-circle-info"></i></a></th>
+					<th>{{ __('Audio') }}</th>
+					<th>{{ __('Image') }}</th>
+					<th>{{ __('Stage') }} <a href="#" onClick="openAlert('{{ __('First appears in stage (overrule default)') }}', '{{ __('If you are defining stages for each tile, exceptions can be defined for individual words.') }}');"><i class="fa-solid fa-circle-info"></i></a></th>
+					<th><input type="checkbox" onClick="checkAll(this, 'words')" /> {{ __('Delete') }}</th>
 				</tr>
 				</thead> 
 				<tbody>
@@ -141,7 +141,7 @@ $tabEnum = TabEnum::WORD;
 							<input type="file" name="words[{{ $key }}][audioFile]" class="custom-file-input" id="chooseFile" value="{{ old('words.' . $key . '.audioFile') }}">
 							<br>
 							@if($errors->has('words.' . $key . '.audioFile') && old('words.' . $key . '.delete') != '1')							
-								<div class="error">Upload a valid file</div>
+								<div class="error">{{ __('Upload a valid file') }}</div>
 							@else
 								@if(isset($word->audioFile) || isset($word->audioFilename))
 									<?php 		
@@ -155,7 +155,7 @@ $tabEnum = TabEnum::WORD;
 									<div class="mt-1">
 										<audio controls style="width: 200px;">
 											<source src="/languagepack/items/{{ $word->languagepackid }}/download/{{ $storedFileName }}?{{ time() }}" type="audio/mpeg">
-											Your browser does not support the audio element.
+											{{ __('Your browser does not support the audio element.') }}
 										</audio> 								
 									</div>
 									<input type="hidden" name="words[{{ $key }}][audioFilename]" value="{{ $audioFilename }}">
@@ -169,7 +169,7 @@ $tabEnum = TabEnum::WORD;
 							<input type="file" name="words[{{ $key }}][imageFile]" class="custom-file-input" id="chooseFile" value="{{ old('words.' . $key . '.imageFile') }}">
 							<br>
 							@if($errors->has('words.' . $key . '.imageFile') && old('words.' . $key . '.delete') != '1')							
-								<div class="error">Upload a valid file</div>
+								<div class="error">{{ __('Upload a valid file') }}</div>
 							@else
 								@if(isset($word->imageFile) || isset($word->imageFilename))
 									<?php 		
@@ -207,11 +207,11 @@ $tabEnum = TabEnum::WORD;
 			{!! $pagination !!}
 		</div>
 
-		<p class="p-3 bg-blue-200 rounded">To delete an item, first select the check box(es) in the Delete column, then click on "Save".</p>
+		<p class="p-3 bg-blue-200 rounded">{{ __('To delete an item, first select the check box(es) in the Delete column, then click on "Save".') }}</p>
 		
 		<p>
-			<input type="submit" name="btnHiddenSave" id="saveButton" value="Save" class="hidden" />
-			<input type="submit" name="btnSave" value="Save" class="btn-sm btn-primary ml-1" onClick='handleSaveReset();' />			
+			<input type="submit" name="btnHiddenSave" id="saveButton" value="{{ __('Save') }}" class="hidden" />
+			<input type="submit" name="btnSave" value="{{ __('Save') }}" class="btn-sm btn-primary ml-1" onClick='handleSaveReset();' />			
 
 		</p>			
 	@endif
@@ -220,27 +220,27 @@ $tabEnum = TabEnum::WORD;
 	</form>
 
 
-	<form id="formAddItems" method="post" action="/languagepack/wordlist/{{ $languagePack->id }}" data-add-items-message="Make sure you only include a single column of data that has the words as written in the language of the game.">
+	<form id="formAddItems" method="post" action="/languagepack/wordlist/{{ $languagePack->id }}" data-add-items-message="{{ __('Make sure you only include a single column of data that has the words as written in the language of the game.') }}">
 		@csrf
 		<div>
-			<label for="add_items">Add Words (one word per line):</label> <a href="#" onClick="openAlert('How many words should be included?', '300 words is recommended, but 100-150 words is a common starting point. A good goal is to include, for every game tile, one word that begins with that game tile (although there are of course some game tiles in some languages that never appear at the beginning of words). If you have more than 300 words, it is worth considering whether multiple apps should be made, perhaps dividing the words into semantic groupings or beginner/advanced groupings, etc.')"><i class="fa-solid fa-circle-info"></i></a><br>
+			<label for="add_items">{{ __('Add Words (one word per line):') }}</label> <a href="#" onClick="openAlert('{{ __('How many words should be included?') }}', '{{ __('300 words is recommended, but 100-150 words is a common starting point. A good goal is to include, for every game tile, one word that begins with that game tile (although there are of course some game tiles in some languages that never appear at the beginning of words). If you have more than 300 words, it is worth considering whether multiple apps should be made, perhaps dividing the words into semantic groupings or beginner/advanced groupings, etc.') }}')"><i class="fa-solid fa-circle-info"></i></a><br>
 			<textarea name="add_items" id="txtAddItems" rows=7 cols=45 class="leading-tight">{{ old('add_items') }}</textarea>
 		</div>
 
 		<div class="mt-3 w-9/12">		
 			<input type="hidden" name="id" value="{{ $languagePack->id }}" />
-			<input type="submit" name="btnAdd" value="Add words" class="btn-sm btn-primary ml-1" />
+			<input type="submit" name="btnAdd" value="{{ __('Add words') }}" class="btn-sm btn-primary ml-1" />
 		</div>
 		<div class="mt-6 w-9/12">	
-			<a href="#" onClick='autoSavePage("/languagepack/tiles/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-secondary pt-0.5 font-normal">Back</a>
+			<a href="#" onClick='autoSavePage("/languagepack/tiles/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-secondary pt-0.5 font-normal">{{ __('Back') }}</a>
 			@if($languagePack->words->count() > 0)
-				<a href="#" onClick='autoSavePage("/languagepack/keyboard/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">Next</a>		
+				<a href="#" onClick='autoSavePage("/languagepack/keyboard/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">{{ __('Next') }}</a>		
 			@endif
 		</div>
 
 	</form>
 	<div class="mt-4">
-		<a href="/dashboard">Back to Dashboard</a>
+		<a href="/dashboard">{{ __('Back to Dashboard') }}</a>
 	</div>
 </div>
 
@@ -255,10 +255,10 @@ function showWordInfo(languagePackId, inputNr, wordId) {
     // Check if the input value has changed from its original value
     if (wordInput && wordInput.defaultValue !== wordInput.value) {
         Swal.fire({
-            title: 'Unsaved Changes',
-            text: 'You need to save the changes first before you can view the tiles.',
+            title: "{{ __('Unsaved Changes') }}",
+            text: "{{ __('You need to save the changes first before you can view the tiles.') }}",
             confirmButtonColor: 'blue',
-            confirmButtonText: 'Close',
+            confirmButtonText: "{{ __('Close') }}",
             showConfirmButton: true,
             showCancelButton: false
         });
@@ -270,10 +270,10 @@ function showWordInfo(languagePackId, inputNr, wordId) {
         .then(response => response.text())
         .then(tiles => {
             Swal.fire({
-                title: 'Word gets parsed into these tiles',
+                title: "{{ __('Word gets parsed into these tiles') }}",
                 html: tiles,
                 confirmButtonColor: 'blue',
-                confirmButtonText: 'Close',
+                confirmButtonText: "{{ __('Close') }}",
                 showConfirmButton: true,
                 showCancelButton: false
             });
@@ -281,10 +281,10 @@ function showWordInfo(languagePackId, inputNr, wordId) {
         .catch(error => {
             console.error('Error fetching tiles:', error);
             Swal.fire({
-                title: 'Error',
-                text: 'Could not fetch tiles for the selected word.',
+                title: "{{ __('Error') }}",
+                text: "{{ __('Could not fetch tiles for the selected word.') }}",
                 confirmButtonColor: 'blue',
-                confirmButtonText: 'Close',
+                confirmButtonText: "{{ __('Close') }}",
                 showConfirmButton: true,
                 showCancelButton: false
             });

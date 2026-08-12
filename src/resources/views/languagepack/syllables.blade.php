@@ -14,8 +14,8 @@ $tabEnum = TabEnum::SYLLABLE;
 
 <div class="prose">
 
-    <h1>Syllables</h1>
-	<div>Adding syllables is optional. You can make the app without syllable-based games.</div>
+    <h1>{{ __('Syllables') }}</h1>
+	<div>{{ __('Adding syllables is optional. You can make the app without syllable-based games.') }}</div>
 
 	<div>
 		<div x-data="{ showMessage: true }" x-show="showMessage" x-init="setTimeout(() => showMessage = false, 3000)">
@@ -36,7 +36,7 @@ $tabEnum = TabEnum::SYLLABLE;
 		@method('DELETE')
 		<div class="alert mb-3">  				
 			<div class="block p-2">
-				<h3 class="mt-0">Are you sure want to delete the following syllables?</h3>
+				<h3 class="mt-0">{{ __('Are you sure want to delete the following syllables?') }}</h3>
 				<?php $syllableDeleteIds = []; ?>
 				@foreach ($syllables as $key => $syllable)					
 					@if(isset($deleteValues[$key]))
@@ -46,8 +46,8 @@ $tabEnum = TabEnum::SYLLABLE;
 				@endforeach					
 				<div class="mt-2">
 					<input type="hidden" name="deleteIds" value="{{ implode(',', $syllableDeleteIds); }}" />
-					<button name="btnCancel" value="cancel" class="btn btn-sm">Cancel</button>
-					<button name="btnDelete" value="delete" class="btn btn-sm btn-primary">Yes</button>
+					<button name="btnCancel" value="cancel" class="btn btn-sm">{{ __('Cancel') }}</button>
+					<button name="btnDelete" value="delete" class="btn btn-sm btn-primary">{{ __('Yes') }}</button>
 				</div>
 			</div>
 		</div>	
@@ -104,11 +104,11 @@ $tabEnum = TabEnum::SYLLABLE;
 				</colgroup>                        
 				<thead>
 				<tr>
-					<th>Syllable</th> 
-					<th>Distractors <a href="#" onClick="openAlert('Distractors', 'The three columns (Or1, Or2, Or3) contain “distractors”. They are used to provide alternative (incorrect) answers. For example, in the word-builder game to the right, the player has compared the syllables in the first column and has correctly selected |chá| below and not |ché| above. The syllable |ché| appears as an option because, in the syllables tab, “ché” is listed as a distractor of “chá”. For distractor syllables, only use syllables that appear in column A as well.', '/images/help/distractor_syllables.png');"><i class="fa-solid fa-circle-info"></i></a></th> 
-					<th>Audio instructions</th>
-					<th>Color <a href="#" onClick="openAlert('Colors', 'The “Color” column indicates which color from your colors tab will appear as the background for that syllable in the Sudan game. This may help you to visually group syllables based on similarity in the Sudan game.')"><i class="fa-solid fa-circle-info"></i></a></th>
-					<th><input type="checkbox" onClick="checkAll(this, 'items')" /> Delete</th>
+					<th>{{ __('Syllable') }}</th> 
+					<th>{{ __('Distractors') }} <a href="#" onClick="openAlert('{{ __('Distractors') }}', '{{ __('The three columns (Or1, Or2, Or3) contain “distractors”. They are used to provide alternative (incorrect) answers. For example, in the word-builder game to the right, the player has compared the syllables in the first column and has correctly selected |chá| below and not |ché| above. The syllable |ché| appears as an option because, in the syllables tab, “ché” is listed as a distractor of “chá”. For distractor syllables, only use syllables that appear in column A as well.') }}', '/images/help/distractor_syllables.png');"><i class="fa-solid fa-circle-info"></i></a></th> 
+					<th>{{ __('Audio instructions') }}</th>
+					<th>{{ __('Color') }} <a href="#" onClick="openAlert('{{ __('Colors') }}', '{{ __('The “Color” column indicates which color from your colors tab will appear as the background for that syllable in the Sudan game. This may help you to visually group syllables based on similarity in the Sudan game.') }}')"><i class="fa-solid fa-circle-info"></i></a></th>
+					<th><input type="checkbox" onClick="checkAll(this, 'items')" /> {{ __('Delete') }}</th>
 				</tr>
 				</thead> 
 				<tbody>
@@ -163,8 +163,8 @@ $tabEnum = TabEnum::SYLLABLE;
 		</div>
 
 		<p>
-			<input type="submit" name="btnHiddenSave" id="saveButton" value="Save" class="hidden" />
-			<input type="submit" name="btnSave" value="Save" class="btn-sm btn-primary ml-1" onClick='handleSaveReset();' />
+			<input type="submit" name="btnHiddenSave" id="saveButton" value="{{ __('Save') }}" class="hidden" />
+			<input type="submit" name="btnSave" value="{{ __('Save') }}" class="btn-sm btn-primary ml-1" onClick='handleSaveReset();' />
 		</p>			
 	@endif
 
@@ -174,23 +174,23 @@ $tabEnum = TabEnum::SYLLABLE;
 	<form method="post" action="/languagepack/syllables/{{ $languagePack->id }}">
 		@csrf
 		<div>
-			<label for="add_items">Add syllables (one syllable per line):</label><br>
+			<label for="add_items">{{ __('Add syllables (one syllable per line):') }}</label><br>
 
 			<textarea name="add_items" rows=7 cols=40 class="leading-tight">{{ old('add_items') }}</textarea>
 		</div>
 
 		<div class="mt-3 w-9/12">		
 			<input type="hidden" name="id" value="{{ $languagePack->id }}" />
-			<input type="submit" name="btnAdd" value="Add syllables" class="btn-sm btn-primary ml-1" />
+			<input type="submit" name="btnAdd" value="{{ __('Add syllables') }}" class="btn-sm btn-primary ml-1" />
 		</div>
 	</form>
 	<div class="mt-6 w-9/12">	
-		<a href="#" onClick='autoSavePage("/languagepack/keyboard/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-secondary pt-0.5 font-normal">Back</a>
-		<a href="#" onClick='autoSavePage("/languagepack/resources/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">Next</a>		
+		<a href="#" onClick='autoSavePage("/languagepack/keyboard/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-secondary pt-0.5 font-normal">{{ __('Back') }}</a>
+		<a href="#" onClick='autoSavePage("/languagepack/resources/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">{{ __('Next') }}</a>		
 	</div>
 
 	<div class="mt-4">
-		<a href="/dashboard">Back to Dashboard</a>
+		<a href="/dashboard">{{ __('Back to Dashboard') }}</a>
 	</div>
 </div>
 

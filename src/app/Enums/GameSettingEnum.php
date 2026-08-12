@@ -54,25 +54,25 @@ enum GameSettingEnum: string
     public function label(): string
     {
         return match ($this) {
-            self::SCAN_SETTING       => 'Game 001 Scan Setting',
-            self::HAS_TILE_AUDIO    =>  'Has tile audio',
-            self::AFTER_12_TRACKERS => 'After 12 checked trackers',
-            self::SYLLABLE_AUDIO => 'Has syllable audio',            
-            self::NUMBER_AVATARS => 'Number of avatars',
-            self::DIFFERENTIATE_TYPES => 'Differentiates types of multitype symbols',
-            self::STAGE_CORRESPONDENCE => 'Stage correspondence ratio',
-            self::FIRST_LETTER_CORRESPONDENCE => 'First letter stage correspondence',
-            self::WORD_LENGTH => 'Stage 1-2 max word length',
-            self::DAYS_EXPIRATION => 'Days until expiration',
-            self::CHILE_KEYBOARD_WIDTH => 'Chile keyboard width',
-            self::CHILE_GUESS_COUNT => 'Chile base guess count',
-            self::CHILE_MIN_WORD_LENGTH => 'Chile minimum word length',
-            self::CHILE_MAX_WORD_LENGTH => 'Chile maximum word length',
-            self::BOLD_NON_INITIAL_TILES => 'Game 001 bold non-initial tiles',
-            self::BOLD_INITIAL_TILES => 'Game 001 bold initial tiles',
-            self::SHARE_LINK => 'Share link',
-            self::GOOGLE_SERVICES_JSON => 'Google Services JSON',
-            self::APP_ID => 'App ID',
+            self::SCAN_SETTING       => __('Game 001 Scan Setting'),
+            self::HAS_TILE_AUDIO    =>  __('Has tile audio'),
+            self::AFTER_12_TRACKERS => __('After 12 checked trackers'),
+            self::SYLLABLE_AUDIO => __('Has syllable audio'),            
+            self::NUMBER_AVATARS => __('Number of avatars'),
+            self::DIFFERENTIATE_TYPES => __('Differentiates types of multitype symbols'),
+            self::STAGE_CORRESPONDENCE => __('Stage correspondence ratio'),
+            self::FIRST_LETTER_CORRESPONDENCE => __('First letter stage correspondence'),
+            self::WORD_LENGTH => __('Stage 1-2 max word length'),
+            self::DAYS_EXPIRATION => __('Days until expiration'),
+            self::CHILE_KEYBOARD_WIDTH => __('Chile keyboard width'),
+            self::CHILE_GUESS_COUNT => __('Chile base guess count'),
+            self::CHILE_MIN_WORD_LENGTH => __('Chile minimum word length'),
+            self::CHILE_MAX_WORD_LENGTH => __('Chile maximum word length'),
+            self::BOLD_NON_INITIAL_TILES => __('Game 001 bold non-initial tiles'),
+            self::BOLD_INITIAL_TILES => __('Game 001 bold initial tiles'),
+            self::SHARE_LINK => __('Share link'),
+            self::GOOGLE_SERVICES_JSON => __('Google Services JSON'),
+            self::APP_ID => __('App ID'),
         };
     }
 
@@ -92,14 +92,14 @@ enum GameSettingEnum: string
     public function helpText(): ?string
     {
         return match($this) {
-            self::WORD_LENGTH => 'Maximum word length of stages 1 and 2 in terms of tiles',
-            self::DAYS_EXPIRATION => 'You may add an optional setting if you want your app to have an expiration date. For example, if you are testing your language’s orthography, you may want to distribute a temporary version of the app that expires after 30 days.',
-            self::CHILE_KEYBOARD_WIDTH => 'For the Guess the Word (Chile.java) game, you can specify the keyboard width, the number of guesses per round and the range of word sizes (in tile length) allowed.',
-            self::BOLD_NON_INITIAL_TILES => 'In Game 001 (Romania) bold non-initial tiles when in focus? (boldNonInitialFocusTiles)',
-            self::BOLD_INITIAL_TILES => 'In Game 001 (Romania) bold initial tiles when in focus? (boldInitialFocusTiles)',
-            self::SHARE_LINK => 'The share button allows you to point the user directly to the Play Store or another link. If link included, Share icon will appear at the bottom of Game selection screen. Clicking Share icon will display QR code.',
-            self::GOOGLE_SERVICES_JSON => 'Using Google’s Firebase, we can track how many people are using your app and for how much time and other non-PII data. By default, the Alpha Tiles support team (alpha_tiles@sil.org) will create the necessary google-services.json analytics file when building your app and will have visibility of these analytics. If you are comfortable creating and managing your own Firebase project, you can supply your own google-services.json file.',
-            self::APP_ID => 'The app ID gets automatically extracted when you upload the Google Services JSON file here from the package name.',
+            self::WORD_LENGTH => __('Maximum word length of stages 1 and 2 in terms of tiles'),
+            self::DAYS_EXPIRATION => __('You may add an optional setting if you want your app to have an expiration date. For example, if you are testing your language’s orthography, you may want to distribute a temporary version of the app that expires after 30 days.'),
+            self::CHILE_KEYBOARD_WIDTH => __('For the Guess the Word (Chile.java) game, you can specify the keyboard width, the number of guesses per round and the range of word sizes (in tile length) allowed.'),
+            self::BOLD_NON_INITIAL_TILES => __('In Game 001 (Romania) bold non-initial tiles when in focus? (boldNonInitialFocusTiles)'),
+            self::BOLD_INITIAL_TILES => __('In Game 001 (Romania) bold initial tiles when in focus? (boldInitialFocusTiles)'),
+            self::SHARE_LINK => __('The share button allows you to point the user directly to the Play Store or another link. If link included, Share icon will appear at the bottom of Game selection screen. Clicking Share icon will display QR code.'),
+            self::GOOGLE_SERVICES_JSON => __('Using Google’s Firebase, we can track how many people are using your app and for how much time and other non-PII data. By default, the Alpha Tiles support team (alpha_tiles@sil.org) will create the necessary google-services.json analytics file when building your app and will have visibility of these analytics. If you are comfortable creating and managing your own Firebase project, you can supply your own google-services.json file.'),
+            self::APP_ID => __('The app ID gets automatically extracted when you upload the Google Services JSON file here from the package name.'),
             default => null
         };
     }
