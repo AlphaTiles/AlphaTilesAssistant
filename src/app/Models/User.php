@@ -20,6 +20,10 @@ class User extends Authenticatable
 
     public function isAdmin(): bool
     {
+        if ($this->email && strtolower($this->email) === strtolower(env('ADMIN_EMAIL', ''))) {
+            return true;
+        }
+
         return DB::table(config('roles.roleUserTable', 'role_user') . ' as ru')
             ->join(config('roles.rolesTable', 'roles') . ' as r', 'r.id', '=', 'ru.role_id')
             ->where('ru.user_id', $this->id)

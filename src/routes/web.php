@@ -16,6 +16,7 @@ use App\Http\Controllers\GoogleDriveController;
 use App\Http\Controllers\GameSettingsController;
 use App\Http\Controllers\LanguageInfoController;
 use App\Http\Controllers\LanguagePackController;
+use App\Http\Controllers\AdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,6 +40,10 @@ Route::get('/locale/{locale}', function (string $locale) {
 
     return redirect()->back();
 })->name('locale.switch');
+
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/admin/languagepacks', [AdminController::class, 'languagePacks'])->name('admin.languagepacks');
+});
 
 Route::middleware(['auth', 'authorize.languagepack'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');    

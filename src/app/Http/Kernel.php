@@ -66,5 +66,6 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'role' => \jeremykenedy\LaravelRoles\App\Http\Middleware\VerifyRole::class,
         'authorize.languagepack' => \App\Http\Middleware\AuthorizeLanguagePack::class,
+        'admin' => \App\Http\Middleware\EnsureIsAdmin::class,
     ];
 }
