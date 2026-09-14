@@ -60,10 +60,57 @@ class NotesControllerTest extends TestCase
                 ],
             ]);
 
-        $response->assertStatus(302);
+        $response->assertStatus(200);
         $this->assertDatabaseHas('notes', [
             'id' => $note->id,
             'text' => 'updated',
         ]);
+    }
+
+    /** @test */
+    public function it_deletes_a_note(): void
+    {
+        $note = Note::create(['languagepackid' => $this->languagePack->id, 'text' => 'to delete']);
+
+        $response = $this->actingAs($this->user)
+            ->delete("/languagepack/notes/{$this->languagePack->id}", [
+                'deleteIds' => (string) $note->id,
+            ]);
+
+        $response->assertStatus(302);
+        $this->assertDatabaseMissing('notes', ['id' => $note->id]);
+    }
+
+    /** @test */
+    public function it_cancels_a_note_deletion(): void
+    {
+        $note = Note::create(['languagepackid' => $this->languagePack->id, 'text' => 'kept']);
+
+        $response = $this->actingAs($this->user)
+            ->delete("/languagepack/notes/{$this->languagePack->id}", [
+                'deleteIds' => (string) $note->id,
+                'btnCancel' => 'cancel',
+            ]);
+
+        $response->assertStatus(302);
+        $this->assertDatabaseHas('notes', ['id' => $note->id]);
+    }
+
+    /** @test */
+    public function checking_the_delete_box_and_saving_shows_a_confirmation_before_deleting(): void
+    {
+        $note = Note::create(['languagepackid' => $this->languagePack->id, 'text' => 'about to delete']);
+
+        $response = $this->actingAs($this->user)
+            ->patch("/languagepack/notes/{$this->languagePack->id}", [
+                'items' => [
+                    ['id' => $note->id, 'text' => $note->text, 'delete' => '1'],
+                ],
+            ]);
+
+        $response->assertStatus(200);
+        $response->assertSee('Are you sure want to delete the following notes?');
+        $response->assertSee('about to delete');
+        $this->assertDatabaseHas('notes', ['id' => $note->id]);
     }
 }

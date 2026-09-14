@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 
-class NotesController extends Controller
+class NotesController extends BaseItemController
 {
     /**
      * Create a new controller instance.
@@ -17,7 +17,11 @@ class NotesController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->route = 'notes';
+        $this->model = new Note();
+        $this->fileKeyname = 'note';
+
+        parent::__construct();
     }
 
     /**
@@ -78,6 +82,17 @@ class NotesController extends Controller
 
         session()->flash('success', 'Records updated successfully');
 
-        return redirect()->back();
+        // return the view directly (not a redirect) so the delete confirmation
+        // step below can see the submitted 'items' delete checkboxes
+        $itemCollection = Note::where('languagepackid', $languagePack->id)
+            ->orderBy('id')
+            ->paginate(config('pagination.default'));
+
+        return view('languagepack.notes', [
+            'completedSteps' => ['lang_info', 'tiles', 'wordlist', 'keyboard', 'syllables', 'resources', 'game_settings', 'games', 'notes'],
+            'languagePack' => $languagePack,
+            'items' => $itemCollection,
+            'pagination' => $itemCollection->links(),
+        ]);
     }
 }

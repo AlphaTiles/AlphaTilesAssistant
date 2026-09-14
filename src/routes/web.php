@@ -110,6 +110,7 @@ Route::middleware(['auth', 'authorize.languagepack'])->group(function () {
     Route::get('languagepack/notes/{languagePack}', [NotesController::class, 'edit']);
     Route::post('languagepack/notes/{languagePack}', [NotesController::class, 'store']);
     Route::patch('languagepack/notes/{languagePack}', [NotesController::class, 'update']);
+    Route::delete('languagepack/notes/{languagePack}', [NotesController::class, 'delete']);
 
     Route::get('languagepack/export/{languagePack}', [ExportController::class, 'show']);    
     Route::post('languagepack/export/{languagePack}', [ExportController::class, 'store']);  

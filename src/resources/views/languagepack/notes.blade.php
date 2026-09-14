@@ -18,6 +18,34 @@
 		</div>
 	</div>
 
+	<?php
+	$itemsData = old('items') ?? request()['items'] ?? $items;
+	$deleteValues = old('items') ? Illuminate\Support\Arr::pluck(old('items'), 'delete') : Illuminate\Support\Arr::pluck($itemsData, 'delete');
+	?>
+	@if($items && in_array(1, $deleteValues))
+	<form method="post" action="/languagepack/notes/{{ $languagePack->id }}" enctype="multipart/form-data">
+	@csrf
+	@method('DELETE')
+	<div class="alert mb-3">
+		<div class="block p-2">
+			<h3 class="mt-0">{{ __('Are you sure want to delete the following notes?') }}</h3>
+			<?php $itemDeleteIds = []; ?>
+			@foreach ($items as $key => $item)
+				@if(isset($deleteValues[$key]))
+					<?php array_push($itemDeleteIds, $item->id); ?>
+					<div>{{ $item->text }}</div>
+				@endif
+			@endforeach
+			<div class="mt-2">
+				<input type="hidden" name="deleteIds" value="{{ implode(',', $itemDeleteIds); }}" />
+				<button name="btnCancel" value="cancel" class="btn btn-sm">{{ __('Cancel') }}</button>
+				<button name="btnDelete" value="delete" class="btn btn-sm btn-primary">{{ __('Yes') }}</button>
+			</div>
+		</div>
+	</div>
+	</form>
+	@endif
+
 	@if ($errors->any())
 	<div class="alert alert-error">
 		<ul class="block">
@@ -40,8 +68,9 @@
 			<table class="table table-compact w-full">
 				<colgroup>
 					<col span="1" style="width: 5%;">
-					<col span="1" style="width: 55%;">
-					<col span="1" style="width: 20%;">
+					<col span="1" style="width: 45%;">
+					<col span="1" style="width: 15%;">
+					<col span="1" style="width: 15%;">
 					<col span="1" style="width: 20%;">
 				</colgroup>
 				<thead>
@@ -50,6 +79,7 @@
 					<th>{{ __('Note') }}</th>
 					<th>{{ __('Created') }}</th>
 					<th>{{ __('Updated') }}</th>
+					<th><input type="checkbox" onClick="checkAll(this, 'items')" /> {{ __('Delete') }}</th>
 				</tr>
 				</thead>
 				<tbody>
@@ -63,6 +93,11 @@
 					</td>
 					<td>{{ $item->created_at->format('Y-m-d H:i') }}</td>
 					<td>{{ $item->updated_at->format('Y-m-d H:i') }}</td>
+					<td>
+						<?php $delete = ($deleteValues[$key] ?? null) === '1'; ?>
+						<input type="checkbox" name="items[{{ $key }}][delete]" value="1"
+							{{ $delete ? 'checked' : '' }} />
+					</td>
 				</tr>
 				@endforeach
 			</table>
