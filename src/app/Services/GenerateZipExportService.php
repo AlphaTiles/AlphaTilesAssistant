@@ -5,6 +5,7 @@ namespace App\Services;
 use ZipArchive;
 use App\Models\Key;
 use App\Models\Game;
+use App\Models\Note;
 use App\Models\Tile;
 use App\Models\Word;
 use App\Models\Resource;
@@ -54,6 +55,10 @@ class GenerateZipExportService
         $tilesFileName = 'aa_langinfo.txt';
         $tilesFile = $this->generateLanginfoFile($tilesFileName, $zip, $zipFileName);
         $zip->addFile($tilesFile, "{$zipFileName}/res/raw/{$tilesFileName}");
+
+        $notesFileName = 'aa_notes.txt';
+        $notesFile = $this->generateNotesFile($notesFileName);
+        $zip->addFile($notesFile, "{$zipFileName}/res/raw/{$notesFileName}");
 
         $tilesFileName = 'aa_gametiles.txt';
         $tilesFile = $this->generateTilesFile($tilesFileName, $zip, $zipFileName);
@@ -307,6 +312,27 @@ class GenerateZipExportService
         return $file;
     }
 
+    public function generateNotesFile(string $fileName): string
+    {
+        $notes = Note::where('languagepackid', $this->languagePack->id)
+            ->orderBy('id')
+            ->get();
+        $fileContent = "#" . self::SEPARATOR . "Note" . self::SEPARATOR . "CreatedAt" . self::SEPARATOR . "UpdatedAt\n";
+
+        $i = 1;
+        foreach ($notes as $note) {
+            $fileContent .= "{$i}" . self::SEPARATOR
+                . "{$note->text}" . self::SEPARATOR
+                . $note->created_at?->format('Y-m-d H:i:s') . self::SEPARATOR
+                . $note->updated_at?->format('Y-m-d H:i:s') . "\n";
+            $i++;
+        }
+
+        $file = "{$this->tempDir}/{$fileName}";
+        file_put_contents($file, $fileContent);
+
+        return $file;
+    }
 
     public function generateSyllablesFile(string $syllablesFileName, ZipArchive $zip, string $zipFileName): string
     {

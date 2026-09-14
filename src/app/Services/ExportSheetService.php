@@ -7,6 +7,7 @@ use Google\Client;
 use App\Models\File;
 use App\Models\Key;
 use App\Models\Game;
+use App\Models\Note;
 use App\Models\Tile;
 use App\Models\Word;
 use App\Models\Resource;
@@ -83,11 +84,26 @@ class ExportSheetService
     {
         $sheetName = 'notes';
         $this->createSheetTab($spreadsheetId, $sheetName, 0);        
+
         $values = [
-            ["#", "1"],
+            ["#", "Note", "CreatedAt", "UpdatedAt"],
         ];
-        
-        $sheetAndRange = $this->getSheetAndRange($sheetName, $values, count($values));
+
+        $items = Note::where('languagepackid', $this->languagePack->id)
+            ->orderBy('id')
+            ->get();
+        $sheetAndRange = $this->getSheetAndRange($sheetName, $values, count($items));
+
+        $i = 1;
+        foreach ($items as $item) {
+            $values[$i] = [
+                $i,
+                $item->text,
+                $item->created_at?->format('Y-m-d H:i:s'),
+                $item->updated_at?->format('Y-m-d H:i:s'),
+            ];
+            $i++;
+        }
 
         $this->clearAndAddValuesToSheet($spreadsheetId, $sheetAndRange, $values);
     }

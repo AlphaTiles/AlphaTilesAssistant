@@ -55,6 +55,57 @@ class ImportSheetServiceTest extends TestCase
         ]);
     }
 
+    public function test_save_notes_uses_provided_timestamps_and_defaults_missing_ones(): void
+    {
+        $languagePack = LanguagePack::factory()->create();
+        $service = new ImportSheetService($languagePack, 'token', 'folder');
+
+        $sheet = new class([
+            ['#', 'Note', 'CreatedAt', 'UpdatedAt'],
+            ['1', 'first note', '2026-01-01 10:00:00', '2026-01-02 10:00:00'],
+            ['2', 'second note', '', ''],
+        ]) {
+            public function __construct(private array $rows)
+            {
+            }
+
+            public function toArray(): array
+            {
+                return $this->rows;
+            }
+        };
+
+        $spreadsheet = new class($sheet) {
+            public function __construct(private $sheet)
+            {
+            }
+
+            public function getSheetByName(string $sheetName)
+            {
+                return $this->sheet;
+            }
+        };
+
+        $this->setProtectedProperty($service, 'sheetType', 'xlsx');
+        $this->setProtectedProperty($service, 'spreadsheet', $spreadsheet);
+
+        $method = new ReflectionMethod(ImportSheetService::class, 'saveNotes');
+        $method->setAccessible(true);
+        $method->invoke($service, 'notes');
+
+        $this->assertDatabaseHas('notes', [
+            'languagepackid' => $languagePack->id,
+            'text' => 'first note',
+            'created_at' => '2026-01-01 10:00:00',
+            'updated_at' => '2026-01-02 10:00:00',
+        ]);
+
+        $secondNote = \App\Models\Note::where('text', 'second note')->first();
+        $this->assertNotNull($secondNote);
+        $this->assertNotNull($secondNote->created_at);
+        $this->assertNotNull($secondNote->updated_at);
+    }
+
     public function test_save_syllables_converts_space_to_placeholder(): void
     {
         $languagePack = LanguagePack::factory()->create();
