@@ -7,6 +7,7 @@ use App\Models\Key;
 use Tests\TestCase;
 use App\Models\File;
 use App\Models\Tile;
+use App\Models\Note;
 use App\Models\Syllable;
 use Google\Service\Drive;
 use App\Models\GameSetting;
@@ -170,6 +171,36 @@ class ExportServiceTest extends TestCase
 
         $this->assertEquals(' ', $columns[0]);
         $this->assertEquals('4', $columns[1]);
+    }
+
+    public function test_notes_are_written_to_the_zip_export_with_defaults_for_missing_timestamps(): void
+    {
+        Note::create([
+            'languagepackid' => $this->languagePack->id,
+            'text' => 'first note',
+        ]);
+        Note::create([
+            'languagepackid' => $this->languagePack->id,
+            'text' => 'second note',
+        ]);
+
+        $exportService = new GenerateZipExportService($this->languagePack);
+        $filePath = $exportService->generateNotesFile('aa_notes.txt');
+
+        $content = file_get_contents($filePath);
+        $lines = explode("\n", trim($content));
+
+        $this->assertCount(3, $lines); // header + 2 notes
+
+        $firstColumns = explode("\t", $lines[1]);
+        $this->assertEquals('1', $firstColumns[0]);
+        $this->assertEquals('first note', $firstColumns[1]);
+        $this->assertNotEmpty($firstColumns[2]); // created_at defaulted
+        $this->assertNotEmpty($firstColumns[3]); // updated_at defaulted
+
+        $secondColumns = explode("\t", $lines[2]);
+        $this->assertEquals('2', $secondColumns[0]);
+        $this->assertEquals('second note', $secondColumns[1]);
     }
 
     public function test_google_services_file_is_uploaded_to_drive_root(): void

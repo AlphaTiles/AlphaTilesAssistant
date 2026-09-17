@@ -90,6 +90,11 @@ class LanguagePack extends Model
     public function resources(): HasMany
     {
         return $this->hasMany(Resource::class, 'languagepackid');
+    }
+
+    public function notes(): HasMany
+    {
+        return $this->hasMany(Note::class, 'languagepackid');
     }        
 
     public function gameSettings(): HasMany

@@ -8,6 +8,7 @@ $sections = [
   'resources' => ['label' => __('Resources'), 'attribute' => 'resources', 'route' => 'resources'],
   'game_settings' => ['label' => __('Settings'), 'attribute' => 'gameSettings', 'route' => 'game_settings'],
   'games' => ['label' => __('Games'), 'attribute' => 'games', 'route' => 'games', 'games'],
+  'notes' => ['label' => __('Notes'), 'attribute' => 'notes', 'route' => 'notes'],
   'export' => ['label' => __('Export'), 'attribute' => 'keys', 'route' => 'export'],
 ];
 

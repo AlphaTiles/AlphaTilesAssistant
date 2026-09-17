@@ -8,6 +8,7 @@ use App\Services\SeededGameCatalog;
 use App\Models\Game;
 use App\Models\Key;
 use App\Models\File;
+use App\Models\Note;
 use App\Models\Tile;
 use App\Models\Word;
 use App\Models\Syllable;
@@ -55,6 +56,7 @@ class ImportSheetService
         }
 
         try {
+            $this->saveNotes('notes');
             $this->saveLanginfo('langinfo');
             $this->saveTiles('gametiles');
             $this->saveWords('wordlist');
@@ -287,6 +289,46 @@ class ImportSheetService
 
         if (!empty($data)) {
             Key::insert($data);
+        }
+    }
+
+    private function saveNotes(string $worksheetName): void
+    {
+        $rows = $this->getWorksheetRows($worksheetName);
+
+        $firstRow = true;
+        $data = [];
+        $key = 0;
+        foreach ($rows as $row) {
+            if ($firstRow) {
+                $firstRow = false;
+                continue;
+            }
+
+            if (!empty($row[1])) {
+                $data[$key]['languagepackid'] = $this->languagePack->id;
+                $data[$key]['text'] = $row[1];
+                $data[$key]['created_at'] = $this->parseDateOrNow($row[2] ?? null);
+                $data[$key]['updated_at'] = $this->parseDateOrNow($row[3] ?? null);
+                $key++;
+            }
+        }
+
+        if (!empty($data)) {
+            Note::insert($data);
+        }
+    }
+
+    private function parseDateOrNow(?string $value): string
+    {
+        if (empty($value)) {
+            return now()->format('Y-m-d H:i:s');
+        }
+
+        try {
+            return \Carbon\Carbon::parse($value)->format('Y-m-d H:i:s');
+        } catch (Exception) {
+            return now()->format('Y-m-d H:i:s');
         }
     }
 

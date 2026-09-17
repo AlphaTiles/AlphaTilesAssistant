@@ -64,7 +64,7 @@ class ExportController extends Controller
         }
 
         return view('languagepack.export', [
-            'completedSteps' => ['lang_info', 'tiles', 'wordlist', 'keyboard', 'syllables', 'resources', 'game_settings', 'games', 'export'],            
+            'completedSteps' => ['lang_info', 'tiles', 'wordlist', 'keyboard', 'syllables', 'resources', 'game_settings', 'games', 'notes', 'export'],            
             'languagePack' => $languagePack,
             'errors' => $groupedErrors,
             'exportWarningMessage' => $exportWarningMessage,

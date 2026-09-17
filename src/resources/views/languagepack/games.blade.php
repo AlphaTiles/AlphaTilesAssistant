@@ -179,7 +179,7 @@ $tabEnum = TabEnum::GAME;
 
 	<div class="mt-6 w-9/12">	
 		<a href="#" onClick='autoSavePage("/languagepack/game_settings/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-secondary pt-0.5 font-normal">{{ __('Back') }}</a>
-		<a href="#" onClick='autoSavePage("/languagepack/export/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">{{ __('Next') }}</a>		
+		<a href="#" onClick='autoSavePage("/languagepack/notes/{{ $languagePack->id }}");' class="inline-block no-underline btn-sm btn-primary ml-1 pt-0.5 text-white font-normal">{{ __('Next') }}</a>		
 	</div>
 
 	<div class="mt-4">

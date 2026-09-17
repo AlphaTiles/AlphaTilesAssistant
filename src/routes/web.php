@@ -10,6 +10,7 @@ use App\Http\Controllers\KeyboardController;
 use App\Http\Controllers\WordlistController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GamesController;
+use App\Http\Controllers\NotesController;
 use App\Http\Controllers\ResourcesController;
 use App\Http\Controllers\SyllablesController;
 use App\Http\Controllers\GoogleDriveController;
@@ -105,6 +106,11 @@ Route::middleware(['auth', 'authorize.languagepack'])->group(function () {
     Route::delete('languagepack/games/{languagePack}', [GamesController::class, 'delete'])->name('delete-games');;
 
     Route::post('api/games/{game}/move', [GamesController::class, 'swapDoor']);
+
+    Route::get('languagepack/notes/{languagePack}', [NotesController::class, 'edit']);
+    Route::post('languagepack/notes/{languagePack}', [NotesController::class, 'store']);
+    Route::patch('languagepack/notes/{languagePack}', [NotesController::class, 'update']);
+    Route::delete('languagepack/notes/{languagePack}', [NotesController::class, 'delete']);
 
     Route::get('languagepack/export/{languagePack}', [ExportController::class, 'show']);    
     Route::post('languagepack/export/{languagePack}', [ExportController::class, 'store']);  
