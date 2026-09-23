@@ -132,6 +132,9 @@ class GamesController extends BaseItemController
                 'items.*.color' => ['sometimes', 'integer'],
                 'items.*.file' => $fileRules,
                 'items.*.stages_included' => ['sometimes', 'nullable', 'integer'],
+                'items.*.look_back_window' => ['sometimes', 'nullable', 'integer', 'min:1'],
+                'items.*.req_accuracy' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:1'],
+                'items.*.min_attempts' => ['sometimes', 'nullable', 'integer', 'min:0'],
             ],
             [
                 'items.*.file' => $customErrorMessage,

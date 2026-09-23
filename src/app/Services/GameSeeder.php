@@ -106,6 +106,14 @@ class GameSeeder
             // Door increments only for included games.
             $currentDoor = $include ? $door++ : null;
 
+            $lookBackWindowRaw = $this->getCsvValue($row, $headerMap, 'LookBackWindow');
+            $reqAccuracyRaw = $this->getCsvValue($row, $headerMap, 'ReqAccuracy');
+            $minAttemptsRaw = $this->getCsvValue($row, $headerMap, 'MinAttempts');
+
+            $lookBackWindow = ($lookBackWindowRaw !== null && is_numeric($lookBackWindowRaw)) ? (int) $lookBackWindowRaw : 10;
+            $reqAccuracy = ($reqAccuracyRaw !== null && is_numeric($reqAccuracyRaw)) ? (float) $reqAccuracyRaw : 0.9;
+            $minAttempts = ($minAttemptsRaw !== null && is_numeric($minAttemptsRaw)) ? (int) $minAttemptsRaw : 10;
+
             $games[] = [
                 'door' => $currentDoor,
                 'order' => $currentOrder,
@@ -116,6 +124,9 @@ class GameSeeder
                 'syll_or_tile' => $this->getCsvValue($row, $headerMap, 'SyllOrTile') ?? '',
                 'stages_included' => ($stagesIncluded === null || $stagesIncluded === '-') ? null : (int) $stagesIncluded,
                 'friendly_name' => $this->getCsvValue($row, $headerMap, 'Friendly Name'),
+                'look_back_window' => $lookBackWindow,
+                'req_accuracy' => $reqAccuracy,
+                'min_attempts' => $minAttempts,
                 'required_assets' => $requiredAssetsValue,
                 'basic' => $basic,
                 'abs' => $isAbs,
