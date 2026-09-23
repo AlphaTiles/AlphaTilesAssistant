@@ -31,6 +31,9 @@ class Game extends Model
         'required_assets',
         'basic',
         'abs',
+        'look_back_window',
+        'req_accuracy',
+        'min_attempts',
     ];
 
     protected $casts = [
@@ -38,6 +41,9 @@ class Game extends Model
         'basic' => 'boolean',
         'abs' => 'boolean',
         'required_assets' => RequiredAssetsEnum::class,
+        'look_back_window' => 'integer',
+        'req_accuracy' => 'float',
+        'min_attempts' => 'integer',
     ];
 
     public function file(): HasOne

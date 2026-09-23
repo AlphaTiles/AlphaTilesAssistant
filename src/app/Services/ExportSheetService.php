@@ -541,7 +541,7 @@ $this->clearAndAddValuesToSheet($spreadsheetId, $sheetAndRange, $values);
 
         $values = [
             ["Door", "Country",	"ChallengeLevel", "Color", "InstructionAudio",	"AudioDuration",
-            	"SyllOrTile", "StagesIncluded", "Friendly Name"],
+            	"SyllOrTile", "StagesIncluded", "Friendly Name", "LookBackWindow", "ReqAccuracy", "MinAttempts"],
         ];
 
         $oldFolderId = $this->googleService->folderExists($folderName, $this->exportFolderId);
@@ -579,7 +579,10 @@ $this->clearAndAddValuesToSheet($spreadsheetId, $sheetAndRange, $values);
                 $item->audio_duration,
                 $item->syll_or_tile,
                 $stagesIncluded,
-                $item->friendly_name
+                $item->friendly_name,
+                $item->look_back_window ?? 10,
+                $item->req_accuracy ?? 0.9,
+                $item->min_attempts ?? 10,
             ];
             $i++;
         }        

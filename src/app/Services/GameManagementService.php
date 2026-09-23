@@ -106,6 +106,9 @@ class GameManagementService
             'door' => null,
             'color' => $game['color'] ?? 0,
             'stages_included' => $game['stages_included'] ?? null,
+            'look_back_window' => isset($game['look_back_window']) && $game['look_back_window'] !== '' ? (int) $game['look_back_window'] : 10,
+            'req_accuracy' => isset($game['req_accuracy']) && $game['req_accuracy'] !== '' ? (float) $game['req_accuracy'] : 0.9,
+            'min_attempts' => isset($game['min_attempts']) && $game['min_attempts'] !== '' ? (int) $game['min_attempts'] : 10,
         ];
 
         if ($fileModel && isset($fileModel->id)) {

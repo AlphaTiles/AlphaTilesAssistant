@@ -110,6 +110,9 @@ $tabEnum = TabEnum::GAME;
 					<th>{{ __('Audio instructions') }}</th>
 					<th>{{ __('Syllable Or Tile') }}</th>
 					<th><span class="mr-2">{{ __('Stages Included') }}</span></th>
+					<th>{{ __('LookBackWindow') }}</th>
+					<th>{{ __('ReqAccuracy') }}</th>
+					<th>{{ __('MinAttempts') }}</th>
 				</tr>
 				</thead> 
 				<tbody>
@@ -159,6 +162,15 @@ $tabEnum = TabEnum::GAME;
 					</td> 					
 					<td>
 						<input type="number" size=5 class="w-20" name="items[{{ $key }}][stages_included]" value="{{ old('items.' . $key . '.stages_included') ?? $item->stages_included }}" />
+					</td>
+					<td>
+						<input type="number" size=5 class="w-20" name="items[{{ $key }}][look_back_window]" value="{{ old('items.' . $key . '.look_back_window') ?? ($item->look_back_window ?? 10) }}" />
+					</td>
+					<td>
+						<input type="number" step="0.01" size=5 class="w-20" name="items[{{ $key }}][req_accuracy]" value="{{ old('items.' . $key . '.req_accuracy') ?? ($item->req_accuracy ?? 0.9) }}" />
+					</td>
+					<td>
+						<input type="number" size=5 class="w-20" name="items[{{ $key }}][min_attempts]" value="{{ old('items.' . $key . '.min_attempts') ?? ($item->min_attempts ?? 10) }}" />
 					</td>
 				</tr>
 				@endforeach

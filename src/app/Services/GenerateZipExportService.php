@@ -376,7 +376,7 @@ public function generateGamesFile(string $fileName, ZipArchive $zip, string $zip
             ->orderBy('order')
             ->get();
         $fileContent = "Door\tCountry\tChallengeLevel\tColor\tInstructionAudio\tAudioDuration\tSyllOrTile\t" .
-                        "StagesIncluded\tFriendly Name\n";
+                        "StagesIncluded\tFriendly Name\tLookBackWindow\tReqAccuracy\tMinAttempts\n";
 
         $door = 1;
         foreach ($items as $item) {
@@ -387,6 +387,10 @@ public function generateGamesFile(string $fileName, ZipArchive $zip, string $zip
             $file = str_replace('.mp3', '', $file);
             $stagesIncluded = $item->stages_included ?? '-';
 
+            $lookBackWindow = $item->look_back_window ?? 10;
+            $reqAccuracy = $item->req_accuracy ?? 0.9;
+            $minAttempts = $item->min_attempts ?? 10;
+
             $fileContent .= "{$door}" . self::SEPARATOR .
             "{$item->country}" . self::SEPARATOR .
             "{$item->level}" . self::SEPARATOR .
@@ -395,7 +399,10 @@ public function generateGamesFile(string $fileName, ZipArchive $zip, string $zip
             "{$item->audio_duration}" . self::SEPARATOR .
             "{$item->syll_or_tile}" . self::SEPARATOR .
             "{$stagesIncluded}" . self::SEPARATOR .
-            "{$item->friendly_name}" . self::SEPARATOR . "\n";
+            "{$item->friendly_name}" . self::SEPARATOR .
+            "{$lookBackWindow}" . self::SEPARATOR .
+            "{$reqAccuracy}" . self::SEPARATOR .
+            "{$minAttempts}" . self::SEPARATOR . "\n";
             $door++;
         }
 

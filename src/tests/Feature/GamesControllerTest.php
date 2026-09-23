@@ -377,4 +377,40 @@ class GamesControllerTest extends TestCase
         $this->assertSame(2, $g3->door);
         $this->assertSame(3, $g4->door);
     }
+
+    /** @test */
+    public function update_saves_look_back_window_req_accuracy_and_min_attempts(): void
+    {
+        $game = Game::factory()->create([
+            'languagepackid' => $this->languagePack->id,
+            'order' => 1,
+            'include' => true,
+            'color' => 1,
+            'look_back_window' => 10,
+            'req_accuracy' => 0.9,
+            'min_attempts' => 10,
+        ]);
+
+        $response = $this->actingAs($this->user)
+            ->patch("/languagepack/games/{$this->languagePack->id}", [
+                'items' => [
+                    [
+                        'id' => $game->id,
+                        'languagepackid' => $this->languagePack->id,
+                        'color' => 1,
+                        'include' => '1',
+                        'look_back_window' => 15,
+                        'req_accuracy' => 0.85,
+                        'min_attempts' => 20,
+                    ],
+                ],
+            ]);
+
+        $response->assertRedirect();
+        $game->refresh();
+
+        $this->assertEquals(15, $game->look_back_window);
+        $this->assertEquals(0.85, $game->req_accuracy);
+        $this->assertEquals(20, $game->min_attempts);
+    }
 }

@@ -208,8 +208,8 @@ class ImportSheetServiceTest extends TestCase
         $service = new ImportSheetService($languagePack, 'token', 'folder');
 
         $sheet = new class([
-            ['Door', 'Country', 'ChallengeLevel', 'Color', 'InstructionAudio', 'AudioDuration', 'SyllOrTile', 'StagesIncluded', 'Friendly Name'],
-            ['1', 'US', '2', '4', 'X', '15', 'tile', '3', 'First Imported Game'],
+            ['Door', 'Country', 'ChallengeLevel', 'Color', 'InstructionAudio', 'AudioDuration', 'SyllOrTile', 'StagesIncluded', 'Friendly Name', 'LookBackWindow', 'ReqAccuracy', 'MinAttempts'],
+            ['1', 'US', '2', '4', 'X', '15', 'tile', '3', 'First Imported Game', '12', '0.85', '15'],
             ['2', 'CA', '5', '8', 'X', '', 'syllable', '-', 'Second Imported Game'],
         ]) {
             public function __construct(private array $rows)
@@ -252,6 +252,9 @@ class ImportSheetServiceTest extends TestCase
             'syll_or_tile' => 'tile',
             'stages_included' => 3,
             'friendly_name' => 'First Imported Game',
+            'look_back_window' => 12,
+            'req_accuracy' => 0.85,
+            'min_attempts' => 15,
         ]);
 
         $this->assertDatabaseHas('games', [
@@ -266,6 +269,9 @@ class ImportSheetServiceTest extends TestCase
             'syll_or_tile' => 'syllable',
             'stages_included' => null,
             'friendly_name' => 'Second Imported Game',
+            'look_back_window' => 10,
+            'req_accuracy' => 0.9,
+            'min_attempts' => 10,
         ]);
 
         $this->assertSame(2, Game::where('languagepackid', $languagePack->id)->count());

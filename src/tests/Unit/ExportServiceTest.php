@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use ZipArchive;
 use App\Models\Key;
+use App\Models\Game;
 use Tests\TestCase;
 use App\Models\File;
 use App\Models\Tile;
@@ -319,6 +320,27 @@ class ExportServiceTest extends TestCase
         $this->assertSame('{"project_info":{"project_id":"demo"}}', $zip->getFromName('testapp/google-services.json'));
 
         $zip->close();
+    }
+
+    /** @test */
+    public function games_file_includes_look_back_window_req_accuracy_and_min_attempts(): void
+    {
+        Game::factory()->create([
+            'languagepackid' => $this->languagePack->id,
+            'order' => 1,
+            'include' => true,
+            'look_back_window' => 15,
+            'req_accuracy' => 0.85,
+            'min_attempts' => 25,
+        ]);
+
+        $exportService = new GenerateZipExportService($this->languagePack);
+        $zip = new ZipArchive();
+        $gamesFile = $exportService->generateGamesFile('aa_games.txt', $zip, 'testzip');
+        $content = file_get_contents($gamesFile);
+
+        $this->assertStringContainsString("LookBackWindow\tReqAccuracy\tMinAttempts", $content);
+        $this->assertStringContainsString("\t15\t0.85\t25\t\n", $content);
     }
 
     private function setProtectedProperty(object $object, string $property, mixed $value): void
