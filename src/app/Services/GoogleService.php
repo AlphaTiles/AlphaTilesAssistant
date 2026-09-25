@@ -237,9 +237,8 @@ class GoogleService
     function handleExport(LanguagePack $languagePack, string $driveRootFolderId): void
     {        
         $this->ensureValidToken();
-        $folderId = $this->createFolder($languagePack->name, $driveRootFolderId);
-        $exportSheetService = new ExportSheetService($languagePack, $this->token, $folderId, $this->refreshToken);
-        $exportSheetService->handle($folderId);
+        $exportSheetService = new ExportSheetService($languagePack, $this->token, $driveRootFolderId, $this->refreshToken);
+        $exportSheetService->handle($driveRootFolderId);
     }
 
 }

@@ -63,12 +63,18 @@ class ExportController extends Controller
             $exportWarningLevel = ErrorLevelEnum::WARNING->value;
         }
 
+        $token = session()->get("socialite_token");
+        $refreshToken = session()->get("socialite_refresh_token");
+
         return view('languagepack.export', [
             'completedSteps' => ['lang_info', 'tiles', 'wordlist', 'keyboard', 'syllables', 'resources', 'game_settings', 'games', 'notes', 'export'],            
             'languagePack' => $languagePack,
             'errors' => $groupedErrors,
             'exportWarningMessage' => $exportWarningMessage,
             'exportWarningLevel' => $exportWarningLevel,
+            'accessToken' => $token,
+            'refreshToken' => $refreshToken,
+            'userId' => auth()->user()?->id ?? 0,
         ]);
     }
 
