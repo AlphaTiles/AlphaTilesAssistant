@@ -188,14 +188,60 @@ document.addEventListener('DOMContentLoaded', function () {
 
   async function pickerCallback(data) {
     if (data.action === google.picker.Action.PICKED) {
-      let folder = data.docs[0];
-      let folderId = folder.id;
+      const parentFolder = data.docs[0];
+      const result = await Swal.fire({
+        title: "{{ __('Choose an export folder') }}",
+        padding: '2rem',
+        input: 'text',
+        inputLabel: "{{ __('Optional: create a new subfolder inside') }} " + parentFolder.name,
+        inputPlaceholder: "{{ __('Leave blank to use the selected folder') }}",
+        showCancelButton: true,
+        confirmButtonText: "{{ __('Continue') }}",
+        cancelButtonText: "{{ __('Cancel') }}",
+      });
+
+      if (!result.isConfirmed) {
+        return;
+      }
+
+      let destinationFolder = parentFolder;
+      const newFolderName = (result.value || '').trim();
+      if (newFolderName) {
+        try {
+          const response = await fetch('https://www.googleapis.com/drive/v3/files?supportsAllDrives=true&fields=id,name', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              name: newFolderName,
+              mimeType: 'application/vnd.google-apps.folder',
+              parents: [parentFolder.id]
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error(await response.text());
+          }
+          destinationFolder = await response.json();
+        } catch (error) {
+          console.error('There was a problem creating the Google Drive folder:', error);
+          await Swal.fire({
+            icon: 'error',
+            title: "{{ __('Could not create folder') }}",
+            text: error.message
+          });
+          return;
+        }
+      }
+
       window.document.getElementById('result').style.visibility = 'visible';
-      window.document.getElementById('folderName').innerText = folder.name;
+      window.document.getElementById('folderName').innerText = destinationFolder.name;
 
       let driveLink = window.document.getElementById('driveFolderLink');
       if (driveLink) {
-        driveLink.href = `https://drive.google.com/drive/folders/${folderId}?usp=drive_link`;
+        driveLink.href = `https://drive.google.com/drive/folders/${destinationFolder.id}?usp=drive_link`;
       }
 
       let dataToSend = {
@@ -203,7 +249,7 @@ document.addEventListener('DOMContentLoaded', function () {
         token: accessToken,
         refreshToken: refreshToken,
         languagePackId: languagePackId,
-        folderId: folderId
+        folderId: destinationFolder.id
       };
 
       fetch('/api/drive/dispatchexport', {
