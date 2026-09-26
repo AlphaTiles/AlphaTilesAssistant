@@ -13,6 +13,7 @@ use App\Jobs\ImportDriveFolderJob;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Services\LogToDatabaseService;
+use App\Models\DatabaseLog;
 use Illuminate\Support\Facades\Session;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -56,6 +57,24 @@ class GoogleDriveController extends Controller
             'success' => true,
             'folderId' => $request->input('folderId'),
         ]);
+    }
+
+    public function cancelExport(Request $request, LanguagePack $languagePack)
+    {
+        $log = DatabaseLog::where('languagepackid', $languagePack->id)
+            ->where('type', 'export')
+            ->firstOrFail();
+
+        if (!in_array($log->status, [ExportStatus::STARTED->value, ExportStatus::IN_PROGRESS->value], true)) {
+            return response()->json(['success' => false, 'status' => $log->status], 409);
+        }
+
+        $log->update([
+            'message' => $log->message . "\nExport cancellation requested.",
+            'status' => ExportStatus::CANCELLED->value,
+        ]);
+
+        return response()->json(['success' => true, 'status' => ExportStatus::CANCELLED->value]);
     }
 
     public function import()

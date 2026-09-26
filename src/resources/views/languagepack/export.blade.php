@@ -28,11 +28,12 @@
 	<hr>
 
 	<div class="mt-4 w-9/12">
-		<div class="flex items-start">
+		<div class="flex items-start" id="driveExportControls">
 			<div>
 				<a href="#" id="authorize_button" class="btn-primary cursor-pointer inline-flex h-auto min-h-12 items-center justify-center rounded px-3 py-2 text-center text-sm leading-tight no-underline text-white font-normal" onclick="connectGoogleDrive()">{{ __('Select Google Drive Folder') }}</a>
+				<button type="button" id="stopExportButton" class="btn-sm btn-error hidden whitespace-nowrap px-4" onclick="stopExport()">{{ __('Stop export') }}</button>
 			</div>
-			<div class="ml-5">
+			<div class="ml-5" id="driveExportHelpText">
 				{{ __('This will export all the media files into folders on Google Drive and the data into a Google sheet.') }}
 				{{ __('You will be able to select your target Google Drive folder.') }} 
 			</div>
@@ -44,7 +45,7 @@
 
 		<div class="mt-4 mb-5" id="exportprogress" style="display: none;">
 			<div class="text-green-700 font-medium mb-2">
-				{{ __('The export is in progress. You will find your exported files in your Google Drive shortly.') }}
+				<p id="exportProgressMessage">{{ __('The export is in progress. You will find your exported files in your Google Drive shortly.') }}</p>
 				<br>
 				<a href="#" id="driveFolderLink" target="_blank" class="text-blue-600 underline">{{ __('Go to Google Drive Folder') }}</a>
 			</div>
@@ -220,6 +221,9 @@ document.addEventListener('DOMContentLoaded', function () {
         return response.json();
       })
       .then(data => {
+        document.getElementById('authorize_button').style.display = 'none';
+        document.getElementById('driveExportHelpText').style.display = 'none';
+        document.getElementById('stopExportButton').classList.remove('hidden');
         window.document.getElementById('exportprogress').style.display = 'block';
         if (pollingInterval) {
           clearInterval(pollingInterval);
@@ -231,6 +235,33 @@ document.addEventListener('DOMContentLoaded', function () {
         console.error('There was a problem starting the export:', error);
       });
     }
+  }
+
+  function stopExport() {
+    const stopButton = document.getElementById('stopExportButton');
+    stopButton.disabled = true;
+    fetch(`/languagepack/export/${languagePackId}/cancel`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+      },
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (!data.success) {
+          stopButton.disabled = false;
+          return;
+        }
+        document.getElementById('exportStatus').innerText = data.status;
+        stopButton.style.display = 'none';
+        if (pollingInterval) clearInterval(pollingInterval);
+        updateLogMessages();
+      })
+      .catch(error => {
+        stopButton.disabled = false;
+        console.error('There was a problem stopping the export:', error);
+      });
   }
 
   function updateLogMessages() {
@@ -248,7 +279,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 logDiv.scrollTop = logDiv.scrollHeight;
                 exportStatus.innerText = data.status;
 
-                if (data.status === 'success' || data.status === 'failed') {
+                if (data.status === 'success' || data.status === 'failed' || data.status === 'cancelled') {
+                    document.getElementById('stopExportButton').style.display = 'none';
+                    if (data.status === 'failed') {
+                      document.getElementById('authorize_button').style.display = '';
+                      document.getElementById('driveExportHelpText').style.display = '';
+                      document.getElementById('exportProgressMessage').innerText = "{{ __('The export failed. Please try again.') }}";
+                    } else if (data.status === 'cancelled') {
+                      document.getElementById('authorize_button').style.display = '';
+                      document.getElementById('driveExportHelpText').style.display = '';
+                    } else if (data.status === 'success') {
+                      document.getElementById('authorize_button').style.display = '';
+                      document.getElementById('driveExportHelpText').style.display = '';
+                      document.getElementById('exportProgressMessage').innerText = "{{ __('The export is complete. Your files are available in Google Drive.') }}";
+                    }
                     if (pollingInterval) {
                       clearInterval(pollingInterval);
                     }

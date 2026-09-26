@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Enums\ExportStatus;
+use App\Exceptions\ExportCancelledException;
 use App\Enums\ImportStatus;
 use App\Models\LanguagePack;
 use Illuminate\Bus\Queueable;
@@ -48,7 +49,11 @@ class ExportDriveFolderJob implements ShouldQueue
      */
     public function handle()
     {        
-        $this->googleService = new GoogleService($this->languagePack, $this->token, 'export', $this->refreshToken);                
-        $this->googleService->handleExport($this->languagePack, $this->driveRootFolderId);
+        try {
+            $this->googleService = new GoogleService($this->languagePack, $this->token, 'export', $this->refreshToken);
+            $this->googleService->handleExport($this->languagePack, $this->driveRootFolderId);
+        } catch (ExportCancelledException $e) {
+            // Cancellation is a normal user action, not a failed queue job.
+        }
     }
 }
