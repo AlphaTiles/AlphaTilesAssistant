@@ -75,6 +75,7 @@ class ExportController extends Controller
             'accessToken' => $token,
             'refreshToken' => $refreshToken,
             'userId' => auth()->user()?->id ?? 0,
+            'driveExport' => $languagePack->driveExports()->latest()->first(),
         ]);
     }
 

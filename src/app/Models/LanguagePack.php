@@ -95,7 +95,12 @@ class LanguagePack extends Model
     public function notes(): HasMany
     {
         return $this->hasMany(Note::class, 'languagepackid');
-    }        
+    }
+
+    public function driveExports(): HasMany
+    {
+        return $this->hasMany(DriveExport::class, 'languagepackid');
+    }
 
     public function gameSettings(): HasMany
     {

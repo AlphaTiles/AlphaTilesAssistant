@@ -55,6 +55,19 @@
 		</div>
 	</div>
 
+	@if ($driveExport)
+		<div class="mt-6 w-9/12">
+			<h2 class="text-lg font-semibold">{{ __('Last Google Drive export') }}</h2>
+			<p class="mt-2">
+				<a href="{{ $driveExport->drive_url }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">{{ $driveExport->folder_name }}</a>
+				<span class="ml-2 text-sm text-gray-600">{{ $driveExport->updated_at->format('Y-m-d H:i') }}</span>
+				<button type="button" class="ml-2 cursor-pointer border-0 bg-transparent p-0 text-blue-600" onclick="showDriveSearchInfo()" aria-label="{{ $driveExport->is_shared ? __('Shared folder') : __('Personal folder') }}" title="{{ $driveExport->is_shared ? __('Shared folder') : __('Personal folder') }}">
+					<i class="fa-solid {{ $driveExport->is_shared ? 'fa-users' : 'fa-user' }}" aria-hidden="true"></i>
+				</button>
+			</p>
+		</div>
+	@endif
+
 	<div class="mt-4">
 		<a href="/dashboard">{{ __('Back to Dashboard') }}</a>
 	</div>
@@ -348,6 +361,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 logDiv.value = "{{ __('No messages yet...') }}";
             }
         });
+  }
+
+  function showDriveSearchInfo() {
+    Swal.fire({
+      icon: 'info',
+      title: @json(__('Google Drive export')),
+      html: @json(__('Only exports saved in the shared Alpha Tiles folder are included in the')) + ' <a href="https://alphatilesapps.org/search.php" target="_blank" rel="noopener noreferrer">' + @json(__('web search tool')) + '</a>.',
+      padding: '2rem'
+    });
   }
 </script>
 <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
