@@ -76,6 +76,9 @@ class ExportController extends Controller
             'refreshToken' => $refreshToken,
             'userId' => auth()->user()?->id ?? 0,
             'driveExport' => $languagePack->driveExports()->latest()->first(),
+            'appAvailability' => GameSetting::where('languagepackid', $languagePack->id)
+                ->where('name', GameSettingEnum::APP_AVAILABILITY->value)
+                ->value('value') ?? GameSettingEnum::APP_AVAILABILITY->defaultValue(),
         ]);
     }
 

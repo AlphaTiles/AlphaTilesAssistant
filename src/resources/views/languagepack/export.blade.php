@@ -68,6 +68,21 @@
 		</div>
 	@endif
 
+	@php
+		$availabilityBadgeClass = match ($appAvailability) {
+			'App available' => 'bg-green-100 text-green-800',
+			'Testing' => 'bg-amber-100 text-amber-800',
+			default => 'bg-gray-100 text-gray-800',
+		};
+	@endphp
+	<div class="mt-4 inline-flex max-w-full items-center gap-4 rounded border border-gray-200 bg-white p-3 shadow-sm">
+		<div>
+			<div class="text-xs font-medium text-gray-600">{{ __('App availability') }}</div>
+			<span class="mt-1 inline-flex rounded-full px-2 py-0.5 text-sm font-semibold {{ $availabilityBadgeClass }}">{{ __($appAvailability) }}</span>
+		</div>
+		<a href="/languagepack/game_settings/{{ $languagePack->id }}#setting-app_availability" class="inline-flex items-center justify-center whitespace-nowrap no-underline btn-sm btn-secondary font-normal">{{ __('Change') }}</a>
+	</div>
+
 	<div class="mt-4">
 		<a href="/dashboard">{{ __('Back to Dashboard') }}</a>
 	</div>

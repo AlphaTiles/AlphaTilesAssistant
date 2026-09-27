@@ -23,7 +23,7 @@ class LanguagePack extends Model
     protected $fillable = [
         'user_id',
         'name',
-        'import_status'
+        'import_status',
     ];
 
     public function casts()
