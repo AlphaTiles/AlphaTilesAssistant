@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DriveExport extends Model
 {
@@ -20,4 +21,9 @@ class DriveExport extends Model
     protected $casts = [
         'is_shared' => 'boolean',
     ];
+
+    public function languagePack(): BelongsTo
+    {
+        return $this->belongsTo(LanguagePack::class, 'languagepackid');
+    }
 }
