@@ -44,6 +44,7 @@ class StoreGameSettingsRequest extends FormRequest
             'settings.share_link' => 'sometimes',
             'settings.google_services_json' => ['sometimes', 'file', 'max:256', new GoogleServicesJson],
             'settings.app_id' => $appIdRules,
+            'settings.' . GameSettingEnum::APP_AVAILABILITY->value => 'required|in:App available,Testing,In progress',
             'btnNext' => 'sometimes',
         ] + $requiredSettings;
     }

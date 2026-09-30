@@ -108,19 +108,29 @@
    *  Create and render a Picker object for searching images.
    */
   function createPicker() {
-    const docsView = new google.picker.DocsView(google.picker.ViewId.DOCS)
+    // My Drive folders view
+    const myDriveFoldersView = new google.picker.DocsView(google.picker.ViewId.FOLDERS)
        .setParent('root')
        .setIncludeFolders(true)       
        .setSelectFolderEnabled(true)
        .setMimeTypes('application/vnd.google-apps.folder');
-        
+
+    // Shared folders view
+    const sharedFoldersView = new google.picker.DocsView(google.picker.ViewId.FOLDERS)
+       .setOwnedByMe(false)
+       .setEnableDrives(true)
+       .setIncludeFolders(true)       
+       .setSelectFolderEnabled(true)
+       .setMimeTypes('application/vnd.google-apps.folder');
+         
     const picker = new google.picker.PickerBuilder()
-        .enableFeature(google.picker.Feature.NAV_HIDDEN)
+        .enableFeature(google.picker.Feature.SUPPORT_DRIVES)
         .setDeveloperKey(API_KEY)
         .setAppId(APP_ID)
         .setOAuthToken(accessToken)
         .setTitle("{{ __('Select a folder') }}") 
-        .addView(docsView)
+        .addView(myDriveFoldersView)
+        .addView(sharedFoldersView)
         .addView(new google.picker.DocsUploadView())
         .setCallback(pickerCallback)
         .build();

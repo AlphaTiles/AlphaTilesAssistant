@@ -18,6 +18,7 @@ use App\Http\Controllers\GameSettingsController;
 use App\Http\Controllers\LanguageInfoController;
 use App\Http\Controllers\LanguagePackController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ExportsCsvController;
 
 /*
 |--------------------------------------------------------------------------
@@ -114,6 +115,7 @@ Route::middleware(['auth', 'authorize.languagepack'])->group(function () {
 
     Route::get('languagepack/export/{languagePack}', [ExportController::class, 'show']);    
     Route::post('languagepack/export/{languagePack}', [ExportController::class, 'store']);  
+    Route::post('languagepack/export/{languagePack}/cancel', [GoogleDriveController::class, 'cancelExport']);
     
     Route::get('drive/import', [GoogleDriveController::class, 'import'])->name('drive.import');    
     Route::get('drive/export/{languagePack}', [GoogleDriveController::class, 'export'])->name('drive.export');    
@@ -122,3 +124,4 @@ Route::middleware(['auth', 'authorize.languagepack'])->group(function () {
 Auth::routes(['register' => false]);
 Route::get('/login/google', [SocialController::class, 'redirect'])->name('redirect');
 Route::get('/login/google/callback', [SocialController::class, 'callback'])->name('callback');
+Route::get('/exports.csv', [ExportsCsvController::class, 'download'])->name('exports.csv');

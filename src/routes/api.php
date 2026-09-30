@@ -19,6 +19,7 @@ use App\Http\Controllers\GoogleDriveController;
 |
 */
 Route::post('drive/dispatchimport', [GoogleDriveController::class, 'dispatchimport']);
+Route::post('drive/dispatchexport', [GoogleDriveController::class, 'dispatchexport']);
 
 Route::get('tiles/words/{languagePack}/{tileId}', [ApiTilesController::class, 'words']);
 Route::get('words/tiles/{languagePack}/{wordId}', [ApiWordController::class, 'tiles']);

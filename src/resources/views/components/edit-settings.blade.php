@@ -24,7 +24,7 @@ use App\Models\File;
 			@endif
 
 			@foreach($settings as $setting)
-			<div class="grid grid-cols-2 gap-4 p-2 even:bg-gray-100">
+			<div id="setting-{{ $setting['name'] }}" class="grid grid-cols-2 gap-4 p-2 even:bg-gray-100">
 				<?php
 				$errorData = isset($errors) ? $errors : null;
 				$value = $repositoryClass::getValue($errorData, $setting);

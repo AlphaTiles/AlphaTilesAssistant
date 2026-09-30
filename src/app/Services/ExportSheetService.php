@@ -11,6 +11,7 @@ use App\Models\Note;
 use App\Models\Tile;
 use App\Models\Word;
 use App\Models\Resource;
+use App\Models\DriveExport;
 use App\Models\Syllable;
 use Google\Service\Drive;
 use Google\Service\Sheets;
@@ -77,7 +78,26 @@ class ExportSheetService
         $this->colorsSheet($spreadsheetId);
         $this->uploadGoogleServicesFileToDriveRoot();
         $this->createFontFolder();
+        $this->logService->handle('Saving Google Drive export details', ExportStatus::IN_PROGRESS);
+        $this->saveDriveExportDetails();
         $this->logService->handle('Export Job completed', ExportStatus::SUCCESS);
+    }
+
+    private function saveDriveExportDetails(): void
+    {
+        $folder = $this->driveService->files->get($this->exportFolderId, [
+            'fields' => 'id,name,webViewLink,shared',
+            'supportsAllDrives' => true,
+        ]);
+
+        DriveExport::updateOrCreate([
+            'languagepackid' => $this->languagePack->id,
+        ], [
+            'folder_id' => $folder->getId(),
+            'folder_name' => $folder->getName(),
+            'drive_url' => $folder->getWebViewLink() ?: 'https://drive.google.com/drive/folders/' . $folder->getId(),
+            'is_shared' => (bool) $folder->getShared(),
+        ]);
     }
 
     private function notesSheet(string $spreadsheetId): void

@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Auth;
 
 enum GameSettingEnum: string
 {
+    public const APP_AVAILABILITY_KEY = 'app_availability';
+
     case SCAN_SETTING        = 'scan_setting';
     case HAS_TILE_AUDIO      = 'has_tile_audio';
     case AFTER_12_TRACKERS = 'after_12_trackers';
@@ -26,6 +28,7 @@ enum GameSettingEnum: string
     case SHARE_LINK = 'share_link';
     case GOOGLE_SERVICES_JSON = 'google_services_json';
     case APP_ID = 'app_id';
+    case APP_AVAILABILITY = 'app_availability';
 
     public function defaultValue(): string
     {
@@ -47,6 +50,7 @@ enum GameSettingEnum: string
             self::BOLD_NON_INITIAL_TILES => false,
             self::BOLD_INITIAL_TILES => false,
             self::GOOGLE_SERVICES_JSON => '',
+            self::APP_AVAILABILITY => 'In progress',
             default                 => '',
         };
     }
@@ -73,6 +77,7 @@ enum GameSettingEnum: string
             self::SHARE_LINK => __('Share link'),
             self::GOOGLE_SERVICES_JSON => __('Google Services JSON'),
             self::APP_ID => __('App ID'),
+            self::APP_AVAILABILITY => __('App available'),
         };
     }
 
@@ -155,6 +160,7 @@ enum GameSettingEnum: string
             self::BOLD_INITIAL_TILES => FieldTypeEnum::CHECKBOX,
             self::GOOGLE_SERVICES_JSON => FieldTypeEnum::UPLOAD,
             self::APP_ID => $isAdmin ? FieldTypeEnum::INPUT : FieldTypeEnum::LABEL,
+            self::APP_AVAILABILITY => FieldTypeEnum::DROPDOWN,
             default                 => FieldTypeEnum::INPUT
         };
     }
@@ -183,6 +189,11 @@ enum GameSettingEnum: string
                                 '0.8' => '80%',
                                 '0.9' => '90%',
                                 '1' => '100%',
+            ],
+            self::APP_AVAILABILITY => [
+                'App available' => 'App available',
+                'Testing' => 'Testing',
+                'In progress' => 'In progress',
             ],
             default                 => null
         };

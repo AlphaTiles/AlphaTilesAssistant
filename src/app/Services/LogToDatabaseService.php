@@ -19,6 +19,16 @@ class LogToDatabaseService
 
     public function handle(string $message, ExportStatus $status): void
     {
+        if ($status !== ExportStatus::STARTED) {
+            $currentLog = DatabaseLog::where('languagepackid', $this->languagepackId)
+                ->where('type', $this->type)
+                ->first();
+
+            if ($currentLog?->status === ExportStatus::CANCELLED->value) {
+                throw new \App\Exceptions\ExportCancelledException('Export cancelled by user.');
+            }
+        }
+
         $previousLog = null;
         $newMessage = $message;
 

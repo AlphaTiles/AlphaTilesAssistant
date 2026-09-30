@@ -13,6 +13,7 @@ use App\Jobs\ImportDriveFolderJob;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Services\LogToDatabaseService;
+use App\Models\DatabaseLog;
 use Illuminate\Support\Facades\Session;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -24,7 +25,7 @@ class GoogleDriveController extends Controller
         $this->middleware('auth');
 
         if(Session::get('drive_permissions_time') < Carbon::now()->subHour()) {
-            app('redirect')->setIntendedUrl('/drive/export/' . $languagePack->id);
+            app('redirect')->setIntendedUrl('/languagepack/export/' . $languagePack->id);
 
             return Socialite::driver('google')
                 ->scopes([Drive::DRIVE, Drive::DRIVE_FILE])
@@ -32,20 +33,48 @@ class GoogleDriveController extends Controller
                 ->redirect();        
         }
 
+        return redirect('/languagepack/export/' . $languagePack->id);
+    }
+
+    public function dispatchexport(Request $request)
+    {
+        $request->validate([
+            'languagePackId' => 'required|integer',
+            'folderId' => 'required|string',
+        ]);
+
+        $languagePack = LanguagePack::findOrFail($request->input('languagePackId'));
+
         $logService = new LogToDatabaseService($languagePack->id, 'export');
         $logService->handle('Export Job started', ExportStatus::STARTED);
 
-        $token = Session::get("socialite_token");
-        $refreshToken = Session::get("socialite_refresh_token");
-        $googleService = new GoogleService($languagePack, $token, 'export', $refreshToken);  
-        $driveRootFolderId = $googleService->createFolder('alphatilesassistant');
+        $token = Session::get("socialite_token") ?? $request->input('token');
+        $refreshToken = Session::get("socialite_refresh_token") ?? $request->input('refreshToken');
 
-        ExportDriveFolderJob::dispatch($token, $languagePack, $driveRootFolderId, $refreshToken);        
+        ExportDriveFolderJob::dispatch($token, $languagePack, $request->input('folderId'), $refreshToken);
 
-        return view('drive-export', [
-            'driveRootFolderId' => $driveRootFolderId,
-            'languagepack' => $languagePack,
+        return response()->json([
+            'success' => true,
+            'folderId' => $request->input('folderId'),
         ]);
+    }
+
+    public function cancelExport(Request $request, LanguagePack $languagePack)
+    {
+        $log = DatabaseLog::where('languagepackid', $languagePack->id)
+            ->where('type', 'export')
+            ->firstOrFail();
+
+        if (!in_array($log->status, [ExportStatus::STARTED->value, ExportStatus::IN_PROGRESS->value], true)) {
+            return response()->json(['success' => false, 'status' => $log->status], 409);
+        }
+
+        $log->update([
+            'message' => $log->message . "\nExport cancellation requested.",
+            'status' => ExportStatus::CANCELLED->value,
+        ]);
+
+        return response()->json(['success' => true, 'status' => ExportStatus::CANCELLED->value]);
     }
 
     public function import()
