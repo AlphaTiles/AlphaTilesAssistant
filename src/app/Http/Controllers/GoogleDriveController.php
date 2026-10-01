@@ -59,6 +59,111 @@ class GoogleDriveController extends Controller
         ]);
     }
 
+    public function browseExportFolders(Request $request, LanguagePack $languagePack)
+    {
+        $validated = $request->validate([
+            'location' => 'required|in:my-drive,shared-with-me,shared-drive',
+            'parent_id' => 'nullable|string|max:255',
+            'drive_id' => 'nullable|string|max:255',
+        ]);
+
+        $service = $this->exportFolderBrowserService();
+        if (!$service) {
+            return response()->json(['message' => __('Reconnect Google Drive to continue.')], 401);
+        }
+
+        try {
+            $driveId = $validated['drive_id'] ?? null;
+            if ($validated['location'] === 'shared-drive') {
+                $allowedDrive = collect($service->listSharedDrivesForBrowser())
+                    ->contains(fn (array $drive) => $drive['id'] === $driveId);
+                if (!$allowedDrive) {
+                    return response()->json(['message' => __('Shared drive not found.')], 403);
+                }
+            }
+
+            return response()->json([
+                'folders' => $service->listFoldersForBrowser(
+                    $validated['location'],
+                    $validated['parent_id'] ?? null,
+                    $driveId,
+                ),
+            ]);
+        } catch (\Throwable $exception) {
+            Log::warning('Could not list Google Drive folders for export', [
+                'language_pack_id' => $languagePack->id,
+                'error' => $exception->getMessage(),
+            ]);
+
+            return response()->json(['message' => __('Could not load Google Drive folders.')], 502);
+        }
+    }
+
+    public function browseExportSharedDrives(LanguagePack $languagePack)
+    {
+        $service = $this->exportFolderBrowserService();
+        if (!$service) {
+            return response()->json(['message' => __('Reconnect Google Drive to continue.')], 401);
+        }
+
+        try {
+            return response()->json([
+                'drives' => $service->listSharedDrivesForBrowser(),
+            ]);
+        } catch (\Throwable $exception) {
+            Log::warning('Could not list Google shared drives for export', [
+                'language_pack_id' => $languagePack->id,
+                'error' => $exception->getMessage(),
+            ]);
+
+            return response()->json(['message' => __('Could not load Google Drive folders.')], 502);
+        }
+    }
+
+    public function createExportFolder(Request $request, LanguagePack $languagePack)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'parent_id' => 'nullable|string|max:255',
+        ]);
+
+        $service = $this->exportFolderBrowserService();
+        if (!$service) {
+            return response()->json(['message' => __('Reconnect Google Drive to continue.')], 401);
+        }
+
+        try {
+            return response()->json([
+                'folder' => $service->createFolderForBrowser(
+                    trim($validated['name']),
+                    $validated['parent_id'] ?? null,
+                ),
+            ], 201);
+        } catch (\Throwable $exception) {
+            Log::warning('Could not create Google Drive folder for export', [
+                'language_pack_id' => $languagePack->id,
+                'error' => $exception->getMessage(),
+            ]);
+
+            return response()->json(['message' => __('Could not create folder in Google Drive.')], 502);
+        }
+    }
+
+    private function exportFolderBrowserService(): ?GoogleService
+    {
+        $token = Session::get('socialite_token');
+        if (!$token) {
+            return null;
+        }
+
+        return new GoogleService(
+            null,
+            $token,
+            'export',
+            Session::get('socialite_refresh_token'),
+        );
+    }
+
     public function cancelExport(Request $request, LanguagePack $languagePack)
     {
         $log = DatabaseLog::where('languagepackid', $languagePack->id)

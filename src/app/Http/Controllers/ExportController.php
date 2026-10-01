@@ -74,6 +74,8 @@ class ExportController extends Controller
             'exportWarningLevel' => $exportWarningLevel,
             'accessToken' => $token,
             'refreshToken' => $refreshToken,
+            'hasDrivePermissions' => session()->get('drive_permissions_time')
+                && session()->get('drive_permissions_time') >= now()->subHour(),
             'userId' => auth()->user()?->id ?? 0,
             'driveExport' => $languagePack->driveExports()->latest()->first(),
             'appAvailability' => GameSetting::where('languagepackid', $languagePack->id)

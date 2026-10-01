@@ -30,7 +30,7 @@
 	<div class="mt-4 w-9/12">
 		<div class="flex items-start" id="driveExportControls">
 			<div>
-				<a href="#" id="authorize_button" class="btn-primary cursor-pointer inline-flex h-auto min-h-12 items-center justify-center rounded px-3 py-2 text-center text-sm leading-tight no-underline text-white font-normal" onclick="connectGoogleDrive()">{{ __('Select Google Drive Folder') }}</a>
+				<a href="#" id="authorize_button" class="btn-primary cursor-pointer inline-flex h-auto min-h-12 items-center justify-center rounded px-3 py-2 text-center text-sm leading-tight no-underline text-white font-normal" onclick="connectGoogleDrive(); return false;">{{ __('Select Google Drive Folder') }}</a>
 				<button type="button" id="stopExportButton" class="btn-sm btn-error hidden whitespace-nowrap px-4" onclick="stopExport()">{{ __('Stop export') }}</button>
 			</div>
 			<div class="ml-5" id="driveExportHelpText">
@@ -127,188 +127,248 @@ document.addEventListener('DOMContentLoaded', function () {
 	});
 });
 
-  const SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets';
-
-  const CLIENT_ID = '<?php echo env('GOOGLE_CLIENT_ID'); ?>';
-  const API_KEY = '<?php echo env('GOOGLE_DRIVE_API_KEY'); ?>';
-  const APP_ID = 'alpha-tiles-assistant';
-
-  let tokenClient;
   let accessToken = '<?php echo $accessToken ?? ''; ?>';
   let refreshToken = '<?php echo $refreshToken ?? ''; ?>';
   let userId = <?php echo $userId ?? 0; ?>;
   let languagePackId = <?php echo $languagePack->id; ?>;
-  let pickerInited = false;
-  let gisInited = false;
   let pollingInterval = null;
+  const hasDrivePermissions = <?php echo $hasDrivePermissions ? 'true' : 'false'; ?>;
+  const resumeFolderBrowserKey = `resume-drive-folder-browser-${languagePackId}`;
 
-  document.getElementById('authorize_button').style.visibility = 'hidden';
+  const folderBrowserUrl = `/languagepack/export/${languagePackId}/drive-folders`;
+  const sharedDrivesUrl = `/languagepack/export/${languagePackId}/shared-drives`;
 
-  function gapiLoaded() {
-    gapi.load('client:picker', initializePicker);
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, character => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+    })[character]);
   }
 
-  async function initializePicker() {
-    await gapi.client.load('https://www.googleapis.com/discovery/v1/apis/drive/v3/rest');
-    pickerInited = true;
-    maybeEnableButtons();
-  }
-
-  function gisLoaded() {
-    tokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: CLIENT_ID,
-      scope: SCOPES,
-      callback: '',
-    });
-    gisInited = true;
-    maybeEnableButtons();
-  }
-
-  function maybeEnableButtons() {
-    if (pickerInited && gisInited) {
-      document.getElementById('authorize_button').style.visibility = 'visible';
+  async function connectGoogleDrive() {
+    if (!hasDrivePermissions) {
+      sessionStorage.setItem(resumeFolderBrowserKey, '1');
+      window.location.href = `/drive/export/${languagePackId}`;
+      return;
     }
-  }
 
-  function connectGoogleDrive() {
-    tokenClient.callback = async (response) => {
-      if (response.error !== undefined) {
-        throw (response);
-      }
-      accessToken = response.access_token;
-      await createPicker();
+    let location = 'shared-with-me';
+    let driveId = null;
+    let driveName = "{{ __('Shared with me') }}";
+    let path = [];
+    let popup;
+
+    const requestHeaders = {
+      'X-CSRF-TOKEN': '{{ csrf_token() }}',
+      'Accept': 'application/json'
     };
 
-    if (!accessToken) {
-      tokenClient.requestAccessToken({prompt: 'consent'});
-    } else {
-      tokenClient.requestAccessToken({prompt: ''});
-    }
-  }
+    const renderBrowser = () => {
+      if (!popup) return;
+      const locationSelect = popup.querySelector('#drive-browser-location');
+      const sharedDriveSelect = popup.querySelector('#drive-browser-shared-drive');
+      const foldersContainer = popup.querySelector('#drive-browser-folders');
+      const currentName = path.length ? path[path.length - 1].name : driveName;
+      const currentLabel = popup.querySelector('#drive-browser-current');
+      currentLabel.textContent = currentName;
+      currentLabel.classList.toggle('hidden', path.length === 0);
+      popup.querySelector('#drive-browser-up').classList.toggle('hidden', path.length === 0);
+      if (locationSelect) locationSelect.value = location === 'shared-drive' ? 'shared-drives' : location;
+      if (sharedDriveSelect) {
+        sharedDriveSelect.classList.toggle('hidden', location !== 'shared-drive');
+        if (driveId) sharedDriveSelect.value = driveId;
+      }
+      foldersContainer.innerHTML = `<p class="p-3 text-sm">{{ __('Loading folders...') }}</p>`;
 
-  function createPicker() {
-    const myDriveFoldersView = new google.picker.DocsView(google.picker.ViewId.FOLDERS)
-       .setParent('root')
-       .setOwnedByMe(true)
-       .setIncludeFolders(true)       
-       .setSelectFolderEnabled(true)
-       .setMimeTypes('application/vnd.google-apps.folder')
-       .setLabel('My folders');
+      const params = new URLSearchParams({ location });
+      if (path.length) params.set('parent_id', path[path.length - 1].id);
+      if (driveId) params.set('drive_id', driveId);
+      fetch(`${folderBrowserUrl}?${params}`, { headers: requestHeaders })
+        .then(async response => {
+          const data = await response.json();
+          if (response.status === 401) {
+            sessionStorage.setItem(resumeFolderBrowserKey, '1');
+            window.location.href = `/drive/export/${languagePackId}`;
+            throw new Error(data.message || "{{ __('Reconnect Google Drive to continue.') }}");
+          }
+          if (!response.ok) throw new Error(data.message || "{{ __('Could not load Google Drive folders.') }}");
+          return data;
+        })
+        .then(data => {
+          if (!data.folders.length) {
+            foldersContainer.innerHTML = `<p class="p-3 text-sm text-gray-600">{{ __('No folders found.') }}</p>`;
+            return;
+          }
+          foldersContainer.innerHTML = data.folders.map(folder => `
+            <div class="flex items-center justify-between gap-3 border-b p-2">
+              <button type="button" class="min-w-0 flex-1 truncate text-left" data-open-folder="${escapeHtml(folder.id)}" data-folder-name="${escapeHtml(folder.name)}">${escapeHtml(folder.name)}</button>
+              <button type="button" class="btn-sm btn-secondary" data-select-folder="${escapeHtml(folder.id)}" data-folder-name="${escapeHtml(folder.name)}">{{ __('Select') }}</button>
+            </div>`).join('');
+        })
+        .catch(error => {
+          foldersContainer.innerHTML = `<p class="p-3 text-sm text-red-700">${escapeHtml(error.message)}</p>`;
+        });
+    };
 
-    const sharedFoldersView = new google.picker.DocsView(google.picker.ViewId.FOLDERS)
-       .setOwnedByMe(false)
-       .setIncludeFolders(true)       
-       .setSelectFolderEnabled(true)
-       .setMimeTypes('application/vnd.google-apps.folder')
-       .setLabel('Shared Folders');
-        
-    const picker = new google.picker.PickerBuilder()
-        .setDeveloperKey(API_KEY)
-        .setAppId(APP_ID)
-        .setOAuthToken(accessToken)
-        .setTitle("{{ __('Select a folder for export') }}") 
-        .addView(sharedFoldersView)
-        .addView(myDriveFoldersView)
-        .setCallback(pickerCallback)
-        .build();
-    picker.setVisible(true);
-  }
+    const destinationChoice = await new Promise(resolve => {
+      let settled = false;
+      const finish = folder => {
+        if (settled) return;
+        settled = true;
+        resolve(folder);
+        Swal.close();
+      };
 
-  async function pickerCallback(data) {
-    if (data.action === google.picker.Action.PICKED) {
-      const parentFolder = data.docs[0];
-      const result = await Swal.fire({
+      Swal.fire({
+      title: "{{ __('Select a folder for export') }}",
+      padding: '1.5rem',
+      width: '42rem',
+      html: `
+        <div class="text-left">
+          <label class="mb-1 block text-sm font-semibold" for="drive-browser-location">{{ __('Location') }}</label>
+          <select id="drive-browser-location" class="mb-3 w-full rounded border p-2">
+            <option value="my-drive">{{ __('My Drive') }}</option>
+            <option value="shared-with-me">{{ __('Shared with me') }}</option>
+            <option value="shared-drives">{{ __('Shared drives') }}</option>
+          </select>
+          <select id="drive-browser-shared-drive" class="mb-3 hidden w-full rounded border p-2"></select>
+          <div class="mb-2 flex items-center gap-2 border-b pb-2">
+            <button id="drive-browser-up" type="button" class="btn-sm btn-secondary hidden">{{ __('Back') }}</button>
+            <span id="drive-browser-current" class="hidden font-semibold"></span>
+          </div>
+          <div id="drive-browser-folders" class="max-h-72 overflow-y-auto rounded border"></div>
+          <p class="mt-2 text-sm text-gray-600">{{ __('Click a folder name to browse inside it, or select it to export there.') }}</p>
+        </div>`,
+      showConfirmButton: false,
+      showCancelButton: true,
+      cancelButtonText: "{{ __('Cancel') }}",
+      didOpen: popupElement => {
+        popup = popupElement;
+        const locationSelect = popup.querySelector('#drive-browser-location');
+        const sharedDriveSelect = popup.querySelector('#drive-browser-shared-drive');
+
+        popup.addEventListener('click', event => {
+          const selectButton = event.target.closest('[data-select-folder]');
+          const openButton = event.target.closest('[data-open-folder]');
+          if (selectButton) {
+            finish({
+              id: selectButton.dataset.selectFolder,
+              name: selectButton.dataset.folderName
+            });
+            return;
+          }
+          if (openButton) {
+            const folder = { id: openButton.dataset.openFolder, name: openButton.dataset.folderName };
+            path.push(folder);
+            renderBrowser();
+          }
+          if (event.target.closest('#drive-browser-up') && path.length) {
+            path.pop();
+            renderBrowser();
+          }
+        });
+
+        locationSelect.addEventListener('change', async () => {
+          path = [];
+          driveId = null;
+          if (locationSelect.value === 'shared-drives') {
+            try {
+              const response = await fetch(sharedDrivesUrl, { headers: requestHeaders });
+              const data = await response.json();
+              if (!response.ok) throw new Error(data.message || "{{ __('Could not load Google Drive folders.') }}");
+              sharedDriveSelect.innerHTML = data.drives.map(drive => `<option value="${escapeHtml(drive.id)}">${escapeHtml(drive.name)}</option>`).join('');
+              if (!data.drives.length) throw new Error("{{ __('No shared drives found.') }}");
+              location = 'shared-drive';
+              driveId = data.drives[0].id;
+              driveName = data.drives[0].name;
+              sharedDriveSelect.classList.remove('hidden');
+              renderBrowser();
+            } catch (error) {
+              popup.querySelector('#drive-browser-folders').innerHTML = `<p class="p-3 text-sm text-red-700">${escapeHtml(error.message)}</p>`;
+            }
+            return;
+          }
+          location = locationSelect.value;
+          driveName = location === 'my-drive' ? "{{ __('My Drive') }}" : "{{ __('Shared with me') }}";
+          sharedDriveSelect.classList.add('hidden');
+          renderBrowser();
+        });
+
+        sharedDriveSelect.addEventListener('change', () => {
+          const option = sharedDriveSelect.selectedOptions[0];
+          driveId = option.value;
+          driveName = option.textContent;
+          path = [];
+          renderBrowser();
+        });
+        renderBrowser();
+      }
+      }).then(() => {
+        if (!settled) resolve(null);
+      });
+    });
+
+    if (!destinationChoice) return;
+    let destinationFolder = destinationChoice;
+      const createResult = await Swal.fire({
         title: "{{ __('Choose an export folder') }}",
         padding: '2rem',
         input: 'text',
-        inputLabel: "{{ __('Optional: create a new subfolder inside') }} " + parentFolder.name,
+        inputLabel: "{{ __('Optional: create a new subfolder inside') }} " + destinationFolder.name,
         inputPlaceholder: "{{ __('Leave blank to use the selected folder') }}",
         showCancelButton: true,
         confirmButtonText: "{{ __('Continue') }}",
         cancelButtonText: "{{ __('Cancel') }}",
       });
+      if (!createResult.isConfirmed) return;
 
-      if (!result.isConfirmed) {
-        return;
-      }
-
-      let destinationFolder = parentFolder;
-      const newFolderName = (result.value || '').trim();
+      const newFolderName = (createResult.value || '').trim();
       if (newFolderName) {
         try {
-          const response = await fetch('https://www.googleapis.com/drive/v3/files?supportsAllDrives=true&fields=id,name', {
+          const response = await fetch(folderBrowserUrl, {
             method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${accessToken}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              name: newFolderName,
-              mimeType: 'application/vnd.google-apps.folder',
-              parents: [parentFolder.id]
-            })
+            headers: { ...requestHeaders, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: newFolderName, parent_id: destinationFolder.id })
           });
-
-          if (!response.ok) {
-            throw new Error(await response.text());
-          }
-          destinationFolder = await response.json();
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.message || "{{ __('Could not create folder in Google Drive.') }}");
+          destinationFolder = data.folder;
         } catch (error) {
-          console.error('There was a problem creating the Google Drive folder:', error);
-          await Swal.fire({
-            icon: 'error',
-            title: "{{ __('Could not create folder') }}",
-            text: error.message
-          });
+          await Swal.fire({ icon: 'error', title: "{{ __('Could not create folder') }}", text: error.message });
           return;
         }
       }
 
-      window.document.getElementById('result').style.visibility = 'visible';
-      window.document.getElementById('folderName').innerText = destinationFolder.name;
+      document.getElementById('result').style.visibility = 'visible';
+      document.getElementById('folderName').innerText = destinationFolder.name;
+      const driveLink = document.getElementById('driveFolderLink');
+      if (driveLink) driveLink.href = `https://drive.google.com/drive/folders/${destinationFolder.id}?usp=drive_link`;
 
-      let driveLink = window.document.getElementById('driveFolderLink');
-      if (driveLink) {
-        driveLink.href = `https://drive.google.com/drive/folders/${destinationFolder.id}?usp=drive_link`;
-      }
-
-      let dataToSend = {
-        userId: userId,
+      const dataToSend = {
+        userId,
         token: accessToken,
-        refreshToken: refreshToken,
-        languagePackId: languagePackId,
+        refreshToken,
+        languagePackId,
         folderId: destinationFolder.id
       };
-
       fetch('/api/drive/dispatchexport', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
         body: JSON.stringify(dataToSend)
       })
       .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
+        if (!response.ok) throw new Error('Network response was not ok');
         return response.json();
       })
-      .then(data => {
+      .then(() => {
         document.getElementById('authorize_button').style.display = 'none';
         document.getElementById('driveExportHelpText').style.display = 'none';
         document.getElementById('stopExportButton').classList.remove('hidden');
-        window.document.getElementById('exportprogress').style.display = 'block';
-        if (pollingInterval) {
-          clearInterval(pollingInterval);
-        }
+        document.getElementById('exportprogress').style.display = 'block';
+        if (pollingInterval) clearInterval(pollingInterval);
         pollingInterval = setInterval(updateLogMessages, 2000);
         updateLogMessages();
       })
-      .catch(error => {
-        console.error('There was a problem starting the export:', error);
-      });
-    }
+      .catch(error => console.error('There was a problem starting the export:', error));
   }
 
   function stopExport() {
@@ -386,7 +446,10 @@ document.addEventListener('DOMContentLoaded', function () {
       padding: '2rem'
     });
   }
+
+  if (sessionStorage.getItem(resumeFolderBrowserKey) === '1') {
+    sessionStorage.removeItem(resumeFolderBrowserKey);
+    if (hasDrivePermissions) connectGoogleDrive();
+  }
 </script>
-<script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
-<script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
 @endsection
