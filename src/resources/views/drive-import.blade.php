@@ -4,203 +4,80 @@
 <div class="prose">
     <h1>{{ __('Import Language Pack from Google Drive') }}</h1>
     <div class="mt-5">
-          {{ __('This is for importing all data including the media for creating a language pack. At the very least you will need to have a Google sheet in the root folder.') }}
+        {{ __('This is for importing all data including the media for creating a language pack. At the very least you will need to have a Google sheet in the root folder.') }}
     </div>
     <div class="mt-5">
-          <a href="#" id="authorize_button" class="btn btn-primary w-40 mt-1 pt-0.5 text-white font-normal no-underline" onclick="connectGoogleDrive()">{{ __('Select Google Drive Folder') }}</a>
+        <button type="button" id="authorize_button" class="btn-primary cursor-pointer inline-flex h-auto min-h-12 items-center justify-center rounded px-3 py-2 text-center text-sm leading-tight no-underline text-white font-normal" onclick="connectGoogleDrive()">{{ __('Select Google Drive Folder') }}</button>
     </div>
-    <div class="mt-5" id="result" style="visibility: hidden;">
-      <div><span class="font-bold">{{ __('Selected folder:') }}</span> <span id="folderName"></span></div>
-      <div class="mt-5 text-blue-700" id="selectionSuccess" style="visibility: hidden;">        
-        {{ __('Import in progress. You will find the imported language pack listed on the dashboard. You may close this page now.') }}
-      </div>
-      <div class="mt-5 text-red-700" id="selectionError" style="visibility: hidden;">{{ __('Error: No Google Sheet or XLSX file found in the selected folder.') }}</div>
-      <div class="mt-5">
-        <a href="/dashboard">{{ __('Back to Dashboard') }}</a>
-      </div>
+    <div class="mt-5" id="result" style="display: none;">
+        <div><span class="font-bold">{{ __('Selected folder:') }}</span> <span id="folderName"></span></div>
+        <div class="mt-5 text-blue-700" id="selectionSuccess" style="display: none;">
+            {{ __('Import in progress. You will find the imported language pack listed on the dashboard. You may close this page now.') }}
+        </div>
+        <div class="mt-5 text-red-700" id="selectionError" style="display: none;"></div>
+        <div class="mt-5">
+            <a href="/dashboard">{{ __('Back to Dashboard') }}</a>
+        </div>
     </div>
 </div>
 @endsection
 
 @section('scripts')
+@include('partials.drive-folder-browser')
 <script>
- // Authorization scopes required by the API; multiple scopes can be
-  // included, separated by spaces.
-  const SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets';
+  const accessToken = @json($accessToken ?? '');
+  const refreshToken = @json($refreshToken ?? '');
+  const userId = @json($userId ?? 0);
+  let importSelectionInProgress = false;
 
-  // TODO(developer): Set to client ID and API key from the Developer Console
-  const CLIENT_ID = '<?php echo env('GOOGLE_CLIENT_ID'); ?>'
-  const API_KEY = '<?php echo env('GOOGLE_DRIVE_API_KEY'); ?>'
+  async function connectGoogleDrive() {
+    if (importSelectionInProgress) return;
+    importSelectionInProgress = true;
+    const selectButton = document.getElementById('authorize_button');
+    selectButton.disabled = true;
+    const errorElement = document.getElementById('selectionError');
+    errorElement.style.display = 'none';
+    let importStarted = false;
 
-  // TODO(developer): Replace with your own project number from console.developers.google.com.
-  const APP_ID = 'alpha-tiles-assistant';
-
-  let tokenClient;
-  let accessToken = '<?php echo $accessToken; ?>';
-  let userId = <?php echo $userId; ?>;
-  let pickerInited = false;
-  let gisInited = false;
-
-
-  document.getElementById('authorize_button').style.visibility = 'hidden';
-
-  /**
-   * Callback after api.js is loaded.
-   */
-  function gapiLoaded() {
-    gapi.load('client:picker', initializePicker);
-  }
-
-  /**
-   * Callback after the API client is loaded. Loads the
-   * discovery doc to initialize the API.
-   */
-  async function initializePicker() {
-    await gapi.client.load('https://www.googleapis.com/discovery/v1/apis/drive/v3/rest');
-    pickerInited = true;
-    maybeEnableButtons();
-  }
-
-  /**
-   * Callback after Google Identity Services are loaded.
-   */
-  function gisLoaded() {
-    tokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: CLIENT_ID,
-      scope: SCOPES,
-      callback: '', // defined later
-    });
-    gisInited = true;
-    maybeEnableButtons();
-  }
-
-  /**
-   * Enables user interaction after all libraries are loaded.
-   */
-  function maybeEnableButtons() {
-    if (pickerInited && gisInited) {
-      document.getElementById('authorize_button').style.visibility = 'visible';
-    }
-  }
-
-  /**
-   *  Sign in the user upon button click.
-   */
-  function connectGoogleDrive() {
-    tokenClient.callback = async (response) => {
-      if (response.error !== undefined) {
-        throw (response);
-      }
-      await createPicker();
-    };
-
-    if (accessToken === null) {
-      // Prompt the user to select a Google Account and ask for consent to share their data
-      // when establishing a new session.
-      tokenClient.requestAccessToken({prompt: 'consent'});
-    } else {
-      // Skip display of account chooser and consent dialog for an existing session.
-      tokenClient.requestAccessToken({prompt: ''});
-    }
-  }
-
-  /**
-   *  Create and render a Picker object for searching images.
-   */
-  function createPicker() {
-    // My Drive folders view
-    const myDriveFoldersView = new google.picker.DocsView(google.picker.ViewId.FOLDERS)
-       .setParent('root')
-       .setIncludeFolders(true)       
-       .setSelectFolderEnabled(true)
-       .setMimeTypes('application/vnd.google-apps.folder');
-
-    // Shared folders view
-    const sharedFoldersView = new google.picker.DocsView(google.picker.ViewId.FOLDERS)
-       .setOwnedByMe(false)
-       .setEnableDrives(true)
-       .setIncludeFolders(true)       
-       .setSelectFolderEnabled(true)
-       .setMimeTypes('application/vnd.google-apps.folder');
-         
-    const picker = new google.picker.PickerBuilder()
-        .enableFeature(google.picker.Feature.SUPPORT_DRIVES)
-        .setDeveloperKey(API_KEY)
-        .setAppId(APP_ID)
-        .setOAuthToken(accessToken)
-        .setTitle("{{ __('Select a folder') }}") 
-        .addView(myDriveFoldersView)
-        .addView(sharedFoldersView)
-        .addView(new google.picker.DocsUploadView())
-        .setCallback(pickerCallback)
-        .build();
-    picker.setVisible(true);
-  }
-
-  /**
-   * Displays the file details of the user's selection.
-   * @param {object} data - Containers the user selection from the picker
-   */
-  async function pickerCallback(data) {
-    if (data.action === google.picker.Action.PICKED) {
-      // let text = `Picker response: \n${JSON.stringify(data, null, 2)}\n`;
-      let folder = data.docs[0];
-      folderId = folder.id;
-      window.document.getElementById('result').style.visibility = 'visible';
-      window.document.getElementById('folderName').innerText = folder.name;
-      let folderHasSheet = await checkFolderHasSheet();
-      if(folderHasSheet) {
-        let dataToSend = {
-          userId: userId,
-          token: accessToken,
-          folderId: folderId
-        };
-        fetch('/api/drive/dispatchimport', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(dataToSend)
-        })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.json(); // Parse the response body as JSON
-        })
-        .then(data => {
-          // Handle the response data
-          console.log(data);
-        })
-        .catch(error => {
-          // Handle any errors
-          console.error('There was a problem with the fetch operation:', error);
-        });        
-      }
-
-    }
-  }
-
-  async function checkFolderHasSheet() {
-      return gapi.client.drive.files.list({
-        'q': "'" + folderId + "' in parents and (mimeType='application/vnd.google-apps.spreadsheet' " +
-           " or mimeType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')",
-        'fields': 'files(name, mimeType)'
-      }).then(function(response) {
-        var files = response.result.files;
-        if (files.length === 0) {
-          window.document.getElementById('selectionSuccess').style.visibility = 'hidden';
-          window.document.getElementById('selectionError').style.visibility = 'visible';
-          return false;
-        } 
-
-        window.document.getElementById('selectionError').style.visibility = 'hidden';
-        window.document.getElementById('selectionSuccess').style.visibility = 'visible';
-        return true;
+    try {
+      const folder = await selectDriveFolder({
+        title: @json(__('Select a folder to import')),
+        onUnauthorized: () => { window.location.href = @json(route('drive.import')); }
       });
-    }  
-</script>
-<script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
-<script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+      if (!folder) return;
 
+      document.getElementById('result').style.display = 'block';
+      document.getElementById('folderName').innerText = folder.name;
+      const importRequestId = window.crypto?.randomUUID
+        ? window.crypto.randomUUID()
+        : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, character => {
+            const random = Math.random() * 16 | 0;
+            return (character === 'x' ? random : (random & 0x3 | 0x8)).toString(16);
+          });
+      const response = await fetch('/api/drive/dispatchimport', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, token: accessToken, refreshToken, folderId: folder.id, requestId: importRequestId })
+      });
+      const data = await response.json();
+      if (response.status === 401) {
+        window.location.href = @json(route('drive.import'));
+        return;
+      }
+      if (!response.ok) throw new Error(data.message || @json(__('Could not start the import.')));
+
+      document.getElementById('selectionSuccess').style.display = 'block';
+      selectButton.style.display = 'none';
+      importStarted = true;
+    } catch (error) {
+      errorElement.textContent = error.message;
+      errorElement.style.display = 'block';
+    } finally {
+      if (!importStarted) {
+        importSelectionInProgress = false;
+        selectButton.disabled = false;
+      }
+    }
+  }
+</script>
 @endsection

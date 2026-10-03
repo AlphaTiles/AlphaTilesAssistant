@@ -35,12 +35,32 @@ class ImportSheetService
     protected $spreadsheet;
     protected string $folderId;
 
-    public function __construct(LanguagePack $languagePack, string $googleToken, string $folderId)
+    public function __construct(LanguagePack $languagePack, string $googleToken, string $folderId, ?string $refreshToken = null)
     {
         $client = new Client();
+        if ($refreshToken) {
+            $client->setClientId(config('services.google.client_id'));
+            $client->setClientSecret(config('services.google.client_secret'));
+        }
         $client->setAccessToken($googleToken);
+        if ($refreshToken && $client->isAccessTokenExpired()) {
+            $credentials = $client->fetchAccessTokenWithRefreshToken($refreshToken);
+            if (empty($credentials['access_token'])) {
+                throw new \RuntimeException('Google did not return a refreshed access token for the import.');
+            }
+        }
+        if ($refreshToken) {
+            $client->setTokenCallback(function ($cacheKey, $accessToken) use ($client, $refreshToken) {
+                $client->setAccessToken([
+                    'access_token' => $accessToken,
+                    'expires_in' => 3600,
+                    'created' => time(),
+                    'refresh_token' => $refreshToken,
+                ]);
+            });
+        }
         $this->languagePack = $languagePack;    
-        $this->googleService = new GoogleService($this->languagePack, $googleToken);      
+        $this->googleService = new GoogleService($this->languagePack, $googleToken, 'import', $refreshToken);
         $this->googleSheet = new Sheets($client);    
         $this->folderId = $folderId;
     }

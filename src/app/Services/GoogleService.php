@@ -47,17 +47,30 @@ class GoogleService
     private function ensureValidToken(): void
     {
         try {
-            if ($this->client->isAccessTokenExpired()) {
-                if ($this->refreshToken) {
-                    Log::info('Refreshing expired Google access token');
-                    $this->client->refreshToken($this->refreshToken);
-                    $this->token = $this->client->getAccessToken()['access_token'] ?? $this->token;
-                } else {
-                    Log::warning('Access token expired but no refresh token available');
+            $accessToken = $this->client->getAccessToken();
+            $tokenExpiryIsKnown = isset($accessToken['expires_in'], $accessToken['created']);
+
+            // Session tokens are often stored as opaque strings, which the
+            // Google client treats as expired because they have no expiry data.
+            if (!$this->refreshToken) {
+                if ($tokenExpiryIsKnown && $this->client->isAccessTokenExpired()) {
+                    Log::warning('Google access token is expired and cannot be refreshed');
                 }
+
+                return;
+            }
+
+            if ($this->client->isAccessTokenExpired()) {
+                Log::info('Refreshing expired Google access token');
+                $credentials = $this->client->fetchAccessTokenWithRefreshToken($this->refreshToken);
+                if (empty($credentials['access_token'])) {
+                    throw new Exception('Google did not return a refreshed access token.');
+                }
+                $this->token = $credentials['access_token'];
             }
         } catch (Exception $e) {
             Log::error('Error checking/refreshing access token: ' . $e->getMessage());
+            throw $e;
         }
     }
 
@@ -95,6 +108,118 @@ class GoogleService
         $results = $this->driveService->files->listFiles($optParams);    
 
         return $results->getFiles();
+    }
+
+    /**
+     * List folders for the in-app Drive folder browser.
+     *
+     * @return array<int, array{id: string, name: string, driveId: ?string}>
+     */
+    public function listFoldersForBrowser(string $location, ?string $parentId = null, ?string $driveId = null): array
+    {
+        $this->ensureValidToken();
+
+        $query = "mimeType='application/vnd.google-apps.folder' and trashed=false";
+        $options = [
+            'fields' => 'nextPageToken,files(id,name,driveId,ownedByMe)',
+            'pageSize' => 1000,
+            'orderBy' => 'name',
+            'spaces' => 'drive',
+            'includeItemsFromAllDrives' => true,
+            'supportsAllDrives' => true,
+        ];
+        if ($location === 'shared-with-me') {
+            $options['corpora'] = 'user';
+        }
+
+        if ($parentId !== null) {
+            $escapedParentId = str_replace(["\\", "'"], ["\\\\", "\\'"], $parentId);
+            $query .= " and '{$escapedParentId}' in parents";
+            if ($location === 'shared-drive' && $driveId) {
+                $options['corpora'] = 'drive';
+                $options['driveId'] = $driveId;
+            }
+        } elseif ($location === 'shared-drive' && $driveId) {
+            $escapedDriveId = str_replace(["\\", "'"], ["\\\\", "\\'"], $driveId);
+            $query .= " and '{$escapedDriveId}' in parents";
+            $options['corpora'] = 'drive';
+            $options['driveId'] = $driveId;
+        } elseif ($location !== 'shared-with-me') {
+            $query .= " and 'root' in parents";
+        }
+
+        $options['q'] = $query;
+        $folders = [];
+        do {
+            $response = $this->driveService->files->listFiles($options);
+            foreach ($response->getFiles() as $file) {
+                // The old Picker's Shared Folders view used ownedByMe=false.
+                if ($location === 'shared-with-me' && $parentId === null && $file->getOwnedByMe() === true) {
+                    continue;
+                }
+
+                $folders[] = [
+                    'id' => $file->getId(),
+                    'name' => $file->getName(),
+                    'driveId' => $file->getDriveId(),
+                ];
+            }
+            $pageToken = $response->getNextPageToken();
+            if ($pageToken) {
+                $options['pageToken'] = $pageToken;
+            }
+        } while ($pageToken);
+
+        return $folders;
+    }
+
+    /** @return array<int, array{id: string, name: string}> */
+    public function listSharedDrivesForBrowser(): array
+    {
+        $this->ensureValidToken();
+        $options = [
+            'fields' => 'nextPageToken,drives(id,name)',
+            'pageSize' => 100,
+        ];
+        $drives = [];
+        do {
+            $response = $this->driveService->drives->listDrives($options);
+            foreach ($response->getDrives() as $drive) {
+                $drives[] = [
+                    'id' => $drive->getId(),
+                    'name' => $drive->getName(),
+                ];
+            }
+            $pageToken = $response->getNextPageToken();
+            if ($pageToken) {
+                $options['pageToken'] = $pageToken;
+            }
+        } while ($pageToken);
+
+        return $drives;
+    }
+
+    public function createFolderForBrowser(string $name, ?string $parentId = null): array
+    {
+        $this->ensureValidToken();
+        $metadata = new DriveFile([
+            'name' => $name,
+            'mimeType' => 'application/vnd.google-apps.folder',
+        ]);
+        if ($parentId && $parentId !== 'root') {
+            $metadata->setParents([$parentId]);
+        }
+
+        $folder = $this->driveService->files->create($metadata, [
+            'fields' => 'id,name,driveId',
+            'supportsAllDrives' => true,
+        ]);
+
+        return [
+            'id' => $folder->getId(),
+            'name' => $folder->getName(),
+            'driveId' => $folder->getDriveId(),
+        ];
     }
 
     function getFileIdByFileName(string $fileName, string $folderPath, string $parentFolderId)
@@ -236,7 +361,6 @@ class GoogleService
 
     function handleExport(LanguagePack $languagePack, string $driveRootFolderId): void
     {        
-        $this->ensureValidToken();
         $exportSheetService = new ExportSheetService($languagePack, $this->token, $driveRootFolderId, $this->refreshToken);
         $exportSheetService->handle($driveRootFolderId);
     }

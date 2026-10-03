@@ -117,6 +117,9 @@ Route::middleware(['auth', 'authorize.languagepack'])->group(function () {
     Route::post('languagepack/export/{languagePack}', [ExportController::class, 'store']);  
     Route::post('languagepack/export/{languagePack}/cancel', [GoogleDriveController::class, 'cancelExport']);
     
+    Route::get('drive/folders', [GoogleDriveController::class, 'browseDriveFolders']);
+    Route::get('drive/shared-drives', [GoogleDriveController::class, 'browseDriveSharedDrives']);
+    Route::post('drive/folders', [GoogleDriveController::class, 'createDriveFolder']);
     Route::get('drive/import', [GoogleDriveController::class, 'import'])->name('drive.import');    
     Route::get('drive/export/{languagePack}', [GoogleDriveController::class, 'export'])->name('drive.export');    
 });

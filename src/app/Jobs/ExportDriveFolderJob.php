@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Enums\ExportStatus;
 use App\Exceptions\ExportCancelledException;
 use App\Enums\ImportStatus;
+use App\Models\DatabaseLog;
 use App\Models\LanguagePack;
 use Illuminate\Bus\Queueable;
 use App\Services\GoogleService;
@@ -55,5 +56,23 @@ class ExportDriveFolderJob implements ShouldQueue
         } catch (ExportCancelledException $e) {
             // Cancellation is a normal user action, not a failed queue job.
         }
+    }
+
+    public function failed(\Throwable $exception): void
+    {
+        Log::error('Google Drive export job failed', [
+            'language_pack_id' => $this->languagePack->id,
+            'error' => $exception->getMessage(),
+        ]);
+
+        $log = DatabaseLog::where('languagepackid', $this->languagePack->id)
+            ->where('type', 'export')
+            ->first();
+        if ($log?->status === ExportStatus::CANCELLED->value) {
+            return;
+        }
+
+        (new LogToDatabaseService($this->languagePack->id, 'export'))
+            ->handle('Export failed. Check the application log for details.', ExportStatus::FAILED);
     }
 }

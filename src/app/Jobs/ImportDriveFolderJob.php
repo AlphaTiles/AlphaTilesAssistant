@@ -6,6 +6,7 @@ use App\Enums\ImportStatus;
 use App\Models\LanguagePack;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use App\Services\GoogleService;
 use App\Services\ImportSheetService;
 use Illuminate\Queue\SerializesModels;
@@ -21,6 +22,8 @@ class ImportDriveFolderJob implements ShouldQueue
 
     public string $folderId;
     public string $token;
+    public ?string $refreshToken = null;
+    public string $requestId;
     public int $userId;
     public GoogleService $googleService;
 
@@ -29,11 +32,13 @@ class ImportDriveFolderJob implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(int $userId, string $token, string $folderId)
+    public function __construct(int $userId, string $token, string $folderId, string $requestId, ?string $refreshToken = null)
     {
         $this->token = $token;
         $this->folderId = $folderId;
-        $this->userId = $userId;           
+        $this->userId = $userId;
+        $this->refreshToken = $refreshToken;
+        $this->requestId = $requestId;
     }
 
     /**
@@ -46,12 +51,12 @@ class ImportDriveFolderJob implements ShouldQueue
         // Ensure googleService exists before createLanguagePack() uses it.
         // Construct with null for the languagePack initially; we'll reassign once created.
         // this is because we need to get the folder id first to create the language pack
-        $this->googleService = new GoogleService(null, $this->token);
+        $this->googleService = new GoogleService(null, $this->token, 'import', $this->refreshToken);
 
         $languagePack = $this->createLanguagePack();
 
         // Reinitialize googleService with the actual language pack
-        $this->googleService = new GoogleService($languagePack, $this->token);
+        $this->googleService = new GoogleService($languagePack, $this->token, 'import', $this->refreshToken);
 
         $files = $this->googleService->listFiles($this->folderId);
         $spreadsheetId = null;
@@ -75,12 +80,21 @@ class ImportDriveFolderJob implements ShouldQueue
             }                       
         }
 
-        $sheetService = new ImportSheetService($languagePack, $this->token, $this->folderId);
+        $sheetService = new ImportSheetService($languagePack, $this->token, $this->folderId, $this->refreshToken);
         $sheetService->readAndSaveData($spreadsheetId, $sheetType);
     }
 
     private function createLanguagePack(): LanguagePack
     {
+        $cacheKey = 'drive-import-language-pack:' . $this->userId . ':' . $this->requestId;
+        $existingPackId = Cache::get($cacheKey);
+        if ($existingPackId) {
+            $existingPack = LanguagePack::find($existingPackId);
+            if ($existingPack) {
+                return $existingPack;
+            }
+        }
+
         $folder = $this->googleService->getFolder($this->folderId);
         $folderName = $folder->getName();
         $existingLanguagePack = LanguagePack::where('user_id', $this->userId)
@@ -91,11 +105,14 @@ class ImportDriveFolderJob implements ShouldQueue
             $folderName = $this->generateUniqueItemName($folderName);
         }
 
-        return LanguagePack::create([
+        $languagePack = LanguagePack::create([
             'user_id' => $this->userId,
             'name' => $folderName,
             'import_status' => ImportStatus::IMPORTING
         ]);
+        Cache::put($cacheKey, $languagePack->id, now()->addDay());
+
+        return $languagePack;
     }
 
     private function generateUniqueItemName($itemName)
