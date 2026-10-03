@@ -70,7 +70,7 @@ class GoogleDriveController extends Controller
         ]);
     }
 
-    public function browseExportFolders(Request $request, LanguagePack $languagePack)
+    public function browseDriveFolders(Request $request)
     {
         $validated = $request->validate([
             'location' => 'required|in:my-drive,shared-with-me,shared-drive',
@@ -78,7 +78,7 @@ class GoogleDriveController extends Controller
             'drive_id' => 'nullable|string|max:255',
         ]);
 
-        $service = $this->exportFolderBrowserService();
+        $service = $this->driveFolderBrowserService();
         if (!$service) {
             return response()->json(['message' => __('Reconnect Google Drive to continue.')], 401);
         }
@@ -101,8 +101,7 @@ class GoogleDriveController extends Controller
                 ),
             ]);
         } catch (\Throwable $exception) {
-            Log::warning('Could not list Google Drive folders for export', [
-                'language_pack_id' => $languagePack->id,
+            Log::warning('Could not list Google Drive folders', [
                 'error' => $exception->getMessage(),
             ]);
 
@@ -110,9 +109,9 @@ class GoogleDriveController extends Controller
         }
     }
 
-    public function browseExportSharedDrives(LanguagePack $languagePack)
+    public function browseDriveSharedDrives()
     {
-        $service = $this->exportFolderBrowserService();
+        $service = $this->driveFolderBrowserService();
         if (!$service) {
             return response()->json(['message' => __('Reconnect Google Drive to continue.')], 401);
         }
@@ -122,8 +121,7 @@ class GoogleDriveController extends Controller
                 'drives' => $service->listSharedDrivesForBrowser(),
             ]);
         } catch (\Throwable $exception) {
-            Log::warning('Could not list Google shared drives for export', [
-                'language_pack_id' => $languagePack->id,
+            Log::warning('Could not list Google shared drives', [
                 'error' => $exception->getMessage(),
             ]);
 
@@ -131,14 +129,14 @@ class GoogleDriveController extends Controller
         }
     }
 
-    public function createExportFolder(Request $request, LanguagePack $languagePack)
+    public function createDriveFolder(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'parent_id' => 'nullable|string|max:255',
         ]);
 
-        $service = $this->exportFolderBrowserService();
+        $service = $this->driveFolderBrowserService();
         if (!$service) {
             return response()->json(['message' => __('Reconnect Google Drive to continue.')], 401);
         }
@@ -151,8 +149,7 @@ class GoogleDriveController extends Controller
                 ),
             ], 201);
         } catch (\Throwable $exception) {
-            Log::warning('Could not create Google Drive folder for export', [
-                'language_pack_id' => $languagePack->id,
+            Log::warning('Could not create Google Drive folder', [
                 'error' => $exception->getMessage(),
             ]);
 
@@ -160,7 +157,7 @@ class GoogleDriveController extends Controller
         }
     }
 
-    private function exportFolderBrowserService(): ?GoogleService
+    private function driveFolderBrowserService(): ?GoogleService
     {
         $token = Session::get('socialite_token');
         if (!$token) {
@@ -197,22 +194,60 @@ class GoogleDriveController extends Controller
     {        
         $this->middleware('auth');
 
-        if(Session::get('drive_permissions_time') < Carbon::now()->subHour()) {
+        if (
+            !Session::get('socialite_token')
+            || !Session::get('socialite_refresh_token')
+            || !Session::get('drive_permissions_time')
+            || Session::get('drive_permissions_time') < Carbon::now()->subHour()
+        ) {
             app('redirect')->setIntendedUrl('/drive/import');
 
             return Socialite::driver('google')
                 ->scopes([Drive::DRIVE, Drive::DRIVE_FILE])
+                ->with(["access_type" => "offline", "prompt" => "consent select_account"])
                 ->redirect();        
         }
 
         return view('drive-import', [
             'accessToken' => Session::get("socialite_token"),
+            'refreshToken' => Session::get("socialite_refresh_token"),
             'userId' => Auth::user()->id
         ]);
     }
 
     public function dispatchimport(Request $request)
     {
-        ImportDriveFolderJob::dispatch($request->userId, $request->token, $request->folderId);
+        $validated = $request->validate([
+            'userId' => 'required|integer',
+            'token' => 'required|string',
+            'refreshToken' => 'nullable|string',
+            'folderId' => 'required|string',
+        ]);
+
+        $service = new GoogleService(
+            null,
+            $validated['token'],
+            'import',
+            $validated['refreshToken'] ?? null,
+        );
+        $files = $service->listFiles($validated['folderId']);
+        $hasImportFile = collect($files)->contains(fn ($file) =>
+            $file->getMimeType() === 'application/vnd.google-apps.spreadsheet'
+            || strtolower(pathinfo($file->getName(), PATHINFO_EXTENSION)) === 'xlsx'
+        );
+        if (!$hasImportFile) {
+            return response()->json([
+                'message' => __('Error: No Google Sheet or XLSX file found in the selected folder.'),
+            ], 422);
+        }
+
+        ImportDriveFolderJob::dispatch(
+            $validated['userId'],
+            $validated['token'],
+            $validated['folderId'],
+            $validated['refreshToken'] ?? null,
+        );
+
+        return response()->json(['success' => true]);
     }    
 }

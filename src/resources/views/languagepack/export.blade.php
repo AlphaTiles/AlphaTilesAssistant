@@ -91,6 +91,7 @@
 @endsection
 
 @section('scripts')
+@include('partials.drive-folder-browser')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 	var form = document.getElementById('zip-export-form');
@@ -127,22 +128,13 @@ document.addEventListener('DOMContentLoaded', function () {
 	});
 });
 
-  let accessToken = '<?php echo $accessToken ?? ''; ?>';
-  let refreshToken = '<?php echo $refreshToken ?? ''; ?>';
-  let userId = <?php echo $userId ?? 0; ?>;
-  let languagePackId = <?php echo $languagePack->id; ?>;
+  let accessToken = @json($accessToken ?? '');
+  let refreshToken = @json($refreshToken ?? '');
+  let userId = @json($userId ?? 0);
+  let languagePackId = @json($languagePack->id);
   let pollingInterval = null;
-  const hasDrivePermissions = <?php echo $hasDrivePermissions ? 'true' : 'false'; ?>;
+  const hasDrivePermissions = @json((bool) $hasDrivePermissions);
   const resumeFolderBrowserKey = `resume-drive-folder-browser-${languagePackId}`;
-
-  const folderBrowserUrl = `/languagepack/export/${languagePackId}/drive-folders`;
-  const sharedDrivesUrl = `/languagepack/export/${languagePackId}/shared-drives`;
-
-  function escapeHtml(value) {
-    return String(value).replace(/[&<>"']/g, character => ({
-      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
-    })[character]);
-  }
 
   async function connectGoogleDrive() {
     if (!hasDrivePermissions) {
@@ -151,233 +143,46 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    let location = 'shared-with-me';
-    let driveId = null;
-    let driveName = "{{ __('Shared with me') }}";
-    let path = [];
-    let popup;
-
-    const requestHeaders = {
-      'X-CSRF-TOKEN': '{{ csrf_token() }}',
-      'Accept': 'application/json'
-    };
-
-    const renderBrowser = () => {
-      if (!popup) return;
-      const locationSelect = popup.querySelector('#drive-browser-location');
-      const sharedDriveSelect = popup.querySelector('#drive-browser-shared-drive');
-      const foldersContainer = popup.querySelector('#drive-browser-folders');
-      const currentName = path.length ? path[path.length - 1].name : driveName;
-      const currentLabel = popup.querySelector('#drive-browser-current');
-      currentLabel.textContent = currentName;
-      currentLabel.classList.toggle('hidden', path.length === 0);
-      popup.querySelector('#drive-browser-up').classList.toggle('hidden', path.length === 0);
-      if (locationSelect) locationSelect.value = location === 'shared-drive' ? 'shared-drives' : location;
-      if (sharedDriveSelect) {
-        sharedDriveSelect.classList.toggle('hidden', location !== 'shared-drive');
-        if (driveId) sharedDriveSelect.value = driveId;
-      }
-      foldersContainer.innerHTML = `<p class="p-3 text-sm">{{ __('Loading folders...') }}</p>`;
-
-      const params = new URLSearchParams({ location });
-      if (path.length) params.set('parent_id', path[path.length - 1].id);
-      if (driveId) params.set('drive_id', driveId);
-      fetch(`${folderBrowserUrl}?${params}`, { headers: requestHeaders })
-        .then(async response => {
-          const data = await response.json();
-          if (response.status === 401) {
-            sessionStorage.setItem(resumeFolderBrowserKey, '1');
-            window.location.href = `/drive/export/${languagePackId}`;
-            throw new Error(data.message || "{{ __('Reconnect Google Drive to continue.') }}");
-          }
-          if (!response.ok) throw new Error(data.message || "{{ __('Could not load Google Drive folders.') }}");
-          return data;
-        })
-        .then(data => {
-          if (!data.folders.length) {
-            foldersContainer.innerHTML = `<p class="p-3 text-sm text-gray-600">{{ __('No folders found.') }}</p>`;
-            return;
-          }
-          foldersContainer.innerHTML = data.folders.map(folder => `
-            <div class="flex items-center justify-between gap-3 border-b p-2">
-              <button type="button" class="min-w-0 flex-1 truncate text-left" data-open-folder="${escapeHtml(folder.id)}" data-folder-name="${escapeHtml(folder.name)}">${escapeHtml(folder.name)}</button>
-              <button type="button" class="btn-sm btn-secondary" data-select-folder="${escapeHtml(folder.id)}" data-folder-name="${escapeHtml(folder.name)}">{{ __('Select') }}</button>
-            </div>`).join('');
-        })
-        .catch(error => {
-          foldersContainer.innerHTML = `<p class="p-3 text-sm text-red-700">${escapeHtml(error.message)}</p>`;
-        });
-    };
-
-    const destinationChoice = await new Promise(resolve => {
-      let settled = false;
-      const finish = folder => {
-        if (settled) return;
-        settled = true;
-        resolve(folder);
-        Swal.close();
-      };
-
-      Swal.fire({
-      title: "{{ __('Select a folder for export') }}",
-      padding: '1.5rem',
-      width: '42rem',
-      html: `
-        <div class="text-left">
-          <label class="mb-1 block text-sm font-semibold" for="drive-browser-location">{{ __('Location') }}</label>
-          <select id="drive-browser-location" class="mb-3 w-full rounded border p-2">
-            <option value="my-drive">{{ __('My Drive') }}</option>
-            <option value="shared-with-me">{{ __('Shared with me') }}</option>
-            <option value="shared-drives">{{ __('Shared drives') }}</option>
-          </select>
-          <select id="drive-browser-shared-drive" class="mb-3 hidden w-full rounded border p-2"></select>
-          <div class="mb-2 flex items-center gap-2 border-b pb-2">
-            <button id="drive-browser-up" type="button" class="btn-sm btn-secondary hidden">{{ __('Back') }}</button>
-            <span id="drive-browser-current" class="hidden font-semibold"></span>
-          </div>
-          <div id="drive-browser-folders" class="max-h-72 overflow-y-auto rounded border"></div>
-          <p class="mt-2 text-sm text-gray-600">{{ __('Click a folder name to browse inside it, or select it to export there.') }}</p>
-        </div>`,
-      showConfirmButton: false,
-      showCancelButton: true,
-      cancelButtonText: "{{ __('Cancel') }}",
-      didOpen: popupElement => {
-        popup = popupElement;
-        const locationSelect = popup.querySelector('#drive-browser-location');
-        const sharedDriveSelect = popup.querySelector('#drive-browser-shared-drive');
-
-        popup.addEventListener('click', event => {
-          const selectButton = event.target.closest('[data-select-folder]');
-          const openButton = event.target.closest('[data-open-folder]');
-          if (selectButton) {
-            finish({
-              id: selectButton.dataset.selectFolder,
-              name: selectButton.dataset.folderName
-            });
-            return;
-          }
-          if (openButton) {
-            const folder = { id: openButton.dataset.openFolder, name: openButton.dataset.folderName };
-            path.push(folder);
-            renderBrowser();
-          }
-          if (event.target.closest('#drive-browser-up') && path.length) {
-            path.pop();
-            renderBrowser();
-          }
-        });
-
-        locationSelect.addEventListener('change', async () => {
-          path = [];
-          driveId = null;
-          if (locationSelect.value === 'shared-drives') {
-            try {
-              const response = await fetch(sharedDrivesUrl, { headers: requestHeaders });
-              const data = await response.json();
-              if (!response.ok) throw new Error(data.message || "{{ __('Could not load Google Drive folders.') }}");
-              sharedDriveSelect.innerHTML = data.drives.map(drive => `<option value="${escapeHtml(drive.id)}">${escapeHtml(drive.name)}</option>`).join('');
-              if (!data.drives.length) throw new Error("{{ __('No shared drives found.') }}");
-              location = 'shared-drive';
-              driveId = data.drives[0].id;
-              driveName = data.drives[0].name;
-              sharedDriveSelect.classList.remove('hidden');
-              renderBrowser();
-            } catch (error) {
-              popup.querySelector('#drive-browser-folders').innerHTML = `<p class="p-3 text-sm text-red-700">${escapeHtml(error.message)}</p>`;
-            }
-            return;
-          }
-          location = locationSelect.value;
-          driveName = location === 'my-drive' ? "{{ __('My Drive') }}" : "{{ __('Shared with me') }}";
-          sharedDriveSelect.classList.add('hidden');
-          renderBrowser();
-        });
-
-        sharedDriveSelect.addEventListener('change', () => {
-          const option = sharedDriveSelect.selectedOptions[0];
-          driveId = option.value;
-          driveName = option.textContent;
-          path = [];
-          renderBrowser();
-        });
-        renderBrowser();
-      }
-      }).then(() => {
-        if (!settled) resolve(null);
-      });
-    });
-
-    if (!destinationChoice) return;
-    let destinationFolder = destinationChoice;
-      const createResult = await Swal.fire({
-        title: "{{ __('Choose an export folder') }}",
-        padding: '2rem',
-        input: 'text',
-        inputLabel: "{{ __('Optional: create a new subfolder inside') }} " + destinationFolder.name,
-        inputPlaceholder: "{{ __('Leave blank to use the selected folder') }}",
-        showCancelButton: true,
-        confirmButtonText: "{{ __('Continue') }}",
-        cancelButtonText: "{{ __('Cancel') }}",
-      });
-      if (!createResult.isConfirmed) return;
-
-      const newFolderName = (createResult.value || '').trim();
-      if (newFolderName) {
-        try {
-          const response = await fetch(folderBrowserUrl, {
-            method: 'POST',
-            headers: { ...requestHeaders, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: newFolderName, parent_id: destinationFolder.id })
-          });
-          const data = await response.json();
-          if (!response.ok) throw new Error(data.message || "{{ __('Could not create folder in Google Drive.') }}");
-          destinationFolder = data.folder;
-        } catch (error) {
-          await Swal.fire({ icon: 'error', title: "{{ __('Could not create folder') }}", text: error.message });
-          return;
+    try {
+      let destinationFolder = await selectDriveFolder({
+        title: @json(__('Select a folder for export')),
+        allowCreate: true,
+        onUnauthorized: () => {
+          sessionStorage.setItem(resumeFolderBrowserKey, '1');
+          window.location.href = `/drive/export/${languagePackId}`;
         }
-      }
+      });
+      if (!destinationFolder) return;
 
       document.getElementById('result').style.visibility = 'visible';
       document.getElementById('folderName').innerText = destinationFolder.name;
       const driveLink = document.getElementById('driveFolderLink');
       if (driveLink) driveLink.href = `https://drive.google.com/drive/folders/${destinationFolder.id}?usp=drive_link`;
 
-      const dataToSend = {
-        userId,
-        token: accessToken,
-        refreshToken,
-        languagePackId,
-        folderId: destinationFolder.id
-      };
-      fetch('/api/drive/dispatchexport', {
+      const response = await fetch('/api/drive/dispatchexport', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-        body: JSON.stringify(dataToSend)
-      })
-      .then(async response => {
-        const data = await response.json();
-        if (response.status === 401) {
-          sessionStorage.setItem(resumeFolderBrowserKey, '1');
-          window.location.href = `/drive/export/${languagePackId}`;
-          throw new Error(data.message || "{{ __('Reconnect Google Drive to continue.') }}");
-        }
-        if (!response.ok) throw new Error(data.message || 'Network response was not ok');
-        return data;
-      })
-      .then(() => {
-        document.getElementById('authorize_button').style.display = 'none';
-        document.getElementById('driveExportHelpText').style.display = 'none';
-        document.getElementById('stopExportButton').classList.remove('hidden');
-        document.getElementById('exportprogress').style.display = 'block';
-        if (pollingInterval) clearInterval(pollingInterval);
-        pollingInterval = setInterval(updateLogMessages, 2000);
-        updateLogMessages();
-      })
-      .catch(error => {
-        console.error('There was a problem starting the export:', error);
-        Swal.fire({ icon: 'error', title: "{{ __('Export could not be started') }}", text: error.message });
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': @json(csrf_token()) },
+        body: JSON.stringify({ userId, token: accessToken, refreshToken, languagePackId, folderId: destinationFolder.id })
       });
+      const data = await response.json();
+      if (response.status === 401) {
+        sessionStorage.setItem(resumeFolderBrowserKey, '1');
+        window.location.href = `/drive/export/${languagePackId}`;
+        return;
+      }
+      if (!response.ok) throw new Error(data.message || 'Network response was not ok');
+
+      document.getElementById('authorize_button').style.display = 'none';
+      document.getElementById('driveExportHelpText').style.display = 'none';
+      document.getElementById('stopExportButton').classList.remove('hidden');
+      document.getElementById('exportprogress').style.display = 'block';
+      if (pollingInterval) clearInterval(pollingInterval);
+      pollingInterval = setInterval(updateLogMessages, 2000);
+      updateLogMessages();
+    } catch (error) {
+      console.error('There was a problem starting the export:', error);
+      Swal.fire({ icon: 'error', title: @json(__('Export could not be started')), text: error.message });
+    }
   }
 
   function stopExport() {
