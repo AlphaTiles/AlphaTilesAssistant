@@ -6,6 +6,7 @@ use App\Enums\ImportStatus;
 use App\Models\LanguagePack;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use App\Services\GoogleService;
 use App\Services\ImportSheetService;
 use Illuminate\Queue\SerializesModels;
@@ -22,6 +23,7 @@ class ImportDriveFolderJob implements ShouldQueue
     public string $folderId;
     public string $token;
     public ?string $refreshToken = null;
+    public string $requestId;
     public int $userId;
     public GoogleService $googleService;
 
@@ -30,12 +32,13 @@ class ImportDriveFolderJob implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(int $userId, string $token, string $folderId, ?string $refreshToken = null)
+    public function __construct(int $userId, string $token, string $folderId, string $requestId, ?string $refreshToken = null)
     {
         $this->token = $token;
         $this->folderId = $folderId;
         $this->userId = $userId;
         $this->refreshToken = $refreshToken;
+        $this->requestId = $requestId;
     }
 
     /**
@@ -83,6 +86,15 @@ class ImportDriveFolderJob implements ShouldQueue
 
     private function createLanguagePack(): LanguagePack
     {
+        $cacheKey = 'drive-import-language-pack:' . $this->userId . ':' . $this->requestId;
+        $existingPackId = Cache::get($cacheKey);
+        if ($existingPackId) {
+            $existingPack = LanguagePack::find($existingPackId);
+            if ($existingPack) {
+                return $existingPack;
+            }
+        }
+
         $folder = $this->googleService->getFolder($this->folderId);
         $folderName = $folder->getName();
         $existingLanguagePack = LanguagePack::where('user_id', $this->userId)
@@ -93,11 +105,14 @@ class ImportDriveFolderJob implements ShouldQueue
             $folderName = $this->generateUniqueItemName($folderName);
         }
 
-        return LanguagePack::create([
+        $languagePack = LanguagePack::create([
             'user_id' => $this->userId,
             'name' => $folderName,
             'import_status' => ImportStatus::IMPORTING
         ]);
+        Cache::put($cacheKey, $languagePack->id, now()->addDay());
+
+        return $languagePack;
     }
 
     private function generateUniqueItemName($itemName)

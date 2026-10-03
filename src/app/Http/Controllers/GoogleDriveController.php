@@ -12,6 +12,7 @@ use App\Jobs\ExportDriveFolderJob;
 use App\Jobs\ImportDriveFolderJob;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use App\Services\LogToDatabaseService;
 use App\Models\DatabaseLog;
 use Illuminate\Support\Facades\Session;
@@ -222,7 +223,13 @@ class GoogleDriveController extends Controller
             'token' => 'required|string',
             'refreshToken' => 'nullable|string',
             'folderId' => 'required|string',
+            'requestId' => 'required|uuid',
         ]);
+
+        $dispatchKey = 'drive-import-dispatch:' . $validated['userId'] . ':' . $validated['requestId'];
+        if (Cache::has($dispatchKey)) {
+            return response()->json(['success' => true, 'duplicate' => true]);
+        }
 
         $service = new GoogleService(
             null,
@@ -241,12 +248,22 @@ class GoogleDriveController extends Controller
             ], 422);
         }
 
-        ImportDriveFolderJob::dispatch(
-            $validated['userId'],
-            $validated['token'],
-            $validated['folderId'],
-            $validated['refreshToken'] ?? null,
-        );
+        if (!Cache::add($dispatchKey, true, now()->addHours(2))) {
+            return response()->json(['success' => true, 'duplicate' => true]);
+        }
+
+        try {
+            ImportDriveFolderJob::dispatch(
+                $validated['userId'],
+                $validated['token'],
+                $validated['folderId'],
+                $validated['requestId'],
+                $validated['refreshToken'] ?? null,
+            );
+        } catch (\Throwable $exception) {
+            Cache::forget($dispatchKey);
+            throw $exception;
+        }
 
         return response()->json(['success' => true]);
     }    
