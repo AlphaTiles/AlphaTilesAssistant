@@ -53,8 +53,8 @@ class ExportSheetService
         $this->debug = env('DEBUG', false);
         $this->client = new Client();
         if ($refreshToken) {
-            $this->client->setClientId(config('services.google.client_id'));
-            $this->client->setClientSecret(config('services.google.client_secret'));
+            $this->client->setClientId(env('GOOGLE_CLIENT_ID'));
+            $this->client->setClientSecret(env('GOOGLE_CLIENT_SECRET'));
         }
         $this->client->setAccessToken($googleToken);
         if ($refreshToken) {
