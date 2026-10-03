@@ -355,9 +355,15 @@ document.addEventListener('DOMContentLoaded', function () {
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
         body: JSON.stringify(dataToSend)
       })
-      .then(response => {
-        if (!response.ok) throw new Error('Network response was not ok');
-        return response.json();
+      .then(async response => {
+        const data = await response.json();
+        if (response.status === 401) {
+          sessionStorage.setItem(resumeFolderBrowserKey, '1');
+          window.location.href = `/drive/export/${languagePackId}`;
+          throw new Error(data.message || "{{ __('Reconnect Google Drive to continue.') }}");
+        }
+        if (!response.ok) throw new Error(data.message || 'Network response was not ok');
+        return data;
       })
       .then(() => {
         document.getElementById('authorize_button').style.display = 'none';
@@ -368,7 +374,10 @@ document.addEventListener('DOMContentLoaded', function () {
         pollingInterval = setInterval(updateLogMessages, 2000);
         updateLogMessages();
       })
-      .catch(error => console.error('There was a problem starting the export:', error));
+      .catch(error => {
+        console.error('There was a problem starting the export:', error);
+        Swal.fire({ icon: 'error', title: "{{ __('Export could not be started') }}", text: error.message });
+      });
   }
 
   function stopExport() {

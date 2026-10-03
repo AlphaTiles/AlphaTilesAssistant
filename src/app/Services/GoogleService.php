@@ -47,17 +47,30 @@ class GoogleService
     private function ensureValidToken(): void
     {
         try {
-            if ($this->client->isAccessTokenExpired()) {
-                if ($this->refreshToken) {
-                    Log::info('Refreshing expired Google access token');
-                    $this->client->refreshToken($this->refreshToken);
-                    $this->token = $this->client->getAccessToken()['access_token'] ?? $this->token;
-                } else {
-                    Log::warning('Access token expired but no refresh token available');
+            $accessToken = $this->client->getAccessToken();
+            $tokenExpiryIsKnown = isset($accessToken['expires_in'], $accessToken['created']);
+
+            // Session tokens are often stored as opaque strings, which the
+            // Google client treats as expired because they have no expiry data.
+            if (!$this->refreshToken) {
+                if ($tokenExpiryIsKnown && $this->client->isAccessTokenExpired()) {
+                    Log::warning('Google access token is expired and cannot be refreshed');
                 }
+
+                return;
+            }
+
+            if ($this->client->isAccessTokenExpired()) {
+                Log::info('Refreshing expired Google access token');
+                $credentials = $this->client->fetchAccessTokenWithRefreshToken($this->refreshToken);
+                if (empty($credentials['access_token'])) {
+                    throw new Exception('Google did not return a refreshed access token.');
+                }
+                $this->token = $credentials['access_token'];
             }
         } catch (Exception $e) {
             Log::error('Error checking/refreshing access token: ' . $e->getMessage());
+            throw $e;
         }
     }
 
@@ -348,7 +361,6 @@ class GoogleService
 
     function handleExport(LanguagePack $languagePack, string $driveRootFolderId): void
     {        
-        $this->ensureValidToken();
         $exportSheetService = new ExportSheetService($languagePack, $this->token, $driveRootFolderId, $this->refreshToken);
         $exportSheetService->handle($driveRootFolderId);
     }

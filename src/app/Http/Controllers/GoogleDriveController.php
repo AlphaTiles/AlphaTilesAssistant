@@ -24,7 +24,12 @@ class GoogleDriveController extends Controller
     { 
         $this->middleware('auth');
 
-        if(Session::get('drive_permissions_time') < Carbon::now()->subHour()) {
+        if (
+            !Session::get('socialite_token')
+            || !Session::get('socialite_refresh_token')
+            || !Session::get('drive_permissions_time')
+            || Session::get('drive_permissions_time') < Carbon::now()->subHour()
+        ) {
             app('redirect')->setIntendedUrl('/languagepack/export/' . $languagePack->id);
 
             return Socialite::driver('google')
@@ -45,11 +50,17 @@ class GoogleDriveController extends Controller
 
         $languagePack = LanguagePack::findOrFail($request->input('languagePackId'));
 
-        $logService = new LogToDatabaseService($languagePack->id, 'export');
-        $logService->handle('Export Job started', ExportStatus::STARTED);
-
         $token = Session::get("socialite_token") ?? $request->input('token');
         $refreshToken = Session::get("socialite_refresh_token") ?? $request->input('refreshToken');
+        if (!$token || !$refreshToken) {
+            return response()->json([
+                'success' => false,
+                'message' => __('Reconnect Google Drive to continue.'),
+            ], 401);
+        }
+
+        $logService = new LogToDatabaseService($languagePack->id, 'export');
+        $logService->handle('Export Job started', ExportStatus::STARTED);
 
         ExportDriveFolderJob::dispatch($token, $languagePack, $request->input('folderId'), $refreshToken);
 

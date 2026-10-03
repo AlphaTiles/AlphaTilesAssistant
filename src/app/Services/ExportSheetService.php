@@ -52,7 +52,27 @@ class ExportSheetService
     {
         $this->debug = env('DEBUG', false);
         $this->client = new Client();
+        if ($refreshToken) {
+            $this->client->setClientId(env('GOOGLE_CLIENT_ID'));
+            $this->client->setClientSecret(env('GOOGLE_CLIENT_SECRET'));
+        }
         $this->client->setAccessToken($googleToken);
+        if ($refreshToken) {
+            $credentials = $this->client->fetchAccessTokenWithRefreshToken($refreshToken);
+            if (empty($credentials['access_token'])) {
+                throw new Exception('Google did not return a refreshed access token for the export.');
+            }
+
+            // Keep the refresh token when the API client refreshes during a long export.
+            $this->client->setTokenCallback(function ($cacheKey, $accessToken) use ($refreshToken) {
+                $this->client->setAccessToken([
+                    'access_token' => $accessToken,
+                    'expires_in' => 3600,
+                    'created' => time(),
+                    'refresh_token' => $refreshToken,
+                ]);
+            });
+        }
         $this->languagePack = $languagePack;    
         $this->googleService = new GoogleService($languagePack, $googleToken, 'export', $refreshToken); 
         $this->logService = new LogToDatabaseService($languagePack->id, 'export');
