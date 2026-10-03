@@ -27,8 +27,8 @@ class GoogleService
         $this->refreshToken = $refreshToken;
         
         if($refreshToken) {
-            $this->client->setClientId(env('GOOGLE_CLIENT_ID'));
-            $this->client->setClientSecret(env('GOOGLE_CLIENT_SECRET'));
+            $this->client->setClientId(config('services.google.client_id'));
+            $this->client->setClientSecret(config('services.google.client_secret'));
         }
         
         $this->client->setAccessToken($token);
@@ -67,6 +67,7 @@ class GoogleService
                     throw new Exception('Google did not return a refreshed access token.');
                 }
                 $this->token = $credentials['access_token'];
+                Log::info('Google access token refreshed successfully');
             }
         } catch (Exception $e) {
             Log::error('Error checking/refreshing access token: ' . $e->getMessage());

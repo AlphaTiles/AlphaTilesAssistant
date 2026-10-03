@@ -53,8 +53,8 @@ class ExportSheetService
         $this->debug = env('DEBUG', false);
         $this->client = new Client();
         if ($refreshToken) {
-            $this->client->setClientId(env('GOOGLE_CLIENT_ID'));
-            $this->client->setClientSecret(env('GOOGLE_CLIENT_SECRET'));
+            $this->client->setClientId(config('services.google.client_id'));
+            $this->client->setClientSecret(config('services.google.client_secret'));
         }
         $this->client->setAccessToken($googleToken);
         if ($refreshToken) {
@@ -62,6 +62,7 @@ class ExportSheetService
             if (empty($credentials['access_token'])) {
                 throw new Exception('Google did not return a refreshed access token for the export.');
             }
+            Log::info('Google access token refreshed for export');
 
             // Keep the refresh token when the API client refreshes during a long export.
             $this->client->setTokenCallback(function ($cacheKey, $accessToken) use ($refreshToken) {
@@ -110,14 +111,30 @@ class ExportSheetService
             'supportsAllDrives' => true,
         ]);
 
-        DriveExport::updateOrCreate([
-            'languagepackid' => $this->languagePack->id,
-        ], [
-            'folder_id' => $folder->getId(),
-            'folder_name' => $folder->getName(),
-            'drive_url' => $folder->getWebViewLink() ?: 'https://drive.google.com/drive/folders/' . $folder->getId(),
-            'is_shared' => (bool) $folder->getShared(),
-        ]);
+        try {
+            DriveExport::updateOrCreate([
+                'languagepackid' => $this->languagePack->id,
+            ], [
+                'folder_id' => $folder->getId(),
+                'folder_name' => $folder->getName(),
+                'drive_url' => $folder->getWebViewLink() ?: 'https://drive.google.com/drive/folders/' . $folder->getId(),
+                'is_shared' => (bool) $folder->getShared(),
+            ]);
+
+            Log::info('Saved Google Drive export details', [
+                'language_pack_id' => $this->languagePack->id,
+                'folder_id' => $folder->getId(),
+                'is_shared' => (bool) $folder->getShared(),
+            ]);
+        } catch (\Throwable $exception) {
+            Log::error('Could not save Google Drive export details', [
+                'language_pack_id' => $this->languagePack->id,
+                'folder_id' => $folder->getId(),
+                'error' => $exception->getMessage(),
+            ]);
+
+            throw $exception;
+        }
     }
 
     private function notesSheet(string $spreadsheetId): void
