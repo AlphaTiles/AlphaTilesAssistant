@@ -85,16 +85,25 @@ class LanguageInfoController extends Controller
         $data = $request->all();
         $settings = $data['settings'];
 
-        $languagePack = [
-            'user_id' => Auth::user()->id,
-            'name' => $settings['lang_name_english']
-        ];
-
         if(isset($data['id'])) {
-            $languagePackSaved = LanguagePack::find($data['id']);
-            $languagePackSaved->update($languagePack);
+            $languagePackSaved = LanguagePack::findOrFail($data['id']);
+            $user = Auth::user();
+            $canEdit = $user->isAdmin()
+                || (int) $languagePackSaved->user_id === (int) $user->id
+                || $languagePackSaved->collaborators()
+                    ->where('user_id', $user->id)
+                    ->exists();
+
+            abort_unless($canEdit, 403);
+
+            // Editing language-pack settings must not transfer ownership.
+            $languagePackSaved->name = $settings['lang_name_english'];
+            $languagePackSaved->save();
         } else {
-            $languagePackSaved = LanguagePack::create($languagePack);
+            $languagePackSaved = LanguagePack::create([
+                'user_id' => Auth::id(),
+                'name' => $settings['lang_name_english'],
+            ]);
         }
 
         $this->saveSettings($languagePackSaved, $request);
