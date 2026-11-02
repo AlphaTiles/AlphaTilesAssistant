@@ -31,6 +31,8 @@ class GoogleDriveController extends Controller
             || !Session::get('drive_permissions_time')
             || Session::get('drive_permissions_time') < Carbon::now()->subHour()
         ) {
+            Session::put('drive_export_auth_pending', true);
+            Session::put('drive_export_return_url', '/languagepack/export/' . $languagePack->id);
             app('redirect')->setIntendedUrl('/languagepack/export/' . $languagePack->id);
 
             return Socialite::driver('google')

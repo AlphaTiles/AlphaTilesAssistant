@@ -850,8 +850,11 @@ $this->clearAndAddValuesToSheet($spreadsheetId, $sheetAndRange, $values);
 
         $relativeFilePath = str_replace('/storage/public', '', $file->file_path);
         $relativeFilePath = str_replace('/storage', '', $relativeFilePath);
-        $filePath = Storage::disk('public')->path($relativeFilePath);
-        $content = Storage::disk('public')->get($relativeFilePath);            
+        $relativeFilePath = ltrim($relativeFilePath, '/');
+        $disk = Storage::disk('public');
+
+        $content = $disk->get($relativeFilePath);
+        $mimeType = $disk->mimeType($relativeFilePath) ?: 'application/octet-stream';
         $fileMetadata = new DriveFile([
             'name' => $fileName,
             'parents' => [ $folderId ],
@@ -860,7 +863,7 @@ $this->clearAndAddValuesToSheet($spreadsheetId, $sheetAndRange, $values);
         try {
             $this->driveService->files->create($fileMetadata, [
                 'data' => $content,
-                'mimeType' => mime_content_type($filePath),
+                'mimeType' => $mimeType,
                 'uploadType' => 'multipart',
                 'fields' => 'id',
                 'supportsAllDrives' => true,
@@ -870,7 +873,7 @@ $this->clearAndAddValuesToSheet($spreadsheetId, $sheetAndRange, $values);
                 usleep(500000);
                 $this->driveService->files->create($fileMetadata, [
                     'data' => $content,
-                    'mimeType' => mime_content_type($filePath),
+                    'mimeType' => $mimeType,
                     'uploadType' => 'multipart',
                     'fields' => 'id',
                     'supportsAllDrives' => true,
