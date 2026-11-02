@@ -852,11 +852,6 @@ $this->clearAndAddValuesToSheet($spreadsheetId, $sheetAndRange, $values);
         $relativeFilePath = str_replace('/storage', '', $relativeFilePath);
         $relativeFilePath = ltrim($relativeFilePath, '/');
         $disk = Storage::disk('public');
-        if (!$disk->exists($relativeFilePath)) {
-            throw new \RuntimeException(
-                "Cannot export {$fileType} '{$fileName}': source file is missing from storage ({$relativeFilePath}). Re-upload this file and retry the export."
-            );
-        }
 
         $content = $disk->get($relativeFilePath);
         $mimeType = $disk->mimeType($relativeFilePath) ?: 'application/octet-stream';
