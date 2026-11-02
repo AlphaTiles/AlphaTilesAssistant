@@ -26,11 +26,18 @@ class SocialController extends Controller
                 if(isset($googleUser->refreshToken)) {
                     Session::put('socialite_refresh_token', $googleUser->refreshToken);
                 }
+
+                $isDriveExportAuth = Session::pull('drive_export_auth_pending', false);
+                $driveExportReturnUrl = Session::pull('drive_export_return_url');
                 
                 $hasDrivePermissions = in_array(Drive::DRIVE_FILE, $googleUser->approvedScopes);          
 
-                if($hasDrivePermissions) {
+                if($isDriveExportAuth || $hasDrivePermissions) {
                     Session::put('drive_permissions_time', now());
+                }
+
+                if ($isDriveExportAuth && $driveExportReturnUrl) {
+                    return redirect()->to($driveExportReturnUrl);
                 }
                 
                 $user = User::where('email', $googleUser->email)->first();                            
