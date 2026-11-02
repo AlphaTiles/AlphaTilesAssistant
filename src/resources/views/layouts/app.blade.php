@@ -56,9 +56,9 @@
         </div>
     </div>
 
-    @yield('scripts')
-
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    @yield('scripts')
 
     <script>
     function openAlert(title, text, image = '') {
