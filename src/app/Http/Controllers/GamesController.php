@@ -39,12 +39,14 @@ class GamesController extends BaseItemController
     {
         $request = request();
         $showExcludedGames = $request->boolean('show_excluded');
+        $showAllStageVersions = $request->boolean('show_all_stage_versions');
         $requiredAssetsFilter = $this->resolveRequiredAssetsFilter($request, $showExcludedGames);
 
         $items = $this->gameManagementService->paginateForEdit(
             $languagePack,
             $showExcludedGames,
-            $requiredAssetsFilter
+            $requiredAssetsFilter,
+            $showAllStageVersions
         );
 
         $validationErrors = $this->resolveValidationErrors($languagePack, $tile);
@@ -54,6 +56,7 @@ class GamesController extends BaseItemController
             'languagePack' => $languagePack,
             'items' => $items,
             'showExcludedGames' => $showExcludedGames,
+            'showAllStageVersions' => $showAllStageVersions,
             'requiredAssetsFilter' => $requiredAssetsFilter,
             'validationErrors' => $validationErrors,
             'pagination' => $items->links(),

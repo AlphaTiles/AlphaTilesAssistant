@@ -46,7 +46,7 @@ $tabEnum = TabEnum::GAME;
 	@endif
 
 	<form id="games-filter-form" method="get" action="{{ url('/languagepack/games/' . $languagePack->id) }}" class="mt-4 mb-0 space-y-1">
-		@foreach(request()->except(['show_excluded', 'required_assets_filter', 'show_tile_audio', 'show_syllable_breaks_only', 'show_syllable_breaks_and_audio', 'show_abs_exclusive', 'page', 'reordered']) as $queryKey => $queryValue)
+		@foreach(request()->except(['show_excluded', 'show_all_stage_versions', 'required_assets_filter', 'show_tile_audio', 'show_syllable_breaks_only', 'show_syllable_breaks_and_audio', 'show_abs_exclusive', 'page', 'reordered']) as $queryKey => $queryValue)
 			@if(is_array($queryValue))
 				@foreach($queryValue as $nestedValue)
 					<input type="hidden" name="{{ $queryKey }}[]" value="{{ $nestedValue }}" />
@@ -56,6 +56,16 @@ $tabEnum = TabEnum::GAME;
 			@endif
 		@endforeach
 		<div class="flex flex-wrap gap-x-6 gap-y-1">
+			<label class="inline-flex items-center gap-2 text-sm ml-2">
+				<input type="hidden" name="show_all_stage_versions" value="0" />
+				<input
+					type="checkbox"
+					name="show_all_stage_versions"
+					value="1"
+					{{ $showAllStageVersions ? 'checked' : '' }}
+				/>
+				<span>{{ __('Show all stage versions') }}</span>
+			</label>
 			<label class="inline-flex items-center gap-2 text-sm ml-2">
 				<span class="ml-1">{{ __('Active Games List') }}</span>
 				<select name="required_assets_filter" class="input input-bordered input-sm w-52">

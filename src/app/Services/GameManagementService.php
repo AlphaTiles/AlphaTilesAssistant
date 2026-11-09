@@ -12,10 +12,18 @@ class GameManagementService
     public function paginateForEdit(
         LanguagePack $languagePack,
         bool $showExcludedGames,
-        string $requiredAssetsFilter
+        string $requiredAssetsFilter,
+        bool $showAllStageVersions = false
     ): LengthAwarePaginator {
         $gamesQuery = Game::where('languagepackid', $languagePack->id)
             ->orderBy('order');
+
+        if (!$showAllStageVersions) {
+            $gamesQuery->where(function ($query) {
+                $query->whereNull('stages_included')
+                    ->orWhere('stages_included', '<=', 1);
+            });
+        }
 
         if (!$showExcludedGames) {
             $gamesQuery->where('include', true);
